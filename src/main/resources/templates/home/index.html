@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main class="container py-4">
+
+    <!-- Bienvenida -->
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1>Bienvenido a Epicentro Gourmet</h1>
+            <p class="mb-3">
+                Sistema de gestión de festivales gastronómicos
+            </p>
+
+            <!-- Usuario y rol autenticado -->
+            <div class="mt-3">
+
+    <span class="badge bg-light text-dark p-2">
+        Usuario:
+        <span th:text="${username}">Usuario</span>
+    </span>
+
+                <span class="badge bg-light text-dark p-2">
+        Rol:
+        <span th:text="${#strings.capitalize(
+            #strings.toLowerCase(
+                #strings.replace(rol, 'ROLE_', '')
+            )
+        )}">Rol</span>
+    </span>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Accesos principales -->
+    <div class="row mb-4">
+
+        <!-- Festivales -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card access-card h-100">
+                <div class="card-body text-center">
+                    <div class="icon">&#127914;</div>
+                    <h5 class="card-title">Festivales</h5>
+                    <p class="card-text text-muted">
+                        Consultar los festivales gastronómicos.
+                    </p>
+                    <span class="btn btn-primary">
+                            Próximamente
+                        </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unidades de venta -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card access-card h-100">
+                <div class="card-body text-center">
+                    <div class="icon">&#127978;</div>
+                    <h5 class="card-title">Unidades de venta</h5>
+                    <p class="card-text text-muted">
+                        Consultar y gestionar puestos gastronómicos.
+                    </p>
+                    <span class="btn btn-primary">
+                            Próximamente
+                        </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pedidos -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card access-card h-100">
+                <div class="card-body text-center">
+                    <div class="icon">&#128203;</div>
+                    <h5 class="card-title">Pedidos</h5>
+                    <p class="card-text text-muted">
+                        Registrar y consultar pedidos.
+                    </p>
+                    <span class="btn btn-primary">
+                            Próximamente
+                        </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reportes -->
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card access-card h-100">
+                <div class="card-body text-center">
+                    <div class="icon">&#128200;</div>
+                    <h5 class="card-title">Reportes</h5>
+                    <p class="card-text text-muted">
+                        Consultar recaudación y rentabilidad.
+                    </p>
+                    <span class="btn btn-primary">
+                            Próximamente
+                        </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+</body>
+</html>
