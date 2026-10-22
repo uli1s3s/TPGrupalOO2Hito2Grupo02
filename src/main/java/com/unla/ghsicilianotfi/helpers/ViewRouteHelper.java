@@ -25,6 +25,9 @@ public class ViewRouteHelper {
 	public final static String UNIDAD_NUEVA = "unidad/nueva";
 	public final static String UNIDAD_LISTA = "unidad/lista";
 	
+	//LIQUIDACION
+	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
+	
 	//EMPLEADO
 	public final static String EMPLEADO_INDEX = "empleados/index";
 	public final static String EMPLEADO_FORM = "empleados/form";

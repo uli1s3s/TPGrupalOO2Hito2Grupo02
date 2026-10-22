@@ -12,4 +12,7 @@ public interface IUnidadVentaService {
 
     // Registra una unidad (FoodTruck o PuestoDesmontable) junto con su usuario responsable
     UnidadVenta registrarUnidad(RegistroUnidadVentaDTO datos);
+    
+    // Unidades asignadas a un responsable (por su nombre de usuario)
+    List<UnidadVenta> listarPorResponsable(String nombreUsuario);
 }
