@@ -51,11 +51,10 @@ public class RegistroUnidadVentaDTO {
 
     // ===== Datos del usuario responsable =====
 
-    @NotBlank(message = "El nombre de usuario del responsable es obligatorio")
-    private String nombreResponsable;
+    // El email se usa también como nombre de usuario para iniciar sesión
 
     @NotBlank(message = "El email del responsable es obligatorio")
-    @Email(message = "Ingresá un email válido")
+    @Email(message = "Ingresa un email válido")
     private String emailResponsable;
 
     @NotBlank(message = "La contraseña del responsable es obligatoria")
