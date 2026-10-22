@@ -45,6 +45,9 @@ public class SecurityConfiguration {
 					auth.requestMatchers("/api/v1/pedidos", "/api/v1/pedidos/**")
 							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE", "EMPLEADO");
 
+					auth.requestMatchers("/empleados", "/empleados/**")
+							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE");
+
 					auth.requestMatchers("/api/v1/**").permitAll();
 
 					auth.anyRequest().authenticated();
