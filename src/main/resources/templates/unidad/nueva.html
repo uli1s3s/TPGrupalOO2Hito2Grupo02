@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main class="container py-4">
+
+    <div class="page-header">
+        <h2>Registrar unidad de venta</h2>
+        <p class="text-muted">Alta de un food truck o puesto desmontable junto con su usuario responsable.</p>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card form-card">
+        <div class="card-body">
+
+            <form th:action="@{/unidades/nueva}" th:object="${registro}" method="post" novalidate>
+
+                <!-- ===== Datos de la unidad ===== -->
+                <h5 class="mb-3">Datos de la unidad</h5>
+
+                <div class="form-group">
+                    <label for="tipoUnidad">Tipo de unidad</label>
+                    <select class="form-control" th:field="*{tipoUnidad}" onchange="mostrarCampos()">
+                        <option value="">Seleccione...</option>
+                        <option value="FOOD_TRUCK">Food truck</option>
+                        <option value="PUESTO_DESMONTABLE">Puesto desmontable</option>
+                    </select>
+                    <small class="text-danger" th:if="${#fields.hasErrors('tipoUnidad')}" th:errors="*{tipoUnidad}"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombreComercial">Nombre comercial</label>
+                    <input type="text" class="form-control" th:field="*{nombreComercial}" placeholder="Ej: La Parrilla Rodante"/>
+                    <small class="text-danger" th:if="${#fields.hasErrors('nombreComercial')}" th:errors="*{nombreComercial}"></small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="superficieM2">Superficie (m²)</label>
+                        <input type="number" step="0.01" min="0.01" class="form-control" th:field="*{superficieM2}"/>
+                        <small class="text-danger" th:if="${#fields.hasErrors('superficieM2')}" th:errors="*{superficieM2}"></small>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="codigoUnico">Código único</label>
+                        <input type="text" maxlength="10" class="form-control" th:field="*{codigoUnico}" placeholder="Ej: FT001"/>
+                        <small class="text-danger" th:if="${#fields.hasErrors('codigoUnico')}" th:errors="*{codigoUnico}"></small>
+                    </div>
+                </div>
+
+                <!-- Campos de FoodTruck -->
+                <div id="camposFoodTruck" style="display:none">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="patente">Patente</label>
+                            <input type="text" class="form-control" th:field="*{patente}" placeholder="Ej: AB123CD"/>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="electricidad">¿Requiere electricidad?</label>
+                            <select class="form-control" th:field="*{electricidad}">
+                                <option value="">Seleccione...</option>
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos de PuestoDesmontable -->
+                <div id="camposPuesto" style="display:none">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="cantidadCarpas">Cantidad de carpas</label>
+                            <input type="number" min="1" class="form-control" th:field="*{cantidadCarpas}"/>
+                            <small class="text-danger" th:if="${#fields.hasErrors('cantidadCarpas')}" th:errors="*{cantidadCarpas}"></small>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="tiempoMontajeMinutos">Tiempo de montaje (minutos)</label>
+                            <input type="number" min="1" class="form-control" th:field="*{tiempoMontajeMinutos}"/>
+                            <small class="text-danger" th:if="${#fields.hasErrors('tiempoMontajeMinutos')}" th:errors="*{tiempoMontajeMinutos}"></small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr/>
+
+                <!-- ===== Datos del responsable ===== -->
+                <h5 class="mb-3">Usuario responsable</h5>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="emailResponsable">Email (será su usuario)</label>
+                        <input type="email" class="form-control" th:field="*{emailResponsable}" placeholder="responsable@mail.com"/>
+                        <small class="text-danger" th:if="${#fields.hasErrors('emailResponsable')}" th:errors="*{emailResponsable}"></small>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="contrasenaResponsable">Contraseña</label>
+                        <input type="password" class="form-control" th:field="*{contrasenaResponsable}"/>
+                        <small class="text-danger" th:if="${#fields.hasErrors('contrasenaResponsable')}" th:errors="*{contrasenaResponsable}"></small>
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <button type="submit" class="btn btn-success mr-2">Registrar</button>
+                    <a th:href="@{/unidades}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+<script>
+    // Muestra los campos específicos según el tipo elegido
+    function mostrarCampos() {
+        var tipo = document.getElementById('tipoUnidad').value;
+        document.getElementById('camposFoodTruck').style.display = (tipo === 'FOOD_TRUCK') ? 'block' : 'none';
+        document.getElementById('camposPuesto').style.display = (tipo === 'PUESTO_DESMONTABLE') ? 'block' : 'none';
+    }
+    // Si el formulario vuelve con errores, mantiene visibles los campos del tipo elegido
+    document.addEventListener('DOMContentLoaded', mostrarCampos);
+</script>
+</body>
+</html>

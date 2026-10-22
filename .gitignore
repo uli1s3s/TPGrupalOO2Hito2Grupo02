@@ -1,10 +1,11 @@
 /target/
+/bin/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### Environment ###
 .env
 
-### STS ###
+### STS / Eclipse ###
 .apt_generated
 .classpath
 .factorypath
@@ -14,7 +15,7 @@
 .sts4-cache
 
 ### IntelliJ IDEA ###
-../TPGrupalOO2Hito2Grupo02 - copia/.idea
+.idea
 *.iws
 *.iml
 *.ipr
