@@ -21,8 +21,12 @@ public class ViewRouteHelper {
 	public final static String USER_LOGIN = "user/login";
 	public final static String USER_LOGOUT = "user/logout";
 
+	//UNIDAD DE VENTA
+	public final static String UNIDAD_NUEVA = "unidad/nueva";
+	
 	/**** Redirects ****/
 	public final static String ROUTE = "/index";
 	public final static String DEGREE_ROOT = "/degrees/";
 	public final static String PERSON_ROOT = "/person";
+	public final static String UNIDAD_ROOT = "/unidades";
 }
