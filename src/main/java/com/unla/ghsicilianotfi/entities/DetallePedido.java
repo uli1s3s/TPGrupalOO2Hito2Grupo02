@@ -15,17 +15,34 @@ public class DetallePedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idDetalle;
+    protected Long idDetalle;
 
     @Column(nullable = false)
-    private int cantidad;
+    protected int cantidad;
 
+    // Un detalle pertenece a un pedido
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", nullable = false)
-    private Pedido pedido;
+    protected Pedido pedido;
 
+    // Un detalle corresponde a un plato
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plato_id", nullable = false)
-    private Plato plato;
+    protected Plato plato;
 
+    // Constructor sin ID
+    public DetallePedido(int cantidad, Pedido pedido, Plato plato) {
+        this.cantidad = cantidad;
+        this.pedido = pedido;
+        this.plato = plato;
+    }
+
+    // Constructor con ID
+    public DetallePedido(Long idDetalle, int cantidad,
+                         Pedido pedido, Plato plato) {
+        this.idDetalle = idDetalle;
+        this.cantidad = cantidad;
+        this.pedido = pedido;
+        this.plato = plato;
+    }
 }
