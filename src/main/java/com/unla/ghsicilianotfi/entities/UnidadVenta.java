@@ -25,4 +25,8 @@ public abstract class UnidadVenta {
 
     @Column(nullable = false, unique = true, length = 10)
     private String codigoUnico;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_responsable", nullable = false)
+    private Usuario responsable;
 }
