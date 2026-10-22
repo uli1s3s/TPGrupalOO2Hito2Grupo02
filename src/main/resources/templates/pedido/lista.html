@@ -76,9 +76,9 @@
 
     <!-- FORMULARIO PARA REGISTRAR PEDIDOS -->
 
-    <section class="card mb-4">
-    <!-- Si esEmpleado == true, muestra el formulario para registrar pedidos. -->
-             th:if="${esEmpleado}">
+
+    <!-- El formulario solo se muestra a los empleados -->
+    <section class="card mb-4" th:if="${esEmpleado}">
 
         <div class="card-header">
             <strong>Registrar nuevo pedido</strong>
