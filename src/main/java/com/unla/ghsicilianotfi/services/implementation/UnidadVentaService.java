@@ -44,6 +44,11 @@ public class UnidadVentaService implements IUnidadVentaService {
     public List<UnidadVenta> listarUnidades() {
         return unidadVentaRepository.findAll();
     }
+    
+    @Override
+    public List<UnidadVenta> listarPorResponsable(String nombreUsuario) {
+        return unidadVentaRepository.findByResponsable_Nombre(nombreUsuario);
+    }
 
     @Override
     @Transactional
