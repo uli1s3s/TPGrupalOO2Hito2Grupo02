@@ -18,4 +18,16 @@ public class FoodTruck extends UnidadVenta {
 
     @Column(nullable = false)
     private Boolean electricidad;
+    
+    @Override
+    public String getTipo() {
+        return "Food truck";
+    }
+
+    @Override
+    public String getDetalle() {
+        return "Patente " + patente
+                + (Boolean.TRUE.equals(electricidad) ? " - con electricidad" : " - sin electricidad");
+    }
+    
 }

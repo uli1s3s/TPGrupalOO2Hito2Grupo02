@@ -29,4 +29,11 @@ public abstract class UnidadVenta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_responsable", nullable = false)
     private Usuario responsable;
+    
+    // polimorfismo
+    public abstract String getTipo();
+
+    // Cada subclase describe sus datos propios
+    public abstract String getDetalle();
+    
 }

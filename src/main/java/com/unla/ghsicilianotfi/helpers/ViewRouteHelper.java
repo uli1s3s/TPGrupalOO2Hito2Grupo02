@@ -23,10 +23,12 @@ public class ViewRouteHelper {
 
 	//UNIDAD DE VENTA
 	public final static String UNIDAD_NUEVA = "unidad/nueva";
+	public final static String UNIDAD_LISTA = "unidad/lista";
 	
 	/**** Redirects ****/
 	public final static String ROUTE = "/index";
 	public final static String DEGREE_ROOT = "/degrees/";
 	public final static String PERSON_ROOT = "/person";
 	public final static String UNIDAD_ROOT = "/unidades";
+	
 }

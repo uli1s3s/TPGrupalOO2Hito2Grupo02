@@ -18,4 +18,14 @@ public class PuestoDesmontable extends UnidadVenta {
 
     @Column(nullable = false)
     private Integer tiempoMontajeMinutos;
+    
+    @Override
+    public String getTipo() {
+        return "Puesto desmontable";
+    }
+
+    @Override
+    public String getDetalle() {
+        return cantidadCarpas + " carpa(s) - montaje de " + tiempoMontajeMinutos + " min";
+    }
 }

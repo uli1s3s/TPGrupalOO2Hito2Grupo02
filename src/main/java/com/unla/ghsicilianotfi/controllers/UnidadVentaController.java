@@ -26,6 +26,16 @@ public class UnidadVentaController {
     public UnidadVentaController(IUnidadVentaService unidadVentaService) {
         this.unidadVentaService = unidadVentaService;
     }
+    
+    // ==========================================
+    // Listar todas las unidades de venta
+    // ==========================================
+    @GetMapping
+    public String listarUnidades(Model model, Authentication authentication) {
+        model.addAttribute("unidades", unidadVentaService.listarUnidades());
+        agregarDatosUsuario(model, authentication);
+        return ViewRouteHelper.UNIDAD_LISTA;
+    }
 
     // ==========================================
     // Mostrar el formulario de alta
@@ -54,19 +64,19 @@ public class UnidadVentaController {
         }
 
         try {
-            UnidadVenta unidad = unidadVentaService.registrarUnidad(registro);
+            
+            unidadVentaService.registrarUnidad(registro);
 
             redirectAttributes.addFlashAttribute("mensaje",
-                    "Unidad \"" + unidad.getNombreComercial() + "\" registrada correctamente. "
-                            + "Responsable: " + unidad.getResponsable().getEmail());
+                    "Unidad de venta cargada correctamente");
 
-            return "redirect:" + ViewRouteHelper.UNIDAD_ROOT + "/nueva";
+            return "redirect:" + ViewRouteHelper.UNIDAD_ROOT;
 
         } catch (IllegalArgumentException e) {
             // Errores de claves duplicadas, etc (Error en una regla de negocio)
             model.addAttribute("error", e.getMessage());
             agregarDatosUsuario(model, authentication);
-            return ViewRouteHelper.UNIDAD_NUEVA;
+            return "redirect:" + ViewRouteHelper.UNIDAD_ROOT;
         }
     }
 
