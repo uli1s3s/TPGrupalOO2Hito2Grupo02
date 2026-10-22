@@ -27,5 +27,6 @@ public class Plato {
 
     @Column(nullable = false)
     private boolean activo = true;
+    
 
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "unidad_venta")
@@ -29,6 +31,12 @@ public abstract class UnidadVenta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_responsable", nullable = false)
     private Usuario responsable;
+    
+    // Empleados de la unidad. Cada empleado pertenece a una sola unidad.
+    // La columna id_unidad queda en la tabla personal y es opcional.
+    @OneToMany
+    @JoinColumn(name = "id_unidad")
+    private Set<Personal> empleados = new HashSet<>();
     
     // polimorfismo
     public abstract String getTipo();

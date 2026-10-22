@@ -4,6 +4,7 @@ import com.unla.ghsicilianotfi.dtos.RegistroUnidadVentaDTO;
 import com.unla.ghsicilianotfi.entities.UnidadVenta;
 import com.unla.ghsicilianotfi.helpers.ViewRouteHelper;
 import com.unla.ghsicilianotfi.services.IUnidadVentaService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import jakarta.validation.Valid;
 
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/unidades")
+@PreAuthorize("hasRole('ADMINISTRADOR')")
 public class UnidadVentaController {
 
     private final IUnidadVentaService unidadVentaService;
