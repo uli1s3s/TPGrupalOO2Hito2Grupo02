@@ -124,10 +124,10 @@ public class UnidadVentaService implements IUnidadVentaService {
             throw new IllegalArgumentException("Ya existe un usuario con el email: " + email);
         }
 
-        Rol rolResponsable = rolRepository.findByNombre(ROL_RESPONSABLE)
+        Rol rolResponsable = rolRepository.findByNombreIgnoreCase(ROL_RESPONSABLE)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No existe el rol RESPONSABLE. Ejecutá el script de datos de prueba."));
-
+        
         Usuario responsable = new Usuario();
         responsable.setNombre(email);
         responsable.setEmail(email);
