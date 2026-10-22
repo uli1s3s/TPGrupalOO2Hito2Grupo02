@@ -22,6 +22,7 @@ public class PedidoService {
 
     public PedidoService(IPedidoRepository pedidoRepository,
                          IPlatoRepository platoRepository) {
+
         this.pedidoRepository = pedidoRepository;
         this.platoRepository = platoRepository;
     }
@@ -31,34 +32,45 @@ public class PedidoService {
 
         if (datos == null || datos.getDetalles() == null
                 || datos.getDetalles().isEmpty()) {
+
             throw new IllegalArgumentException(
-                    "El pedido debe contener al menos un detalle");
+                    "El pedido debe contener al menos un detalle"
+            );
         }
 
-        Pedido pedido = new Pedido();
-        pedido.setFechaPedido(LocalDate.now());
+        // TODO: Asociar con UnidadVenta cuando esté implementada.
+        Pedido pedido = new Pedido(LocalDate.now());
 
         for (DetallePedidoDTO detalleDTO : datos.getDetalles()) {
 
-            if (detalleDTO == null || detalleDTO.getIdPlato() == null
+            if (detalleDTO == null
+                    || detalleDTO.getIdPlato() == null
                     || detalleDTO.getCantidad() <= 0) {
+
                 throw new IllegalArgumentException(
-                        "El plato y la cantidad deben ser válidos");
+                        "El plato y la cantidad deben ser válidos"
+                );
             }
 
-            Plato plato = platoRepository.findById(detalleDTO.getIdPlato())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "El plato no existe"));
+            Plato plato = platoRepository
+                    .findById(detalleDTO.getIdPlato())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "El plato no existe"
+                            )
+                    );
 
             if (!plato.isActivo()) {
                 throw new IllegalArgumentException(
-                        "El plato no está disponible");
+                        "El plato no está disponible"
+                );
             }
 
-            DetallePedido detalle = new DetallePedido();
-            detalle.setPlato(plato);
-            detalle.setCantidad(detalleDTO.getCantidad());
-            detalle.setPedido(pedido);
+            DetallePedido detalle = new DetallePedido(
+                    detalleDTO.getCantidad(),
+                    pedido,
+                    plato
+            );
 
             pedido.getDetalles().add(detalle);
         }
