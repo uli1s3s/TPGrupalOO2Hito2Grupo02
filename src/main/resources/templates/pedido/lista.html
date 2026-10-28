@@ -2,67 +2,257 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Pedidos - Epicentro Gourmet</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
-    <style>
-        body {
-            background-color: #f4f7f4;
-            font-family: Arial, sans-serif;
-        }
-
-        header {
-            background-color: #226b45;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        .contenedor {
-            max-width: 1000px;
-            margin: 40px auto;
-        }
-
-        h2 {
-            color: #226b45;
-        }
-
-        .btn-guardar {
-            background-color: #226b45;
-            color: white;
-        }
-
-        .btn-guardar:hover {
-            background-color: #185031;
-            color: white;
-        }
-    </style>
-</head>
+<head th:replace="~{layout :: head}"></head>
 
 <body>
 
-<header>
-    <h1>EPICENTRO GOURMET</h1>
-</header>
+<nav th:replace="~{layout :: navbar}"></nav>
 
-<main class="container contenedor">
+<style>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    /* CONTENEDOR */
 
-        <h2 class="mb-0">Pedidos</h2>
+    .pedidos-contenedor {
+        max-width: 1100px;
+        margin: 25px auto 50px;
+    }
 
-        <a th:href="@{/}" class="btn btn-secondary">
-            ← Volver al inicio
-        </a>
+    /* ENCABEZADO */
 
-    </div>
+    .pedidos-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        border-radius: 12px;
+        padding: 40px 35px;
+        margin-bottom: 30px;
+    }
+
+    .pedidos-header h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .pedidos-header p {
+        color: #e5e9e3;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+
+    /* BOTONES */
+
+    .boton-volver {
+        background-color: transparent;
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        border-radius: 6px;
+        padding: 10px 18px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .boton-volver:hover {
+        background-color: white;
+        color: #26352b;
+        text-decoration: none;
+    }
+
+    .boton-guardar {
+        background-color: #26352b;
+        border: 1px solid #26352b;
+        color: white;
+        border-radius: 6px;
+        padding: 10px 22px;
+        font-weight: bold;
+    }
+
+    .boton-guardar:hover {
+        background-color: #425843;
+        border-color: #425843;
+        color: white;
+    }
+
+    .boton-agregar {
+        background-color: white;
+        color: #26352b;
+        border: 1px solid #425843;
+        border-radius: 6px;
+        padding: 10px 20px;
+    }
+
+    .boton-agregar:hover {
+        background-color: #edf2ec;
+        color: #26352b;
+    }
+
+    /* TARJETAS */
+
+    .pedidos-card,
+    .pedidos-card:hover {
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        background-color: white;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .pedidos-card-header {
+        padding: 22px 25px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e9ece8;
+        color: #26352b;
+        font-size: 19px;
+        font-weight: bold;
+    }
+
+    .pedidos-card-body {
+        padding: 25px;
+    }
+
+    /* FORMULARIO */
+
+    .fila-detalle {
+        background-color: #f7f8f5;
+        padding: 18px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #e5e9e3;
+    }
+
+    .form-label {
+        font-weight: bold;
+        color: #26352b;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .selector-plato,
+    .campo-cantidad {
+        border: 1px solid #ced5cd;
+        border-radius: 6px;
+        height: 42px;
+    }
+
+    .selector-plato:focus,
+    .campo-cantidad:focus {
+        border-color: #425843;
+        box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
+    }
+
+    .boton-quitar {
+        height: 42px;
+    }
+
+    /* TÍTULOS */
+
+    .titulo-listado {
+        color: #26352b;
+        font-size: 25px;
+        font-weight: bold;
+        margin-bottom: 25px;
+    }
+
+    /* TABLAS */
+
+    .tabla-pedidos {
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    .tabla-pedidos thead {
+        background-color: #26352b;
+        color: white;
+    }
+
+    .tabla-pedidos thead th {
+        padding: 15px;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .tabla-pedidos tbody td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #e9ece8;
+    }
+
+    .tabla-pedidos tbody tr:nth-child(even) {
+        background-color: #f7f8f5;
+    }
+
+    .total-pedido {
+        background-color: #edf2ec;
+        color: #26352b;
+        padding: 18px 25px;
+        text-align: right;
+        font-size: 19px;
+        font-weight: bold;
+    }
+
+    .fecha-pedido {
+        color: #666;
+        font-size: 14px;
+        font-weight: normal;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 768px) {
+
+        .pedidos-header {
+            padding: 30px 22px;
+        }
+
+        .pedidos-header h2 {
+            font-size: 25px;
+        }
+
+        .pedidos-card-body {
+            padding: 18px;
+        }
+
+        .pedidos-card-header {
+            padding: 18px;
+        }
+
+    }
+
+</style>
+
+<main class="container py-4 pedidos-contenedor">
+
+    <!-- ENCABEZADO -->
+
+    <section class="pedidos-header">
+
+        <div class="d-flex justify-content-between
+                    align-items-center flex-wrap">
+
+            <div class="mb-3 mb-md-0">
+
+                <h2>Gestión de pedidos</h2>
+
+                <p>
+                    Registro y consulta de pedidos gastronómicos.
+                </p>
+
+            </div>
+
+            <a th:href="@{/index}"
+               class="boton-volver">
+                &larr; Volver al inicio
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- MENSAJES -->
 
     <div class="alert alert-success"
          th:if="${mensaje}"
@@ -74,23 +264,29 @@
          th:text="${error}">
     </div>
 
-    <!-- FORMULARIO PARA REGISTRAR PEDIDOS -->
+    <!-- REGISTRO DE PEDIDOS -->
+    <!-- SOLO EMPLEADOS -->
 
+    <section class="card pedidos-card"
+             th:if="${esEmpleado}">
 
-    <!-- El formulario solo se muestra a los empleados -->
-    <section class="card mb-4" th:if="${esEmpleado}">
-
-        <div class="card-header">
-            <strong>Registrar nuevo pedido</strong>
+        <div class="pedidos-card-header">
+            Registrar nuevo pedido
         </div>
 
-        <div class="card-body">
+        <div class="pedidos-card-body">
+
+            <!-- SIN PLATOS ACTIVOS -->
 
             <div class="alert alert-info"
                  th:if="${#lists.isEmpty(platos)}">
+
                 No hay platos activos disponibles.
                 Primero cargá un plato en la base de datos.
+
             </div>
+
+            <!-- FORMULARIO -->
 
             <form method="post"
                   th:action="@{/pedidos/nuevo}"
@@ -98,13 +294,19 @@
 
                 <div id="filas-detalle">
 
-                    <div class="row g-2 align-items-end mb-3 fila-detalle">
+                    <!-- PRIMER DETALLE -->
 
-                        <div class="col-md-7">
+                    <div class="row align-items-end fila-detalle">
 
-                            <label class="form-label">Plato</label>
+                        <!-- PLATO -->
 
-                            <select class="form-select selector-plato"
+                        <div class="col-md-7 mb-3 mb-md-0">
+
+                            <label class="form-label">
+                                Plato
+                            </label>
+
+                            <select class="form-control selector-plato"
                                     name="detalles[0].idPlato"
                                     required>
 
@@ -121,9 +323,13 @@
 
                         </div>
 
-                        <div class="col-md-3">
+                        <!-- CANTIDAD -->
 
-                            <label class="form-label">Cantidad</label>
+                        <div class="col-md-3 mb-3 mb-md-0">
+
+                            <label class="form-label">
+                                Cantidad
+                            </label>
 
                             <input class="form-control campo-cantidad"
                                    type="number"
@@ -134,10 +340,12 @@
 
                         </div>
 
+                        <!-- QUITAR -->
+
                         <div class="col-md-2">
 
                             <button type="button"
-                                    class="btn btn-outline-danger w-100 boton-quitar"
+                                    class="btn btn-outline-danger btn-block boton-quitar"
                                     onclick="quitarFila(this)">
                                 Quitar
                             </button>
@@ -148,17 +356,23 @@
 
                 </div>
 
-                <div class="d-flex gap-2 flex-wrap">
+                <!-- BOTONES DEL FORMULARIO -->
+
+                <div class="d-flex flex-wrap">
 
                     <button type="button"
-                            class="btn btn-outline-secondary"
+                            class="btn boton-agregar mr-2 mb-2"
                             onclick="agregarFila()">
+
                         + Agregar otro plato
+
                     </button>
 
                     <button type="submit"
-                            class="btn btn-guardar">
+                            class="btn boton-guardar mb-2">
+
                         Guardar pedido
+
                     </button>
 
                 </div>
@@ -171,72 +385,118 @@
 
     <!-- LISTADO DE PEDIDOS -->
 
-    <h2 class="mb-4">Listado de pedidos</h2>
+    <h2 class="titulo-listado">
+        Listado de pedidos
+    </h2>
+
+    <!-- SIN PEDIDOS -->
 
     <div class="alert alert-info"
          th:if="${#lists.isEmpty(pedidos)}">
+
         Todavía no hay pedidos registrados.
+
     </div>
 
-    <div class="card mb-4"
+    <!-- PEDIDOS REGISTRADOS -->
+
+    <div class="card pedidos-card"
          th:each="pedido : ${pedidos}">
 
-        <div class="card-header d-flex justify-content-between">
+        <!-- ENCABEZADO DEL PEDIDO -->
+
+        <div class="pedidos-card-header
+                    d-flex justify-content-between
+                    align-items-center flex-wrap">
 
             <strong>
+
                 Pedido N.º
-                <span th:text="${pedido.idPedido}"></span>
+
+                <span th:text="${pedido.idPedido}">
+                    1
+                </span>
+
             </strong>
 
-            <span th:text="${pedido.fechaPedido}"></span>
+            <span class="fecha-pedido"
+                  th:text="${pedido.fechaPedido}">
+                Fecha
+            </span>
 
         </div>
 
-        <div class="card-body">
+        <!-- DETALLES DEL PEDIDO -->
 
-            <div class="table-responsive">
+        <div class="table-responsive">
 
-                <table class="table table-bordered">
+            <table class="table tabla-pedidos">
 
-                    <thead>
-                    <tr>
-                        <th>Plato</th>
-                        <th>Cantidad</th>
-                        <th>Precio unitario</th>
-                        <th>Subtotal</th>
-                    </tr>
-                    </thead>
+                <thead>
 
-                    <tbody>
+                <tr>
 
-                    <tr th:each="detalle : ${pedido.detalles}">
+                    <th>Plato</th>
 
-                        <td th:text="${detalle.plato.nombre}"></td>
+                    <th>Cantidad</th>
 
-                        <td th:text="${detalle.cantidad}"></td>
+                    <th>Precio unitario</th>
 
-                        <td th:text="${detalle.plato.precioVenta}"></td>
+                    <th>Subtotal</th>
 
-                        <td th:text="${detalle.cantidad * detalle.plato.precioVenta}"></td>
+                </tr>
 
-                    </tr>
+                </thead>
 
-                    </tbody>
+                <tbody>
 
-                </table>
+                <tr th:each="detalle : ${pedido.detalles}">
 
-            </div>
+                    <td th:text="${detalle.plato.nombre}">
+                        Plato
+                    </td>
 
-            <h5 class="text-end">
-                Total: $
-                <span th:text="${#numbers.formatDecimal(pedido.total, 1, 2)}"></span>
-            </h5>
+                    <td th:text="${detalle.cantidad}">
+                        1
+                    </td>
+
+                    <td th:text="${detalle.plato.precioVenta}">
+                        0
+                    </td>
+
+                    <td th:text="${detalle.cantidad * detalle.plato.precioVenta}">
+                        0
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- TOTAL DEL PEDIDO -->
+
+        <div class="total-pedido">
+
+            Total: $
+
+            <span th:text="${#numbers.formatDecimal(pedido.total, 1, 2)}">
+                0,00
+            </span>
 
         </div>
 
     </div>
 
 </main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
+<!-- JAVASCRIPT PARA AGREGAR Y QUITAR PLATOS -->
 
 <script>
 
@@ -251,7 +511,9 @@
 
             filas[i].querySelector('.campo-cantidad').name =
                 'detalles[' + i + '].cantidad';
+
         }
+
     }
 
     function agregarFila() {
@@ -267,6 +529,7 @@
         contenedor.appendChild(fila);
 
         actualizarIndices();
+
     }
 
     function quitarFila(boton) {
@@ -278,7 +541,9 @@
             boton.closest('.fila-detalle').remove();
 
             actualizarIndices();
+
         }
+
     }
 
 </script>
