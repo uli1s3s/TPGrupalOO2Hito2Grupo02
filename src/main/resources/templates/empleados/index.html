@@ -1,130 +1,610 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
+
 <body>
-    <nav th:replace="~{layout :: navbar}"></nav>
 
-    <main class="container py-4">
+<nav th:replace="~{layout :: navbar}"></nav>
 
-        <!-- Mensajes de Alerta -->
-        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <span th:text="${mensajeExito}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+<style>
 
-        <div th:if="${mensajeInfo}" class="alert alert-info alert-dismissible fade show" role="alert">
-            <span th:text="${mensajeInfo}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+    /* CONTENEDOR */
 
-        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span th:text="${mensajeError}"></span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+    .personal-contenedor {
+        margin-top: 25px;
+        margin-bottom: 50px;
+    }
 
-        <!-- Encabezado -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    /* ENCABEZADO */
+
+    .personal-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 40px 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .personal-header h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .personal-header p {
+        color: #e5e9e3;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+
+    /* BOTONES */
+
+    .boton-alta {
+        display: inline-block;
+        background-color: #d99a4e;
+        border: 1px solid #d99a4e;
+        color: #26352b;
+        padding: 11px 22px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .boton-alta:hover {
+        background-color: #e7ad65;
+        border-color: #e7ad65;
+        color: #26352b;
+        text-decoration: none;
+    }
+
+    .boton-filtrar {
+        background-color: #26352b;
+        border: 1px solid #26352b;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .boton-filtrar:hover {
+        background-color: #425843;
+        border-color: #425843;
+        color: white;
+    }
+
+    .boton-limpiar {
+        border: 1px solid #425843;
+        color: #26352b;
+        background-color: white;
+        border-radius: 6px;
+    }
+
+    .boton-limpiar:hover {
+        background-color: #edf2ec;
+        color: #26352b;
+    }
+
+    .boton-editar {
+        border: 1px solid #425843;
+        color: #26352b;
+        background-color: white;
+        border-radius: 5px;
+    }
+
+    .boton-editar:hover {
+        background-color: #edf2ec;
+        color: #26352b;
+    }
+
+    /* TARJETAS */
+
+    .personal-card,
+    .personal-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .personal-card-body {
+        padding: 28px;
+    }
+
+    .personal-card-header {
+        background-color: white;
+        padding: 22px 25px;
+        border-bottom: 1px solid #e9ece8;
+    }
+
+    .personal-card-header h3 {
+        color: #26352b;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    /* FILTROS */
+
+    .personal-card label {
+        color: #26352b;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .personal-card .form-control {
+        border: 1px solid #ced5cd;
+        border-radius: 6px;
+        min-height: 42px;
+    }
+
+    .personal-card .form-control:focus {
+        border-color: #425843;
+        box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
+    }
+
+    /* TABLA */
+
+    .tabla-personal {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    .tabla-personal thead {
+        background-color: #26352b;
+        color: white;
+    }
+
+    .tabla-personal thead th {
+        padding: 16px 13px;
+        border: none;
+        font-weight: bold;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .tabla-personal tbody td {
+        padding: 15px 13px;
+        vertical-align: middle;
+        border-top: 1px solid #e9ece8;
+    }
+
+    .tabla-personal tbody tr:nth-child(even) {
+        background-color: #f7f8f5;
+    }
+
+    .tabla-personal tbody tr:hover {
+        background-color: #edf2ec;
+    }
+
+    .nombre-empleado {
+        color: #26352b;
+        font-weight: bold;
+    }
+
+    /* ETIQUETAS DE TIPO */
+
+    .tipo-cocinero {
+        background-color: #e8eee6;
+        color: #26352b;
+        padding: 7px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .tipo-cajero {
+        background-color: #fff0dc;
+        color: #805322;
+        padding: 7px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    /* ALERTAS */
+
+    .alerta-personal {
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+    }
+
+    /* SIN EMPLEADOS */
+
+    .sin-empleados {
+        padding: 45px 25px;
+        text-align: center;
+        color: #666;
+    }
+
+    .sin-empleados h5 {
+        color: #26352b;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 768px) {
+
+        .personal-header {
+            padding: 30px 22px;
+        }
+
+        .personal-header h2 {
+            font-size: 25px;
+        }
+
+        .boton-alta {
+            margin-top: 20px;
+        }
+
+        .personal-card-body {
+            padding: 20px;
+        }
+
+        .tabla-personal {
+            font-size: 13px;
+        }
+
+    }
+
+</style>
+
+<main class="container py-4 personal-contenedor">
+
+    <!-- ENCABEZADO -->
+
+    <section class="personal-header">
+
+        <div class="d-flex justify-content-between
+                    align-items-center flex-wrap">
+
             <div>
+
                 <h2>Gestión de Personal</h2>
-                <p class="text-muted mb-0">Listado de empleados activos de la unidad de venta</p>
+
+                <p>
+                    Listado y administración de empleados
+                    activos de la unidad de venta.
+                </p>
+
             </div>
-            <a th:href="@{/empleados/nuevo}" class="btn btn-success">
-                + Alta de Empleado
+
+            <!-- ALTA DE EMPLEADO -->
+
+            <a th:href="@{/empleados/nuevo}"
+               class="boton-alta">
+
+                + Alta de empleado
+
             </a>
+
         </div>
 
-        <!-- Barra de Filtros (Pág. 2 del PDF) -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-body">
-                <form th:action="@{/empleados}" method="get" class="form-row align-items-end">
-                    <div class="col-md-6 mb-2">
-                        <label for="busqueda" class="font-weight-bold">Buscar por Nombre, Apellido o DNI:</label>
-                        <input type="text" id="busqueda" name="busqueda" class="form-control"
-                               placeholder="Ej: Juan, Perez, 35123456" th:value="${busqueda}"/>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label for="tipo" class="font-weight-bold">Filtrar por Tipo de Empleado:</label>
-                        <select id="tipo" name="tipo" class="form-control">
-                            <option value="TODOS" th:selected="${tipoSeleccionado == 'TODOS'}">Todos los tipos</option>
-                            <option value="COCINERO" th:selected="${tipoSeleccionado == 'COCINERO'}">Cocinero</option>
-                            <option value="CAJERO" th:selected="${tipoSeleccionado == 'CAJERO'}">Cajero</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
-                        <a th:href="@{/empleados}" class="btn btn-outline-secondary btn-block mt-1">Limpiar</a>
-                    </div>
-                </form>
-            </div>
+    </section>
+
+    <!-- MENSAJES DE ALERTA -->
+
+    <div th:if="${mensajeExito}"
+         class="alert alert-success alert-dismissible fade show alerta-personal"
+         role="alert">
+
+        <span th:text="${mensajeExito}"></span>
+
+        <button type="button"
+                class="close"
+                data-dismiss="alert"
+                aria-label="Cerrar">
+
+            <span aria-hidden="true">&times;</span>
+
+        </button>
+
+    </div>
+
+    <div th:if="${mensajeInfo}"
+         class="alert alert-info alert-dismissible fade show alerta-personal"
+         role="alert">
+
+        <span th:text="${mensajeInfo}"></span>
+
+        <button type="button"
+                class="close"
+                data-dismiss="alert"
+                aria-label="Cerrar">
+
+            <span aria-hidden="true">&times;</span>
+
+        </button>
+
+    </div>
+
+    <div th:if="${mensajeError}"
+         class="alert alert-danger alert-dismissible fade show alerta-personal"
+         role="alert">
+
+        <span th:text="${mensajeError}"></span>
+
+        <button type="button"
+                class="close"
+                data-dismiss="alert"
+                aria-label="Cerrar">
+
+            <span aria-hidden="true">&times;</span>
+
+        </button>
+
+    </div>
+
+    <!-- FILTROS -->
+
+    <div class="card personal-card">
+
+        <div class="personal-card-header">
+
+            <h3>Buscar empleados</h3>
+
         </div>
 
-        <!-- Tabla de Empleados Activos -->
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Tipo</th>
-                                <th>Nombre y Apellido</th>
-                                <th>DNI</th>
-                                <th>Fecha Ingreso</th>
-                                <th>Sueldo Base</th>
-                                <th>Puesto / Detalle</th>
-                                <th>Usuario / Email</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="emp : ${empleados}">
-                                <td th:text="${emp.idPersonal}"></td>
-                                <td>
-                                    <span th:if="${emp.tipoEmpleado == 'COCINERO'}" class="badge badge-success px-2 py-1">Cocinero</span>
-                                    <span th:if="${emp.tipoEmpleado == 'CAJERO'}" class="badge badge-info px-2 py-1">Cajero</span>
-                                </td>
-                                <td>
-                                    <strong th:text="${emp.apellido + ', ' + emp.nombre}"></strong>
-                                </td>
-                                <td th:text="${emp.dni}"></td>
-                                <td th:text="${emp.fechaIngreso}"></td>
-                                <td th:text="${'$' + #numbers.formatDecimal(emp.sueldoBase, 0, 'POINT', 2, 'COMMA')}"></td>
-                                <td th:text="${emp.detalleRol}"></td>
-                                <td th:text="${emp.email}"></td>
-                                <td class="text-center text-nowrap">
-                                    <a th:href="@{/empleados/editar/{id}(id=${emp.idPersonal})}"
-                                       class="btn btn-sm btn-outline-primary mr-1">
-                                        Editar
-                                    </a>
-                                    <form th:action="@{/empleados/{id}/baja(id=${emp.idPersonal})}" method="post"
-                                          onsubmit="return confirm('¿Confirma la baja lógica de este empleado?');" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            Baja lógica
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <div class="personal-card-body">
+
+            <form th:action="@{/empleados}"
+                  method="get"
+                  class="form-row align-items-end">
+
+                <!-- BÚSQUEDA -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label for="busqueda">
+                        Buscar por nombre, apellido o DNI
+                    </label>
+
+                    <input type="text"
+                           id="busqueda"
+                           name="busqueda"
+                           class="form-control"
+                           placeholder="Ej: Juan, Pérez, 35123456"
+                           th:value="${busqueda}"/>
+
                 </div>
 
-                <div th:if="${empleados == null or empleados.isEmpty()}" class="text-center text-muted py-5">
-                    <h5>No se encontraron empleados activos con los criterios seleccionados.</h5>
-                    <p class="mb-0">Hacé clic en "+ Alta de Empleado" para registrar uno nuevo.</p>
+                <!-- TIPO -->
+
+                <div class="col-md-4 mb-3">
+
+                    <label for="tipo">
+                        Tipo de empleado
+                    </label>
+
+                    <select id="tipo"
+                            name="tipo"
+                            class="form-control">
+
+                        <option value="TODOS"
+                                th:selected="${tipoSeleccionado == 'TODOS'}">
+                            Todos los tipos
+                        </option>
+
+                        <option value="COCINERO"
+                                th:selected="${tipoSeleccionado == 'COCINERO'}">
+                            Cocinero
+                        </option>
+
+                        <option value="CAJERO"
+                                th:selected="${tipoSeleccionado == 'CAJERO'}">
+                            Cajero
+                        </option>
+
+                    </select>
+
                 </div>
-            </div>
+
+                <!-- BOTONES -->
+
+                <div class="col-md-2 mb-3">
+
+                    <button type="submit"
+                            class="btn boton-filtrar btn-block">
+                        Filtrar
+                    </button>
+
+                    <a th:href="@{/empleados}"
+                       class="btn boton-limpiar btn-block mt-2">
+                        Limpiar
+                    </a>
+
+                </div>
+
+            </form>
+
         </div>
 
-    </main>
+    </div>
 
-    <footer th:replace="~{layout :: footer}"></footer>
-    <div th:replace="~{layout :: scripts}"></div>
+    <!-- LISTADO DE EMPLEADOS -->
+
+    <div class="card personal-card">
+
+        <div class="personal-card-header">
+
+            <h3>Empleados activos</h3>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table tabla-personal">
+
+                <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Tipo</th>
+
+                    <th>Nombre y apellido</th>
+
+                    <th>DNI</th>
+
+                    <th>Fecha de ingreso</th>
+
+                    <th>Sueldo base</th>
+
+                    <th>Puesto / Detalle</th>
+
+                    <th>Usuario / Email</th>
+
+                    <th class="text-center">Acciones</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr th:each="emp : ${empleados}">
+
+                    <!-- ID -->
+
+                    <td th:text="${emp.idPersonal}">
+                        1
+                    </td>
+
+                    <!-- TIPO -->
+
+                    <td>
+
+                        <span th:if="${emp.tipoEmpleado == 'COCINERO'}"
+                              class="tipo-cocinero">
+                            Cocinero
+                        </span>
+
+                        <span th:if="${emp.tipoEmpleado == 'CAJERO'}"
+                              class="tipo-cajero">
+                            Cajero
+                        </span>
+
+                    </td>
+
+                    <!-- NOMBRE -->
+
+                    <td>
+
+                        <strong class="nombre-empleado"
+                                th:text="${emp.apellido + ', ' + emp.nombre}">
+                            Pérez, Juan
+                        </strong>
+
+                    </td>
+
+                    <!-- DNI -->
+
+                    <td th:text="${emp.dni}">
+                        35123456
+                    </td>
+
+                    <!-- FECHA -->
+
+                    <td th:text="${emp.fechaIngreso}">
+                        2026-10-25
+                    </td>
+
+                    <!-- SUELDO -->
+
+                    <td th:text="${'$' + #numbers.formatDecimal(emp.sueldoBase, 0, 'POINT', 2, 'COMMA')}">
+                        $ 100.000,00
+                    </td>
+
+                    <!-- DETALLE -->
+
+                    <td th:text="${emp.detalleRol}">
+                        Detalle
+                    </td>
+
+                    <!-- EMAIL -->
+
+                    <td th:text="${emp.email}">
+                        empleado@epicentro.com
+                    </td>
+
+                    <!-- ACCIONES -->
+
+                    <td class="text-center text-nowrap">
+
+                        <!-- EDITAR -->
+
+                        <a th:href="@{/empleados/editar/{id}(id=${emp.idPersonal})}"
+                           class="btn btn-sm boton-editar mr-1">
+
+                            Editar
+
+                        </a>
+
+                        <!-- BAJA LÓGICA -->
+
+                        <form th:action="@{/empleados/{id}/baja(id=${emp.idPersonal})}"
+                              method="post"
+                              class="d-inline"
+                              onsubmit="return confirm('¿Confirma la baja lógica de este empleado?');">
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger">
+
+                                Baja lógica
+
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- SIN EMPLEADOS -->
+
+        <div th:if="${empleados == null or empleados.isEmpty()}"
+             class="sin-empleados">
+
+            <h5>
+                No se encontraron empleados activos
+                con los criterios seleccionados.
+            </h5>
+
+            <p class="mb-0">
+                Hacé clic en "+ Alta de empleado"
+                para registrar uno nuevo.
+            </p>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
 </body>
 </html>
-

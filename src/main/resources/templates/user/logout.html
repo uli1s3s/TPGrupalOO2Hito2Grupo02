@@ -1,31 +1,231 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logout - UNLA TFI</title>
-    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}"/>
-    <link rel="stylesheet" th:href="@{/css/modern-business.css}"/>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Cerrar sesión - Epicentro Gourmet</title>
+
+    <link rel="stylesheet"
+          th:href="@{/vendor/bootstrap/css/bootstrap.min.css}"/>
+
+    <link rel="stylesheet"
+          th:href="@{/css/modern-business.css}"/>
+
+    <style>
+
+        /* FONDO */
+
+        body {
+            background: linear-gradient(135deg, #f7f5f0, #e8eee6);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 25px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CONTENEDOR */
+
+        .logout-container {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+
+        /* TARJETA */
+
+        .logout-card,
+        .logout-card:hover {
+            background-color: white;
+            border: none;
+            border-top: 6px solid #d99a4e;
+            border-radius: 14px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.10);
+            transform: none;
+            transition: none;
+            overflow: hidden;
+        }
+
+        .logout-card .card-body {
+            padding: 40px 35px;
+        }
+
+        /* ENCABEZADO */
+
+        .logout-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logout-icono {
+            width: 75px;
+            height: 75px;
+            background-color: #edf2ec;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin: 0 auto 20px;
+        }
+
+        .logout-header h2 {
+            color: #26352b;
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .logout-header p {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        /* MENSAJE */
+
+        .logout-mensaje {
+            background-color: #edf2ec;
+            border: 1px solid #c9dcc8;
+            color: #26352b;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 28px;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        /* BOTÓN */
+
+        .boton-login {
+            display: block;
+            width: 100%;
+            background-color: #26352b;
+            border: 1px solid #26352b;
+            color: white;
+            text-align: center;
+            padding: 13px;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .boton-login:hover,
+        .boton-login:focus {
+            background-color: #425843;
+            border-color: #425843;
+            color: white;
+            text-decoration: none;
+        }
+
+        /* PIE INFORMATIVO */
+
+        .logout-footer {
+            text-align: center;
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid #e9ece8;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .logout-footer strong {
+            color: #425843;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 576px) {
+
+            .logout-card .card-body {
+                padding: 30px 22px;
+            }
+
+            .logout-header h2 {
+                font-size: 23px;
+            }
+
+        }
+
+    </style>
+
 </head>
-<body class="bg-light">
 
-    <div class="login-container">
-        <div class="card login-card">
-            <div class="card-body">
-                <div class="login-header">
-                    <h3>UNLA TFI</h3>
+<body>
+
+<div class="logout-container">
+
+    <div class="card logout-card">
+
+        <div class="card-body">
+
+            <!-- ENCABEZADO -->
+
+            <div class="logout-header">
+
+                <div class="logout-icono">
+                    &#127860;
                 </div>
 
-                <div class="alert alert-success text-center">
-                    Cesion finalizada correctamente.
-                </div>
+                <h2>EPICENTRO GOURMET</h2>
 
-                <a th:href="@{/login}" class="btn btn-primary w-100">Iniciar sesion</a>
+                <p>
+                    Sistema de gestión de festivales gastronómicos
+                </p>
+
             </div>
+
+            <!-- MENSAJE DE CIERRE DE SESIÓN -->
+
+            <div class="logout-mensaje">
+
+                <strong>Sesión finalizada correctamente.</strong>
+
+                <p class="mb-0 mt-2">
+                    Cerraste tu sesión de forma segura.
+                </p>
+
+            </div>
+
+            <!-- VOLVER AL LOGIN -->
+
+            <a th:href="@{/login}"
+               class="boton-login">
+
+                Iniciar sesión nuevamente
+
+            </a>
+
+            <!-- PIE INFORMATIVO -->
+
+            <div class="logout-footer">
+
+                <strong>Epicentro Gourmet</strong>
+
+                <p class="mb-0 mt-1">
+                    Trabajo Final Integrador - Orientación a Objetos II
+                </p>
+
+            </div>
+
         </div>
+
     </div>
 
-    <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</div>
+
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
 </body>
 </html>

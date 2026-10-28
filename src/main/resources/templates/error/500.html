@@ -1,19 +1,164 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
+
 <body>
-    <nav th:replace="~{layout :: navbar}"></nav>
 
-    <main class="container py-4">
-        <div class="error-container">
-            <div class="error-code">500</div>
-            <h2>Error interno del servidor</h2>
-            <p class="error-message">Algo salio mal. Intenta nuevamente mas tarde.</p>
-            <a th:href="@{/index}" class="btn btn-primary">Volver al inicio</a>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+
+    /* CONTENEDOR */
+
+    .error-contenedor {
+        max-width: 750px;
+        margin: 55px auto 70px;
+    }
+
+    /* TARJETA */
+
+    .error-card,
+    .error-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 6px solid #d99a4e;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        text-align: center;
+        padding: 55px 35px;
+    }
+
+    /* CÓDIGO DE ERROR */
+
+    .error-codigo {
+        color: #26352b;
+        font-size: 100px;
+        font-weight: bold;
+        line-height: 1;
+        margin-bottom: 25px;
+    }
+
+    .error-linea {
+        width: 75px;
+        height: 5px;
+        background-color: #d99a4e;
+        border-radius: 5px;
+        margin: 0 auto 30px;
+    }
+
+    /* MENSAJE */
+
+    .error-titulo {
+        color: #26352b;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 18px;
+    }
+
+    .error-mensaje {
+        color: #666;
+        font-size: 16px;
+        line-height: 1.7;
+        margin-bottom: 35px;
+    }
+
+    /* BOTÓN */
+
+    .boton-volver {
+        display: inline-block;
+        background-color: #26352b;
+        border: 1px solid #26352b;
+        color: white;
+        padding: 13px 28px;
+        border-radius: 7px;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .boton-volver:hover,
+    .boton-volver:focus {
+        background-color: #425843;
+        border-color: #425843;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 576px) {
+
+        .error-contenedor {
+            margin: 30px auto 45px;
+        }
+
+        .error-card {
+            padding: 40px 22px;
+        }
+
+        .error-codigo {
+            font-size: 75px;
+        }
+
+        .error-titulo {
+            font-size: 23px;
+        }
+
+        .error-mensaje {
+            font-size: 14px;
+        }
+
+    }
+
+</style>
+
+<main class="container py-4">
+
+    <div class="error-contenedor">
+
+        <div class="card error-card">
+
+            <!-- CÓDIGO -->
+
+            <div class="error-codigo">
+                500
+            </div>
+
+            <div class="error-linea"></div>
+
+            <!-- MENSAJE -->
+
+            <h2 class="error-titulo">
+                Error interno del servidor
+            </h2>
+
+            <p class="error-mensaje">
+                Ocurrió un problema al procesar tu solicitud.
+                Intentá nuevamente más tarde.
+            </p>
+
+            <!-- VOLVER AL INICIO -->
+
+            <a th:href="@{/index}"
+               class="boton-volver">
+
+                &larr; Volver al inicio
+
+            </a>
+
         </div>
-    </main>
 
-    <footer th:replace="~{layout :: footer}"></footer>
-    <div th:replace="~{layout :: scripts}"></div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
 </body>
 </html>
