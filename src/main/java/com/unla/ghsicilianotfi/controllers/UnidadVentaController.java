@@ -73,10 +73,11 @@ public class UnidadVentaController {
             return "redirect:" + ViewRouteHelper.UNIDAD_ROOT;
 
         } catch (IllegalArgumentException e) {
-            // Errores de claves duplicadas, etc (Error en una regla de negocio)
+            // Error de una regla de negocio (código repetido, email existente, etc.):
+            // se vuelve al formulario con los datos cargados y el mensaje de error
             model.addAttribute("error", e.getMessage());
             agregarDatosUsuario(model, authentication);
-            return "redirect:" + ViewRouteHelper.UNIDAD_ROOT;
+            return ViewRouteHelper.UNIDAD_NUEVA;
         }
     }
 
