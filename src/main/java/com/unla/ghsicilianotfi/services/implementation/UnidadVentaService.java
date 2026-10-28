@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -24,6 +25,8 @@ public class UnidadVentaService implements IUnidadVentaService {
     private static final String TIPO_FOOD_TRUCK = "FOOD_TRUCK";
     private static final String TIPO_PUESTO = "PUESTO_DESMONTABLE";
     private static final String ROL_RESPONSABLE = "RESPONSABLE";
+    // Lógica de validación propia del código: 2 letras del tipo + 8 dígitos (10 caracteres)
+    private static final String FORMATO_CODIGO = "^(FT|PD)\\d{8}$";
 
     private final IUnidadVentaRepository unidadVentaRepository;
     private final IUsuarioRepository usuarioRepository;
@@ -58,20 +61,15 @@ public class UnidadVentaService implements IUnidadVentaService {
             throw new IllegalArgumentException("Los datos de la unidad son obligatorios");
         }
 
-        // 1) El codigo unico no se puede repetir
-        String codigo = datos.getCodigoUnico().trim().toUpperCase(Locale.ROOT);
-        if (unidadVentaRepository.existsByCodigoUnico(codigo)) {
-            throw new IllegalArgumentException(
-                    "Ya existe una unidad de venta con el código: " + codigo);
-        }
-
-        // 2) Crear segun el tipo elegido
+        // 1. Crear segun el tipo elegido
         UnidadVenta unidad = crearSegunTipo(datos);
 
-        // 3. Datos comunes
+        // 2. Datos comunes
         unidad.setNombreComercial(datos.getNombreComercial().trim());
         unidad.setSuperficieM2(datos.getSuperficieM2());
-        unidad.setCodigoUnico(codigo);
+
+        // 3. Codigo unico generado por el sistema (FT00000001, PD00000001, ...)
+        unidad.setCodigoUnico(generarCodigoUnico(unidad));
 
         // 4. Crear y asociar el usuario responsable
         unidad.setResponsable(crearResponsable(datos));
@@ -116,6 +114,41 @@ public class UnidadVentaService implements IUnidadVentaService {
         }
 
         throw new IllegalArgumentException("El tipo de unidad seleccionado no es válido");
+    }
+    
+    // =====================================================
+    // Genera el siguiente codigo segun el tipo: prefijo + numero de 8 dígitos
+    // =====================================================
+    private String generarCodigoUnico(UnidadVenta unidad) {
+
+        String prefijo = unidad.getPrefijoCodigo();
+        int siguienteNumero = 1;
+
+        // Buscar el ultimo codigo cargado con ese prefijo y sumarle 1
+        Optional<UnidadVenta> ultima = unidadVentaRepository
+                .findTopByCodigoUnicoStartingWithOrderByCodigoUnicoDesc(prefijo);
+
+        if (ultima.isPresent() && esCodigoValido(ultima.get().getCodigoUnico())) {
+            String numero = ultima.get().getCodigoUnico().substring(prefijo.length());
+            siguienteNumero = Integer.parseInt(numero) + 1;
+        }
+
+        String codigo = prefijo + String.format("%08d", siguienteNumero);
+
+        // Validacion propia antes de guardar
+        if (!esCodigoValido(codigo)) {
+            throw new IllegalArgumentException("El código generado no tiene un formato válido: " + codigo);
+        }
+        if (unidadVentaRepository.existsByCodigoUnico(codigo)) {
+            throw new IllegalArgumentException("No se pudo generar un código único. Intentá nuevamente.");
+        }
+
+        return codigo;
+    }
+
+    // El código debe tener 10 caracteres: FT o PD seguido de 8 dígitos
+    private boolean esCodigoValido(String codigo) {
+        return codigo != null && codigo.matches(FORMATO_CODIGO);
     }
 
     // =====================================================

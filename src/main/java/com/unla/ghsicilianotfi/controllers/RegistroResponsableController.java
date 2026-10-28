@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.unla.ghsicilianotfi.entities.UnidadVenta;
 
 /**
  * Registro publico: una persona sin usuario se registra como responsable
@@ -67,7 +68,8 @@ public class RegistroResponsableController {
         }
 
         try {
-            unidadVentaService.registrarUnidad(registro);
+            UnidadVenta unidad = unidadVentaService.registrarUnidad(registro);
+            redirectAttributes.addFlashAttribute("codigoGenerado", unidad.getCodigoUnico());
             redirectAttributes.addFlashAttribute("emailRegistrado",
                     registro.getEmailResponsable().trim().toLowerCase());
             return "redirect:" + ViewRouteHelper.REGISTRO_RESPONSABLE_ROOT + "/exito";

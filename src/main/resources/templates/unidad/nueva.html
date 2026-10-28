@@ -45,18 +45,11 @@
                     <small class="text-danger" th:if="${#fields.hasErrors('nombreComercial')}" th:errors="*{nombreComercial}"></small>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="superficieM2">Superficie (m²)</label>
-                        <input type="number" step="0.01" min="0.01" class="form-control" th:field="*{superficieM2}"/>
-                        <small class="text-danger" th:if="${#fields.hasErrors('superficieM2')}" th:errors="*{superficieM2}"></small>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="codigoUnico">Código único</label>
-                        <input type="text" maxlength="10" class="form-control" th:field="*{codigoUnico}" placeholder="Ej: FT001"/>
-                        <small class="text-danger" th:if="${#fields.hasErrors('codigoUnico')}" th:errors="*{codigoUnico}"></small>
-                    </div>
-                </div>
+				<div class="form-group">
+				    <label for="superficieM2">Superficie (m²)</label>
+				    <input type="number" step="0.01" min="0.01" class="form-control" th:field="*{superficieM2}"/>
+				    <small class="text-danger" th:if="${#fields.hasErrors('superficieM2')}" th:errors="*{superficieM2}"></small>
+				</div>
 
                 <!-- Campos de FoodTruck -->
                 <div id="camposFoodTruck" style="display:none">
