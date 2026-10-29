@@ -41,4 +41,22 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
     @EntityGraph(attributePaths = {"responsable", "festivales"})
     List<UnidadVenta> findDistinctByFestivales_IdFestival(Long idFestival);
     
+    // Total vendido por una unidad en un festival (cantidad x precio de venta)
+    @Query("SELECT COALESCE(SUM(d.cantidad * d.plato.precioVenta), 0.0) FROM DetallePedido d "
+         + "WHERE d.pedido.unidadVenta.idUnidad = :idUnidad "
+         + "AND d.pedido.festival.idFestival = :idFestival")
+    Double sumarVentas(@Param("idUnidad") Long idUnidad, @Param("idFestival") Long idFestival);
+
+    // Costo de los platos vendidos por una unidad en un festival (cantidad x costo de produccion)
+    @Query("SELECT COALESCE(SUM(d.cantidad * d.plato.costoProduccion), 0.0) FROM DetallePedido d "
+         + "WHERE d.pedido.unidadVenta.idUnidad = :idUnidad "
+         + "AND d.pedido.festival.idFestival = :idFestival")
+    Double sumarCostoPlatos(@Param("idUnidad") Long idUnidad, @Param("idFestival") Long idFestival);
+
+    // Sueldos liquidados a los empleados de una unidad en un festival
+    @Query("SELECT COALESCE(SUM(l.totalACobrar), 0.0) FROM LiquidacionDeHaber l "
+         + "WHERE l.unidadVenta.idUnidad = :idUnidad "
+         + "AND l.festival.idFestival = :idFestival")
+    Double sumarSueldos(@Param("idUnidad") Long idUnidad, @Param("idFestival") Long idFestival);
+    
 }
