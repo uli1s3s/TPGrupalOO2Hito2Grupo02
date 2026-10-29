@@ -1,7 +1,10 @@
 package com.unla.ghsicilianotfi.controllers;
 
+import com.unla.ghsicilianotfi.dtos.FestivalFormDTO;
 import com.unla.ghsicilianotfi.dtos.RegistroUnidadVentaDTO;
+import com.unla.ghsicilianotfi.entities.UnidadVenta;
 import com.unla.ghsicilianotfi.helpers.ViewRouteHelper;
+import com.unla.ghsicilianotfi.services.IFestivalService;
 import com.unla.ghsicilianotfi.services.IUnidadVentaService;
 
 import jakarta.validation.Valid;
@@ -14,30 +17,43 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.unla.ghsicilianotfi.entities.UnidadVenta;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Registro publico: una persona sin usuario se registra como responsable
- * y da de alta su unidad de venta en el mismo paso.
- * Si ya hay una sesion iniciada (por ejemplo un administrador), no se permite.
+ * y da de alta su unidad de venta en un festival activo, en el mismo paso.
+ * Si ya hay una sesión iniciada (por ejemplo un administrador), no se permite.
  */
 @Controller
 @RequestMapping("/registro-responsable")
 public class RegistroResponsableController {
 
     private final IUnidadVentaService unidadVentaService;
+    private final IFestivalService festivalService;
 
-    public RegistroResponsableController(IUnidadVentaService unidadVentaService) {
+    public RegistroResponsableController(IUnidadVentaService unidadVentaService,
+                                         IFestivalService festivalService) {
         this.unidadVentaService = unidadVentaService;
+        this.festivalService = festivalService;
     }
 
     // ==========================================
     // Mostrar el formulario de registro
+    // Si se llega desde un festival (?festival=ID), queda preseleccionado
     // ==========================================
     @GetMapping
-    public String mostrarFormulario(Model model, Authentication authentication) {
-        model.addAttribute("registro", new RegistroUnidadVentaDTO());
+    public String mostrarFormulario(@RequestParam(name = "festival", required = false) Long idFestival,
+                                    Model model,
+                                    Authentication authentication) {
+
+        RegistroUnidadVentaDTO registro = new RegistroUnidadVentaDTO();
+        registro.setIdFestival(idFestival);
+        model.addAttribute("registro", registro);
+        cargarFestivales(model);
 
         // authentication es null cuando nadie inicio sesión
         if (authentication != null) {
@@ -59,11 +75,13 @@ public class RegistroResponsableController {
         // Un usuario logueado (admin, responsable o empleado) no puede registrarse de nuevo
         if (authentication != null) {
             model.addAttribute("bloqueado", true);
+            cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
 
-        // Errores de formato (campos vacíos, email invalido, etc.)
+        // Errores de formato (campos vacios, email invalido, festival sin elegir, etc.)
         if (resultado.hasErrors()) {
+            cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
 
@@ -75,8 +93,9 @@ public class RegistroResponsableController {
             return "redirect:" + ViewRouteHelper.REGISTRO_RESPONSABLE_ROOT + "/exito";
 
         } catch (IllegalArgumentException e) {
-            // Errores de negocio: código repetido, email ya registrado, etc.
+            // Errores de negocio: festival inactivo, email ya registrado, etc.
             model.addAttribute("error", e.getMessage());
+            cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
     }
@@ -87,5 +106,14 @@ public class RegistroResponsableController {
     @GetMapping("/exito")
     public String exito() {
         return ViewRouteHelper.REGISTRO_RESPONSABLE_EXITO;
+    }
+
+    // Solo se ofrecen festivales activos que todavia no terminaron
+    private void cargarFestivales(Model model) {
+        List<FestivalFormDTO> festivales = festivalService.listarActivos()
+                .stream()
+                .filter(festival -> !festival.getFechaFin().isBefore(LocalDate.now()))
+                .toList();
+        model.addAttribute("festivales", festivales);
     }
 }

@@ -49,11 +49,10 @@ public class SecurityConfiguration {
 					auth.requestMatchers(
 							"/",
 							"/index",
-							"/login",
-							"/unidades/nueva"
+							"/login"
 					).permitAll();
 
-					// REGISTRO PÚBLICO DE RESPONSABLES
+					// REGISTRO PUBLICO DE RESPONSABLES
 					// Incorporado desde develop
 					auth.requestMatchers(
 							"/registro-responsable",
