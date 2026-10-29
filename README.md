@@ -15,7 +15,7 @@ Aplicación web Spring Boot para administrar los festivales gastronómicos del p
 
 ## Diagrama de clases
 
-UML actualizado del proyecto: **[Diagrama de clases](COMPLETAR_LINK_AL_UML)**
+UML actualizado del proyecto: **[Diagrama de clases](https://drive.google.com/file/d/1ytv_8UYJ_ZzZESxqBh13KMhssF_K3_bg/view)**
 
 ## Tecnologías
 
