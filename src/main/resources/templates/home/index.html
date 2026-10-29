@@ -343,7 +343,7 @@
 
                         <strong>Fecha de inicio:</strong>
 
-                        <span th:text="${festival.fechaInicio}">
+                        <span th:text="${festival.fechaInicio != null ? #temporals.format(festival.fechaInicio, 'dd/MM/yyyy') : '-'}">
                             22/10/2026
                         </span>
 
@@ -353,7 +353,7 @@
 
                         <strong>Fecha de finalización:</strong>
 
-                        <span th:text="${festival.fechaFin}">
+                        <span th:text="${festival.fechaFin != null ? #temporals.format(festival.fechaFin, 'dd/MM/yyyy') : '-'}">
                             15/12/2026
                         </span>
 

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
@@ -9,15 +8,10 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <style>
-
-    /* CONTENEDOR */
-
     .liquidaciones-contenedor {
         margin-top: 25px;
         margin-bottom: 50px;
     }
-
-    /* ENCABEZADO */
 
     .liquidaciones-header {
         background: linear-gradient(135deg, #26352b, #425843);
@@ -40,22 +34,14 @@
         margin-bottom: 0;
     }
 
-    /* TARJETAS */
-
-    .liquidaciones-card,
-    .liquidaciones-card:hover {
+    .liquidaciones-card {
         background-color: white;
         border: none;
         border-top: 5px solid #d99a4e;
         border-radius: 12px;
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-        transform: none;
-        transition: none;
-        overflow: hidden;
-    }
-
-    .liquidaciones-card {
         margin-bottom: 30px;
+        overflow: hidden;
     }
 
     .liquidaciones-card-body {
@@ -69,44 +55,36 @@
         margin-bottom: 20px;
     }
 
-    /* FORMULARIO */
-
     .liquidaciones-label {
         font-weight: bold;
         color: #26352b;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
+    .liquidaciones-select,
     .liquidaciones-input {
         border: 1px solid #ced5cd;
         border-radius: 6px;
         height: 42px;
     }
 
-    .liquidaciones-input:focus {
-        border-color: #425843;
-        box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
-    }
-
-    .boton-calcular {
+    .boton-filtrar {
         background-color: #26352b;
         border: 1px solid #26352b;
         color: white;
-        padding: 10px 25px;
+        padding: 9px 22px;
         border-radius: 6px;
         font-weight: bold;
     }
 
-    .boton-calcular:hover,
-    .boton-calcular:focus {
+    .boton-filtrar:hover {
         background-color: #425843;
-        border-color: #425843;
         color: white;
     }
 
-    .informacion-calculo {
+    .info-festival-box {
         margin-top: 20px;
-        padding: 15px 18px;
+        padding: 15px 20px;
         background-color: #f7f5f0;
         border-left: 4px solid #d99a4e;
         border-radius: 5px;
@@ -114,12 +92,10 @@
         font-size: 14px;
     }
 
-    /* TABLA */
-
     .tabla-liquidaciones {
         width: 100%;
         margin-bottom: 0;
-        font-size: 14px;
+        font-size: 13.5px;
     }
 
     .tabla-liquidaciones thead {
@@ -128,7 +104,7 @@
     }
 
     .tabla-liquidaciones thead th {
-        padding: 16px 13px;
+        padding: 13px 10px;
         border: none;
         font-weight: bold;
         vertical-align: middle;
@@ -136,7 +112,7 @@
     }
 
     .tabla-liquidaciones tbody td {
-        padding: 15px 13px;
+        padding: 12px 10px;
         vertical-align: middle;
         border-top: 1px solid #e9ece8;
     }
@@ -160,261 +136,224 @@
         border-top: 2px solid #425843;
     }
 
-    .total-destacado {
+    .badge-dias {
+        background-color: #e8eee6;
         color: #26352b;
         font-weight: bold;
-        white-space: nowrap;
+        padding: 5px 10px;
+        border-radius: 15px;
     }
 
-    /* ALERTAS */
-
-    .alerta-liquidaciones {
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin-bottom: 25px;
+    .badge-insuficiente {
+        background-color: #f8d7da;
+        color: #721c24;
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 15px;
     }
-
-    @media (max-width: 768px) {
-
-        .liquidaciones-header {
-            padding: 30px 22px;
-        }
-
-        .liquidaciones-header h2 {
-            font-size: 25px;
-        }
-
-        .liquidaciones-card-body {
-            padding: 22px 18px;
-        }
-
-        .tabla-liquidaciones {
-            font-size: 13px;
-        }
-
-    }
-
 </style>
 
 <main class="container py-4 liquidaciones-contenedor">
 
     <!-- ENCABEZADO -->
-
     <section class="liquidaciones-header">
-
         <h2>Liquidación de haberes</h2>
-
         <p>
-            Sueldo base + plus por categoría (cocina)
-            o antigüedad (cajeros), según la cantidad
-            de días que dura el festival.
+            Cálculo y registro mensual de sueldos según la duración del festival y la fecha de ingreso de cada empleado.
         </p>
-
     </section>
 
-    <!-- MENSAJE DE ERROR -->
+    <!-- MENSAJES DE ALERTA -->
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-info" th:if="${info}" th:text="${info}"></div>
+    <div class="alert alert-warning" th:if="${warning}" th:text="${warning}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
 
-    <div class="alert alert-danger alerta-liquidaciones"
-         th:if="${error}"
-         th:text="${error}">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span></span>
+        <a th:href="@{/recibos}" class="btn btn-outline-dark font-weight-bold">
+            Ver historial de recibos emitidos &rarr;
+        </a>
     </div>
 
-    <!-- FORMULARIO DE CÁLCULO -->
-
+    <!-- SELECTOR DE FESTIVAL Y PERÍODO -->
     <div class="card liquidaciones-card">
-
         <div class="liquidaciones-card-body">
+            <h3 class="titulo-card">Parámetros del Festival y Período</h3>
 
-            <h3 class="titulo-card">
-                Parámetros de liquidación
-            </h3>
-
-            <form th:action="@{/liquidaciones}"
-                  method="get">
-
+            <form th:action="@{/liquidaciones}" method="get">
                 <div class="form-row align-items-end">
-
                     <div class="form-group col-md-5">
-
-                        <label for="dias"
-                               class="liquidaciones-label">
-                            Días que dura el festival:
-                        </label>
-
-                        <input type="number"
-                               id="dias"
-                               name="dias"
-                               min="1"
-                               th:value="${dias}"
-                               class="form-control liquidaciones-input"/>
-
+                        <label for="idFestival" class="liquidaciones-label">Seleccionar Festival:</label>
+                        <select id="idFestival" name="idFestival" class="form-control liquidaciones-select" onchange="this.form.submit()">
+                            <option th:each="f : ${festivales}"
+                                    th:value="${f.idFestival}"
+                                    th:text="${f.nombreLimpio} + ' (' + ${f.duracionDias} + ' días)'"
+                                    th:selected="${festivalSeleccionado != null and festivalSeleccionado.idFestival == f.idFestival}">
+                                Festival Primavera (90 días)
+                            </option>
+                        </select>
                     </div>
 
-                    <div class="form-group col-md-auto">
+                    <div class="form-group col-md-4">
+                        <label for="periodo" class="liquidaciones-label">Período a liquidar:</label>
+                        <select id="periodo" name="periodo" class="form-control liquidaciones-select" onchange="this.form.submit()">
+                            <option value="TODOS" th:selected="${periodo == 'TODOS' or periodo == null}">
+                                Todos los meses del festival
+                            </option>
+                            <option th:each="p : ${periodosFestival}"
+                                    th:value="${p}"
+                                    th:text="${p}"
+                                    th:selected="${periodo == p.toString()}">
+                                2026-08
+                            </option>
+                        </select>
+                    </div>
 
-                        <button type="submit"
-                                class="btn boton-calcular">
-                            Calcular liquidación
+                    <div class="form-group col-md-3">
+                        <button type="submit" class="btn boton-filtrar btn-block">
+                            Actualizar cálculo
                         </button>
-
                     </div>
-
                 </div>
-
             </form>
 
-            <!-- PORCENTAJE APLICADO -->
-
-            <div class="informacion-calculo">
-
-                Se liquida el
-
-                <strong th:text="${porcentaje} + '%'">
-                    50%
-                </strong>
-
-                de (sueldo base + adicional).
-
+            <!-- INFORMACIÓN DEL FESTIVAL SELECCIONADO -->
+            <div class="info-festival-box" th:if="${festivalSeleccionado != null}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Festival:</strong> <span th:text="${festivalSeleccionado.nombreLimpio}">Nombre</span> |
+                        <strong>Fechas:</strong>
+                        <span th:text="${#temporals.format(festivalSeleccionado.fechaInicio, 'dd/MM/yyyy')}">01/10/2026</span> al
+                        <span th:text="${#temporals.format(festivalSeleccionado.fechaFin, 'dd/MM/yyyy')}">31/10/2026</span> |
+                        <strong>Duración total:</strong>
+                        <span class="badge-dias" th:text="${festivalSeleccionado.duracionDias} + ' días'">30 días</span>
+                    </div>
+                </div>
             </div>
 
+            <!-- ADVERTENCIA DE FESTIVAL CORTO (< 15 DÍAS) -->
+            <div class="alert alert-danger mt-3 mb-0" th:if="${advertenciaFestival != null}">
+                <strong th:text="${advertenciaFestival}">Advertencia</strong>
+            </div>
         </div>
-
     </div>
 
     <!-- SIN EMPLEADOS -->
-
-    <div class="alert alert-info alerta-liquidaciones"
-         th:if="${#lists.isEmpty(liquidaciones)}">
-
-        No hay empleados activos asignados
-        a unidades de venta.
-
+    <div class="alert alert-info" th:if="${#lists.isEmpty(liquidaciones)}">
+        No hay empleados activos asignados a unidades de venta para calcular en este festival.
     </div>
 
-    <!-- TABLA DE LIQUIDACIONES -->
-
-    <div class="card liquidaciones-card"
-         th:unless="${#lists.isEmpty(liquidaciones)}">
-
+    <!-- TABLA DE PREVISUALIZACIÓN DE LIQUIDACIÓN -->
+    <div class="card liquidaciones-card" th:unless="${#lists.isEmpty(liquidaciones)}">
         <div class="liquidaciones-card-body pb-0">
-
-            <h3 class="titulo-card">
-                Detalle de liquidaciones
-            </h3>
-
+            <h3 class="titulo-card">Detalle de Haberes Computados</h3>
         </div>
 
         <div class="table-responsive">
-
             <table class="table tabla-liquidaciones">
-
                 <thead>
-
                 <tr>
-
                     <th>Empleado</th>
-
                     <th>DNI</th>
-
-                    <th>Tipo</th>
-
-                    <th>Unidad</th>
-
-                    <th class="text-right">
-                        Sueldo base
-                    </th>
-
-                    <th class="text-right">
-                        Adicional
-                    </th>
-
-                    <th>Detalle</th>
-
-                    <th class="text-right">
-                        %
-                    </th>
-
-                    <th class="text-right">
-                        Total a cobrar
-                    </th>
-
+                    <th class="text-center">Período</th>
+                    <th>Cargo</th>
+                    <th>Puesto / Unidad</th>
+                    <th>Ingreso Empresa</th>
+                    <th class="text-center">Días trabajados</th>
+                    <th class="text-right">Sueldo Base ($)</th>
+                    <th class="text-right">Adicional ($)</th>
+                    <th>Detalle Adicional</th>
+                    <th class="text-center">Factor %</th>
+                    <th class="text-right">Total a cobrar ($)</th>
                 </tr>
-
                 </thead>
-
                 <tbody>
-
                 <tr th:each="l : ${liquidaciones}">
-
-                    <td th:text="${l.empleado}">
-                        Pérez, Juan
+                    <td>
+                        <strong th:text="${l.empleado}">Pérez, Juan</strong>
+                        <span th:if="${l.yaLiquidado}" class="badge badge-success ml-1">Liquidado ✓</span>
                     </td>
-
-                    <td th:text="${l.dni}">
-                        30111222
+                    <td th:text="${l.dni}">12345678</td>
+                    <td class="text-center">
+                        <span class="badge badge-light border font-weight-bold" th:text="${l.periodoDescripcion}">Liquidación de Octubre 2026</span>
                     </td>
-
-                    <td th:text="${l.tipo}">
-                        Cajero
+                    <td th:text="${l.tipo}">Cocinero</td>
+                    <td th:text="${l.unidad}">Puesto 1</td>
+                    <td th:text="${l.fechaIngreso != null ? #temporals.format(l.fechaIngreso, 'dd/MM/yyyy') : 'N/D'}">26/10/2026</td>
+                    <td class="text-center">
+                        <span th:class="${l.diasFestival >= 15} ? 'badge-dias' : 'badge-insuficiente'"
+                              th:text="${l.diasFestival} + ' días'">
+                            30 días
+                        </span>
+                        <small class="d-block text-danger" th:if="${l.diasFestival < 15}">
+                            (&lt; 15 días: no liquidable)
+                        </small>
                     </td>
-
-                    <td th:text="${l.unidad}">
-                        La Parrilla
+                    <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(l.sueldoBase, 1, 'POINT', 2, 'COMMA')}">
+                        $100.000,00
                     </td>
-
-                    <td class="text-right"
-                        th:text="'$ ' + ${#numbers.formatDecimal(l.sueldoBase, 1, 'POINT', 2, 'COMMA')}">
-                        $ 100.000,00
+                    <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(l.adicional, 1, 'POINT', 2, 'COMMA')}">
+                        $50.000,00
                     </td>
-
-                    <td class="text-right"
-                        th:text="'$ ' + ${#numbers.formatDecimal(l.adicional, 1, 'POINT', 2, 'COMMA')}">
-                        $ 0,00
+                    <td th:text="${l.detalleAdicional}">Plus Cocinero</td>
+                    <td class="text-center">
+                        <span th:if="${l.diasFestival < 15}" class="badge badge-secondary">No liquidable</span>
+                        <strong th:unless="${l.diasFestival < 15}" th:text="${l.porcentaje} + '%'">100%</strong>
                     </td>
-
-                    <td th:text="${l.detalleAdicional}">
-                        Detalle
-                    </td>
-
-                    <td class="text-right"
-                        th:text="${l.porcentaje} + '%'">
-                        50%
-                    </td>
-
-                    <td class="text-right total-destacado">
-
-                        <strong th:text="'$ ' + ${#numbers.formatDecimal(l.totalACobrar, 1, 'POINT', 2, 'COMMA')}">
-                            $ 0,00
+                    <td class="text-right">
+                        <span th:if="${l.diasFestival < 15}" class="text-muted font-italic">$0,00</span>
+                        <strong th:unless="${l.diasFestival < 15}" style="color: #26352b;"
+                                th:text="'$' + ${#numbers.formatDecimal(l.totalACobrar, 1, 'POINT', 2, 'COMMA')}">
+                            $150.000,00
                         </strong>
-
                     </td>
-
                 </tr>
-
                 </tbody>
-
                 <tfoot>
-
                 <tr>
-
-                    <th colspan="8"
-                        class="text-right">
-                        Total a pagar
+                    <th colspan="11" class="text-right">Total general de liquidación:</th>
+                    <th class="text-right" style="color: #26352b; font-size: 16px;"
+                        th:text="'$' + ${#numbers.formatDecimal(totalGeneral, 1, 'POINT', 2, 'COMMA')}">
+                        $0,00
                     </th>
-
-                    <th class="text-right total-destacado"
-                        th:text="'$ ' + ${#numbers.formatDecimal(totalGeneral, 1, 'POINT', 2, 'COMMA')}">
-                        $ 0,00
-                    </th>
-
                 </tr>
-
                 </tfoot>
-
             </table>
-
         </div>
 
+        <!-- FORMULARIO DE CONFIRMACIÓN Y GUARDADO -->
+        <div class="card-footer bg-white border-top p-3" th:if="${festivalSeleccionado != null}">
+            <form th:action="@{/liquidaciones/generar}" method="post" class="form-inline justify-content-between align-items-center">
+                <input type="hidden" name="idFestival" th:value="${festivalSeleccionado.idFestival}" />
+                <input type="hidden" name="periodo" th:value="${periodo}" />
+
+                <div class="text-muted small">
+                    <span th:if="${totalPendientes > 0}">
+                        Hay <strong><span th:text="${totalPendientes}">2</span></strong> empleado(s) con al menos 15 días listos para registrar en este período.
+                    </span>
+                    <span th:if="${totalPendientes == 0 and not #lists.isEmpty(liquidaciones)}" class="text-success font-weight-bold">
+                        ✓ Todas las liquidaciones posibles de este festival ya fueron registradas para el período <span th:text="${periodo}"></span>.
+                    </span>
+                </div>
+
+                <div>
+                    <button th:if="${sePuedeLiquidar}"
+                            type="submit"
+                            class="btn btn-success font-weight-bold px-4 py-2"
+                            onclick="return confirm('¿Confirma que desea guardar y registrar las liquidaciones de este festival en la base de datos?');">
+                        Confirmar y Registrar Liquidaciones del Mes
+                    </button>
+                    <button th:unless="${sePuedeLiquidar}"
+                            type="button"
+                            disabled
+                            class="btn btn-secondary font-weight-bold px-4 py-2">
+                        <span th:if="${totalPendientes == 0 and not #lists.isEmpty(liquidaciones)}">Período ya liquidado</span>
+                        <span th:unless="${totalPendientes == 0 and not #lists.isEmpty(liquidaciones)}">Liquidación no disponible</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
 </main>

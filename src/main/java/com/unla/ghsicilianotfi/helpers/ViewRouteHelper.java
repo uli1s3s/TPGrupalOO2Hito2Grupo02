@@ -29,6 +29,10 @@ public class ViewRouteHelper {
 	
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
+
+	//RECIBO DE SUELDO
+	public final static String RECIBO_LISTA = "recibos/mis-recibos";
+	public final static String RECIBO_ROOT = "/recibos";
 	
 	//EMPLEADO
 	public final static String EMPLEADO_INDEX = "empleados/index";

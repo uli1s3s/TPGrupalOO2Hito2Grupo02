@@ -27,5 +27,26 @@ public class LiquidacionDeHaberDTO {
     private String detalleAdicional;
     private int porcentajeAplicado;
     private double totalACobrar;
-}
+    private String nombreFestival;
 
+    public String getPeriodoDescripcion() {
+        if (periodo == null || periodo.trim().isEmpty()) {
+            return "-";
+        }
+        try {
+            java.time.YearMonth ym = java.time.YearMonth.parse(periodo.trim());
+            String mes = ym.getMonth().getDisplayName(java.time.format.TextStyle.FULL, new java.util.Locale("es", "AR"));
+            String mesCap = mes.substring(0, 1).toUpperCase() + mes.substring(1);
+            return "Liquidación de " + mesCap + " " + ym.getYear();
+        } catch (Exception e) {
+            return periodo;
+        }
+    }
+
+    public String getNombreFestivalLimpio() {
+        if (nombreFestival == null || nombreFestival.trim().isEmpty()) {
+            return "Festival General";
+        }
+        return nombreFestival.replaceAll("\\s*\\([^)]*\\)", "").trim();
+    }
+}

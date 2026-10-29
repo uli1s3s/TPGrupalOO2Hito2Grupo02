@@ -204,11 +204,33 @@
 
                 <!-- PERSONAL -->
 
-                <li class="nav-item">
+                <li class="nav-item" sec:authorize="hasAnyRole('ROLE_ADMINISTRADOR', 'ROLE_RESPONSABLE')">
 
                     <a class="nav-link"
                        th:href="@{/empleados}">
                         Personal
+                    </a>
+
+                </li>
+
+                <!-- LIQUIDACIONES -->
+
+                <li class="nav-item" sec:authorize="hasAnyRole('ROLE_ADMINISTRADOR', 'ROLE_RESPONSABLE')">
+
+                    <a class="nav-link"
+                       th:href="@{/liquidaciones}">
+                        Liquidaciones
+                    </a>
+
+                </li>
+
+                <!-- RECIBOS -->
+
+                <li class="nav-item">
+
+                    <a class="nav-link"
+                       th:href="@{/recibos}">
+                        Recibos
                     </a>
 
                 </li>

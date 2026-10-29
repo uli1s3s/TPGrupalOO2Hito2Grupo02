@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .recibos-contenedor {
+        margin-top: 25px;
+        margin-bottom: 50px;
+    }
+
+    .recibos-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 40px 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .recibos-header h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .recibos-header p {
+        color: #e5e9e3;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .recibos-card {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    .recibos-card-body {
+        padding: 28px;
+    }
+
+    .titulo-card {
+        color: #26352b;
+        font-size: 19px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .tabla-recibos {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    .tabla-recibos thead {
+        background-color: #26352b;
+        color: white;
+    }
+
+    .tabla-recibos thead th {
+        padding: 16px 13px;
+        border: none;
+        font-weight: bold;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .tabla-recibos tbody td {
+        padding: 15px 13px;
+        vertical-align: middle;
+        border-top: 1px solid #e9ece8;
+    }
+
+    .tabla-recibos tbody tr:nth-child(even) {
+        background-color: #f7f8f5;
+    }
+
+    .tabla-recibos tbody tr:hover {
+        background-color: #edf2ec;
+    }
+
+    .btn-descargar-pdf {
+        background-color: #26352b;
+        color: white;
+        border: 1px solid #26352b;
+        padding: 7px 15px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s;
+    }
+
+    .btn-descargar-pdf:hover {
+        background-color: #d99a4e;
+        border-color: #d99a4e;
+        color: white;
+        text-decoration: none;
+    }
+
+    .badge-periodo {
+        background-color: #e8eee6;
+        color: #26352b;
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .badge-festival {
+        background-color: #e3ebfc;
+        color: #1a4f9c;
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+</style>
+
+<main class="container py-4 recibos-contenedor">
+
+    <!-- ENCABEZADO -->
+    <section class="recibos-header">
+        <h2 th:text="${esEmpleado} ? 'Mis Recibos de Sueldo' : 'Historial de Recibos Emitidos'">
+            Recibos de Sueldo
+        </h2>
+        <p th:if="${esEmpleado}">
+            Consulta tu historial mensual de liquidaciones y descarga tus recibos oficiales en formato PDF para tu control.
+        </p>
+        <p th:unless="${esEmpleado}">
+            Historial de liquidaciones persistidas en el sistema para todos los empleados de las unidades de venta y festivales.
+        </p>
+    </section>
+
+    <!-- MENSAJES DE ALERTA -->
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-warning" th:if="${warning}" th:text="${warning}"></div>
+
+    <!-- BOTÓN VOLVER (Para Admin / Responsable) -->
+    <div class="mb-3" th:unless="${esEmpleado}">
+        <a th:href="@{/liquidaciones}" class="btn btn-outline-secondary btn-sm">
+            &larr; Volver a pantalla de liquidaciones
+        </a>
+    </div>
+
+    <!-- SIN RECIBOS -->
+    <div class="alert alert-info" th:if="${#lists.isEmpty(recibos)}">
+        <span th:if="${esEmpleado}">
+            Aún no tienes recibos de sueldo registrados. Las liquidaciones se generan a fin de mes.
+        </span>
+        <span th:unless="${esEmpleado}">
+            No se encontraron recibos emitidos en el sistema. Puedes generar uno desde la pantalla de <a th:href="@{/liquidaciones}">liquidaciones</a>.
+        </span>
+    </div>
+
+    <!-- TABLA DE RECIBOS -->
+    <div class="card recibos-card" th:unless="${#lists.isEmpty(recibos)}">
+        <div class="recibos-card-body pb-0">
+            <h3 class="titulo-card">Historial de Liquidaciones</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table tabla-recibos">
+                <thead>
+                <tr>
+                    <th>N° Recibo</th>
+                    <th>Período</th>
+                    <th>Festival</th>
+                    <th th:unless="${esEmpleado}">Empleado</th>
+                    <th th:unless="${esEmpleado}">DNI</th>
+                    <th>Puesto / Unidad</th>
+                    <th>Fecha Emisión</th>
+                    <th class="text-center">Días</th>
+                    <th class="text-right">Básico ($)</th>
+                    <th class="text-right">Adicional ($)</th>
+                    <th class="text-right">Total Neto ($)</th>
+                    <th class="text-center">Acción</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${recibos}">
+                    <td>
+                        <strong th:text="'#' + ${r.idLiquidacion}">#1</strong>
+                    </td>
+                    <td>
+                        <span class="badge-periodo" th:text="${r.periodoDescripcion}">Liquidación de Agosto 2026</span>
+                    </td>
+                    <td>
+                        <span class="badge-festival" th:text="${r.nombreFestivalLimpio}">Festival de Primavera</span>
+                    </td>
+                    <td th:unless="${esEmpleado}" th:text="${r.nombreCompleto}">Pérez, Juan</td>
+                    <td th:unless="${esEmpleado}" th:text="${r.dni}">12345678</td>
+                    <td th:text="${r.unidadVenta}">Puesto 1</td>
+                    <td th:text="${r.fechaLiquidacion != null ? #temporals.format(r.fechaLiquidacion, 'dd/MM/yyyy') : '-'}">31/10/2026</td>
+                    <td class="text-center" th:text="${r.diasTrabajados}">30</td>
+                    <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(r.sueldoBase, 1, 'POINT', 2, 'COMMA')}">
+                        $100.000,00
+                    </td>
+                    <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(r.adicional, 1, 'POINT', 2, 'COMMA')}">
+                        $50.000,00
+                    </td>
+                    <td class="text-right">
+                        <strong style="color: #26352b;" th:text="'$' + ${#numbers.formatDecimal(r.totalACobrar, 1, 'POINT', 2, 'COMMA')}">
+                            $150.000,00
+                        </strong>
+                    </td>
+                    <td class="text-center">
+                        <a th:href="@{/recibos/{id}/descargar-pdf(id=${r.idLiquidacion})}"
+                           class="btn-descargar-pdf"
+                           target="_blank">
+                            Descargar PDF
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
+</body>
+</html>
+
