@@ -45,6 +45,14 @@ public class PlatoController {
         return ViewRouteHelper.PLATO_INDEX;
     }
 
+    @GetMapping("/rentabilidad")
+    public String verRentabilidad(Model model, Authentication authentication) {
+        model.addAttribute(
+                "reporte",
+                platoService.listarRentabilidadPorResponsable(authentication.getName()));
+        return ViewRouteHelper.PLATO_RENTABILIDAD;
+    }
+
     @GetMapping("/nuevo")
     public String nuevo(Model model, Authentication authentication) {
         PlatoFormDTO plato = new PlatoFormDTO();

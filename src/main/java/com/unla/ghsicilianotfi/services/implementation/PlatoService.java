@@ -1,15 +1,18 @@
 package com.unla.ghsicilianotfi.services.implementation;
 
 import com.unla.ghsicilianotfi.dtos.PlatoFormDTO;
+import com.unla.ghsicilianotfi.dtos.ReporteRentabilidadPlatoDTO;
 import com.unla.ghsicilianotfi.entities.Plato;
 import com.unla.ghsicilianotfi.entities.UnidadVenta;
 import com.unla.ghsicilianotfi.repositories.IPlatoRepository;
+import com.unla.ghsicilianotfi.repositories.PlatoRentabilidadProjection;
 import com.unla.ghsicilianotfi.services.IPlatoService;
 import com.unla.ghsicilianotfi.services.IUnidadVentaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,16 @@ public class PlatoService implements IPlatoService {
         return platoRepository.findByUnidadVenta_Responsable_NombreOrderByNombreAsc(nombreResponsable)
                 .stream()
                 .map(this::toDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteRentabilidadPlatoDTO> listarRentabilidadPorResponsable(
+            String nombreResponsable) {
+        return platoRepository.buscarRentabilidadPorResponsable(nombreResponsable)
+                .stream()
+                .map(this::toReporteRentabilidad)
                 .toList();
     }
 
@@ -148,5 +161,32 @@ public class PlatoService implements IPlatoService {
         dto.setNombreUnidad(plato.getUnidadVenta().getNombreComercial());
         dto.setActivo(plato.isActivo());
         return dto;
+    }
+
+    private ReporteRentabilidadPlatoDTO toReporteRentabilidad(
+            PlatoRentabilidadProjection plato) {
+        BigDecimal precioVenta = BigDecimal.valueOf(plato.getPrecioVenta());
+        BigDecimal costoProduccion = BigDecimal.valueOf(plato.getCostoProduccion());
+        BigDecimal rentabilidadUnitaria = precioVenta.subtract(costoProduccion);
+        BigDecimal margenPorcentaje = precioVenta.signum() == 0
+                ? null
+                : rentabilidadUnitaria
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(precioVenta, 2, RoundingMode.HALF_UP);
+        BigDecimal facturacionTotal = BigDecimal.valueOf(plato.getFacturacionTotal());
+        BigDecimal costoTotal = BigDecimal.valueOf(plato.getCostoTotal());
+
+        return new ReporteRentabilidadPlatoDTO(
+                plato.getIdPlato(),
+                plato.getNombre(),
+                plato.getNombreUnidad(),
+                precioVenta,
+                costoProduccion,
+                rentabilidadUnitaria,
+                margenPorcentaje,
+                plato.getCantidadVendida(),
+                facturacionTotal,
+                facturacionTotal.subtract(costoTotal),
+                Boolean.TRUE.equals(plato.getActivo()));
     }
 }

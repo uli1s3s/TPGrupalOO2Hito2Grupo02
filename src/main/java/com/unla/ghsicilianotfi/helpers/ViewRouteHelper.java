@@ -30,6 +30,7 @@ public class ViewRouteHelper {
 	//FESTIVAL
 	public final static String FESTIVAL_INDEX = "festival/index";
 	public final static String FESTIVAL_FORM = "festival/form";
+	public final static String FESTIVAL_FACTURACION = "festival/facturacion";
 	
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
@@ -48,6 +49,7 @@ public class ViewRouteHelper {
 	//PLATO
 	public final static String PLATO_INDEX = "platos/index";
 	public final static String PLATO_FORM = "platos/form";
+	public final static String PLATO_RENTABILIDAD = "platos/rentabilidad";
 
 	/**** Redirects ****/
 	public final static String ROUTE = "/index";

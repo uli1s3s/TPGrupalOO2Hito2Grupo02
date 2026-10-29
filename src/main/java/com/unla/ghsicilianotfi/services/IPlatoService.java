@@ -1,6 +1,7 @@
 package com.unla.ghsicilianotfi.services;
 
 import com.unla.ghsicilianotfi.dtos.PlatoFormDTO;
+import com.unla.ghsicilianotfi.dtos.ReporteRentabilidadPlatoDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,8 @@ import java.util.Set;
 public interface IPlatoService {
 
     List<PlatoFormDTO> listarPorResponsable(String nombreResponsable);
+
+    List<ReporteRentabilidadPlatoDTO> listarRentabilidadPorResponsable(String nombreResponsable);
 
     Set<Long> listarIdsPlatosEstrellaPorResponsable(String nombreResponsable);
 

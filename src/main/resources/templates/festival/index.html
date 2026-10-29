@@ -13,7 +13,11 @@
             <h1>Festivales</h1>
             <p class="text-muted mb-0">Administración de festivales y sus costos.</p>
         </div>
-        <a class="btn btn-success" th:href="@{/festivales/nuevo}">Nuevo festival</a>
+        <div class="d-flex flex-wrap">
+            <a class="btn btn-outline-primary mr-2 mb-2"
+               th:href="@{/festivales/facturacion}">Ver facturación de festivales</a>
+            <a class="btn btn-success mb-2" th:href="@{/festivales/nuevo}">Nuevo festival</a>
+        </div>
     </div>
 
     <div class="alert alert-success" th:if="${mensajeExito}" th:text="${mensajeExito}"></div>
