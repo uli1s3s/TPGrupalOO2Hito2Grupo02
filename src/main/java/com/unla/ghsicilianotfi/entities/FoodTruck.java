@@ -30,4 +30,8 @@ public class FoodTruck extends UnidadVenta {
                 + (Boolean.TRUE.equals(electricidad) ? " - con electricidad" : " - sin electricidad");
     }
     
+    @Override
+    public String getPrefijoCodigo() {
+        return "FT";
+    }
 }

@@ -28,4 +28,9 @@ public class PuestoDesmontable extends UnidadVenta {
     public String getDetalle() {
         return cantidadCarpas + " carpa(s) - montaje de " + tiempoMontajeMinutos + " min";
     }
+    
+    @Override
+    public String getPrefijoCodigo() {
+        return "PD";
+    }
 }

@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<div class="container" style="max-width: 650px; margin-top: 55px;">
+
+    <div class="card shadow-sm"
+         style="border: none; border-top: 5px solid #d99a4e;
+                border-radius: 12px;">
+
+        <div class="card-body p-4">
+
+            <h2 class="text-center mb-3"
+                style="color: #26352b; font-weight: bold;">
+                Cambiar contraseña
+            </h2>
+
+            <p class="text-center text-muted mb-4">
+                Actualizá la contraseña de tu cuenta.
+            </p>
+
+            <!-- MENSAJE DE ÉXITO -->
+            <div th:if="${mensaje}"
+                 class="alert alert-success"
+                 th:text="${mensaje}">
+            </div>
+
+            <!-- MENSAJE DE ERROR -->
+            <div th:if="${error}"
+                 class="alert alert-danger"
+                 th:text="${error}">
+            </div>
+
+            <form th:action="@{/cambiar-contrasena}"
+                  th:object="${cambioContrasena}"
+                  method="post">
+
+                <!-- CONTRASEÑA ACTUAL -->
+                <div class="form-group">
+
+                    <label for="contrasenaActual">
+                        Contraseña actual
+                    </label>
+
+                    <div class="input-group">
+
+                        <input type="password"
+                               th:field="*{contrasenaActual}"
+                               class="form-control"
+                               id="contrasenaActual"
+                               autocomplete="current-password"
+                               required>
+
+                        <div class="input-group-append">
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="mostrarContrasena('contrasenaActual', this)"
+                                    aria-label="Mostrar contraseña actual">
+
+                                <span class="icono-ojo">
+                                    &#128065;
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <small class="text-danger"
+                           th:errors="*{contrasenaActual}">
+                    </small>
+
+                </div>
+
+                <!-- NUEVA CONTRASEÑA -->
+                <div class="form-group">
+
+                    <label for="contrasenaNueva">
+                        Nueva contraseña
+                    </label>
+
+                    <div class="input-group">
+
+                        <input type="password"
+                               th:field="*{contrasenaNueva}"
+                               class="form-control"
+                               id="contrasenaNueva"
+                               autocomplete="new-password"
+                               minlength="8"
+                               required>
+
+                        <div class="input-group-append">
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="mostrarContrasena('contrasenaNueva', this)"
+                                    aria-label="Mostrar nueva contraseña">
+
+                                <span class="icono-ojo">
+                                    &#128065;
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <small class="text-danger"
+                           th:errors="*{contrasenaNueva}">
+                    </small>
+
+                </div>
+
+                <!-- CONFIRMAR NUEVA CONTRASEÑA -->
+                <div class="form-group">
+
+                    <label for="confirmarContrasena">
+                        Confirmar nueva contraseña
+                    </label>
+
+                    <div class="input-group">
+
+                        <input type="password"
+                               th:field="*{confirmarContrasena}"
+                               class="form-control"
+                               id="confirmarContrasena"
+                               autocomplete="new-password"
+                               required>
+
+                        <div class="input-group-append">
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="mostrarContrasena('confirmarContrasena', this)"
+                                    aria-label="Mostrar confirmación de contraseña">
+
+                                <span class="icono-ojo">
+                                    &#128065;
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <small class="text-danger"
+                           th:errors="*{confirmarContrasena}">
+                    </small>
+
+                </div>
+
+                <!-- GUARDAR -->
+                <button type="submit"
+                        class="btn btn-block mt-4"
+                        style="background-color: #26352b;
+                               color: white;
+                               padding: 12px;">
+
+                    Guardar nueva contraseña
+
+                </button>
+
+                <!-- VOLVER -->
+                <a th:href="@{/index}"
+                   class="btn btn-outline-secondary btn-block mt-2">
+
+                    Volver al inicio
+
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
+<!-- MOSTRAR / OCULTAR CONTRASEÑAS -->
+<script>
+
+    function mostrarContrasena(idCampo, boton) {
+
+        const campo = document.getElementById(idCampo);
+        const icono = boton.querySelector(".icono-ojo");
+
+        if (campo.type === "password") {
+
+            campo.type = "text";
+
+            icono.textContent = "🙈";
+
+            boton.setAttribute(
+                "aria-label",
+                "Ocultar contraseña"
+            );
+
+        } else {
+
+            campo.type = "password";
+
+            icono.textContent = "👁";
+
+            boton.setAttribute(
+                "aria-label",
+                "Mostrar contraseña"
+            );
+
+        }
+
+    }
+
+</script>
+
+</body>
+</html>

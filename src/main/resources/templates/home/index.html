@@ -1,6 +1,8 @@
 
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="~{layout :: head}"></head>
 
@@ -9,7 +11,6 @@
 <nav th:replace="~{layout :: navbar}"></nav>
 
 <style>
-
     body {
         background-color: #f7f5f0;
         color: #26352b;
@@ -243,9 +244,7 @@
         .festival-nombre {
             font-size: 19px;
         }
-
     }
-
 </style>
 
 <main class="container py-4">
@@ -261,18 +260,23 @@
             y sus unidades de venta.
         </p>
 
-        <div class="datos-usuario">
+        <!-- DATOS: SOLO USUARIOS AUTENTICADOS -->
+
+        <div class="datos-usuario"
+             sec:authorize="isAuthenticated()">
 
             <span class="dato">
-
                 Usuario:
-                <strong th:text="${username}">Usuario</strong>
-
+                <strong sec:authentication="name">
+                    Usuario
+                </strong>
             </span>
 
-            <span class="dato" th:if="${rol != null}">
+            <span class="dato"
+                  th:if="${rol != null}">
 
                 Rol:
+
                 <strong th:text="${#strings.capitalize(
                     #strings.toLowerCase(
                         #strings.replace(rol, 'ROLE_', '')
@@ -289,7 +293,7 @@
 
     <!-- FESTIVALES DISPONIBLES -->
 
-    <section>
+    <section id="festivales">
 
         <h2 class="titulo-seccion">
             Nuestros festivales
@@ -340,23 +344,19 @@
                 <div class="festival-fechas">
 
                     <p>
-
                         <strong>Fecha de inicio:</strong>
 
                         <span th:text="${festival.fechaInicio}">
                             22/10/2026
                         </span>
-
                     </p>
 
                     <p>
-
                         <strong>Fecha de finalización:</strong>
 
                         <span th:text="${festival.fechaFin}">
                             15/12/2026
                         </span>
-
                     </p>
 
                 </div>
@@ -367,9 +367,10 @@
 
     </section>
 
-    <!-- ACCESOS DE GESTIÓN -->
+    <!-- ACCESOS DE GESTIÓN: SOLO AUTENTICADOS -->
 
-    <section class="accesos-rapidos">
+    <section class="accesos-rapidos"
+             sec:authorize="isAuthenticated()">
 
         <h2 class="titulo-seccion">
             Accesos de gestión
@@ -381,9 +382,10 @@
 
         <div class="row">
 
-            <!-- PEDIDOS -->
+            <!-- PEDIDOS: ADMINISTRADOR, RESPONSABLE Y EMPLEADO -->
 
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6 mb-4"
+                 sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
 
                 <div class="card acceso-card h-100">
 
@@ -407,9 +409,10 @@
 
             </div>
 
-            <!-- PERSONAL -->
+            <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
 
-            <div class="col-md-6 mb-4">
+            <div class="col-md-6 mb-4"
+                 sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
 
                 <div class="card acceso-card h-100">
 

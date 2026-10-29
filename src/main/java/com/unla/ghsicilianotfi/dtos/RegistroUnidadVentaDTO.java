@@ -31,10 +31,6 @@ public class RegistroUnidadVentaDTO {
     @DecimalMin(value = "0.01", message = "La superficie debe ser mayor a cero")
     private Float superficieM2;
 
-    @NotBlank(message = "El código único es obligatorio")
-    @Size(max = 10, message = "El código unico admite hasta 10 caracteres")
-    private String codigoUnico;
-
     // ===== Datos especificos de FoodTruck =====
 
     private String patente;
