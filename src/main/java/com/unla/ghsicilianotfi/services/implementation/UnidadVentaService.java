@@ -35,6 +35,7 @@ import com.unla.ghsicilianotfi.helpers.TarifaCanon;
 
 import com.unla.ghsicilianotfi.entities.Personal;
 import com.unla.ghsicilianotfi.dtos.RentabilidadNetaDTO;
+import com.unla.ghsicilianotfi.services.IVerificacionEmailService;
 
 import java.math.RoundingMode;
 
@@ -59,19 +60,22 @@ public class UnidadVentaService implements IUnidadVentaService {
     private final IRolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
     private final IFestivalRepository festivalRepository;
+    private final IVerificacionEmailService verificacionEmailService;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
             IUsuarioRepository usuarioRepository,
             IRolRepository rolRepository,
             PasswordEncoder passwordEncoder,
             ParametrosCanon parametrosCanon,
-            IFestivalRepository festivalRepository) {
+            IFestivalRepository festivalRepository,
+            IVerificacionEmailService verificacionEmailService) {
 	this.unidadVentaRepository = unidadVentaRepository;
 	this.usuarioRepository = usuarioRepository;
 	this.rolRepository = rolRepository;
 	this.passwordEncoder = passwordEncoder;
 	this.parametrosCanon = parametrosCanon;
     this.festivalRepository = festivalRepository;
+    this.verificacionEmailService = verificacionEmailService;
 	}
 
     @Override
@@ -115,8 +119,14 @@ public class UnidadVentaService implements IUnidadVentaService {
         // 4. Crear y asociar el usuario responsable
         unidad.setResponsable(crearResponsable(datos));
 
-        // 5. Guardar
-        return unidadVentaRepository.save(unidad);
+        // 5. Guardar la unidad
+        UnidadVenta guardada = unidadVentaRepository.save(unidad);
+
+        // 6. Enviar el codigo para que el responsable verifique su email
+        //    (la cuenta queda inactiva hasta que lo ingrese)
+        verificacionEmailService.generarYEnviarCodigo(guardada.getResponsable());
+
+        return guardada;
     }
 
     // =====================================================
@@ -234,7 +244,8 @@ public class UnidadVentaService implements IUnidadVentaService {
         responsable.setNombre(email);
         responsable.setEmail(email);
         responsable.setContrasena(passwordEncoder.encode(datos.getContrasenaResponsable()));
-        responsable.setActivo(true);
+        // Queda inactivo hasta que verifique su email con el codigo
+        responsable.setActivo(false);
         responsable.setRol(rolResponsable);
 
         return usuarioRepository.save(responsable);
