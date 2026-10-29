@@ -25,6 +25,7 @@ public class ViewRouteHelper {
 	public final static String UNIDAD_NUEVA = "unidad/nueva";
 	public final static String UNIDAD_LISTA = "unidad/lista";
 	public final static String MI_UNIDAD = "unidad/mi-unidad";
+	public final static String RENTABILIDAD_NETA = "unidad/rentabilidad";
 
 	//FESTIVAL
 	public final static String FESTIVAL_INDEX = "festival/index";
