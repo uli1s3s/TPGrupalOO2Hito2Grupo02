@@ -4,6 +4,7 @@ package com.unla.ghsicilianotfi.controllers;
 import com.unla.ghsicilianotfi.dtos.RegistrarPedidoDTO;
 import com.unla.ghsicilianotfi.entities.Pedido;
 import com.unla.ghsicilianotfi.entities.Plato;
+import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
 import com.unla.ghsicilianotfi.repositories.IPedidoRepository;
 import com.unla.ghsicilianotfi.repositories.IPlatoRepository;
 import com.unla.ghsicilianotfi.services.implementation.PedidoService;
@@ -18,7 +19,6 @@ import org.springframework.security.core.Authentication;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -26,14 +26,17 @@ public class PedidoController {
 
     private final IPedidoRepository pedidoRepository;
     private final IPlatoRepository platoRepository;
+    private final IFestivalRepository festivalRepository;
     private final PedidoService pedidoService;
 
     public PedidoController(IPedidoRepository pedidoRepository,
                             IPlatoRepository platoRepository,
+                            IFestivalRepository festivalRepository,
                             PedidoService pedidoService) {
 
         this.pedidoRepository = pedidoRepository;
         this.platoRepository = platoRepository;
+        this.festivalRepository = festivalRepository;
         this.pedidoService = pedidoService;
     }
 
@@ -98,17 +101,12 @@ public class PedidoController {
     private void cargarDatos(Model model) {
 
         List<Pedido> pedidos = pedidoRepository.findAll();
-
-        List<Plato> platosActivos = new ArrayList<>();
-
-        for (Plato plato : platoRepository.findAll()) {
-
-            if (plato.isActivo()) {
-                platosActivos.add(plato);
-            }
-        }
+        List<Plato> platosActivos = platoRepository.findByActivoTrue();
 
         model.addAttribute("pedidos", pedidos);
         model.addAttribute("platos", platosActivos);
+        model.addAttribute("festivales", festivalRepository.findByActivoTrue().stream()
+                .filter(festival -> !festival.getUnidades().isEmpty())
+                .toList());
     }
 }

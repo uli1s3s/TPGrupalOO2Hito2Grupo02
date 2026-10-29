@@ -8,7 +8,9 @@ Los usuarios con rol `ADMINISTRADOR` pueden crear, consultar, modificar y elimin
 
 ## Administración de platos
 
-Los usuarios con rol `RESPONSABLE` pueden crear, consultar y modificar platos en `/platos`. Cada plato se asocia a una unidad de venta que pertenezca al responsable autenticado; las bajas son lógicas para conservar los platos vinculados con pedidos anteriores.
+Los usuarios con rol `RESPONSABLE` pueden crear, consultar y modificar platos en `/platos`. Cada plato se asocia a una unidad de venta que pertenezca al responsable autenticado; las bajas son lógicas para conservar los platos vinculados con pedidos anteriores. En el listado, una estrella identifica el plato con mayor cantidad vendida de cada unidad del responsable.
+
+Al crear o modificar un festival, el administrador puede asignarle unidades de venta. Al registrar pedidos, el empleado selecciona un festival y una unidad participante; todos los platos del pedido deben corresponder a esa unidad. Los pedidos anteriores a este cambio conservan sus referencias de festival y unidad vacías y no forman parte del cálculo del plato estrella. Hibernate agrega las nuevas relaciones al iniciar la aplicación (`ddl-auto: update`).
 
 ## Crear el administrador inicial
 

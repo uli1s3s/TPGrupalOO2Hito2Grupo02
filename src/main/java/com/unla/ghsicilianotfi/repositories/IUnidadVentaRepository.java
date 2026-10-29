@@ -3,6 +3,7 @@ package com.unla.ghsicilianotfi.repositories;
 import com.unla.ghsicilianotfi.entities.UnidadVenta;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
     boolean existsByCodigoUnico(String codigoUnico);
 
     // Unidades asignadas a un responsable (por su nombre de usuario)
+    @EntityGraph(attributePaths = {"responsable", "festivales"})
     List<UnidadVenta> findByResponsable_Nombre(String nombreUsuario);
 
     // Última unidad cargada con ese prefijo (para generar el siguiente código)

@@ -37,7 +37,11 @@ public class PlatoController {
 
     @GetMapping
     public String listar(Model model, Authentication authentication) {
-        model.addAttribute("platos", platoService.listarPorResponsable(authentication.getName()));
+        String nombreResponsable = authentication.getName();
+        model.addAttribute("platos", platoService.listarPorResponsable(nombreResponsable));
+        model.addAttribute(
+                "platosEstrella",
+                platoService.listarIdsPlatosEstrellaPorResponsable(nombreResponsable));
         return ViewRouteHelper.PLATO_INDEX;
     }
 

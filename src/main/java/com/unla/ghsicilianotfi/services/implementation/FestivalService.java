@@ -5,7 +5,9 @@ import com.unla.ghsicilianotfi.dtos.FestivalFormDTO;
 import com.unla.ghsicilianotfi.entities.Costo;
 import com.unla.ghsicilianotfi.entities.Festival;
 import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
+import com.unla.ghsicilianotfi.entities.UnidadVenta;
 import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
+import com.unla.ghsicilianotfi.repositories.IUnidadVentaRepository;
 import com.unla.ghsicilianotfi.services.IFestivalService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +24,12 @@ import java.util.stream.Collectors;
 public class FestivalService implements IFestivalService {
 
     private final IFestivalRepository festivalRepository;
+    private final IUnidadVentaRepository unidadVentaRepository;
 
-    public FestivalService(IFestivalRepository festivalRepository) {
+    public FestivalService(IFestivalRepository festivalRepository,
+                           IUnidadVentaRepository unidadVentaRepository) {
         this.festivalRepository = festivalRepository;
+        this.unidadVentaRepository = unidadVentaRepository;
     }
 
     @Override
@@ -89,15 +94,46 @@ public class FestivalService implements IFestivalService {
         }
         festival.getCostos().removeIf(costo -> costosExistentes.containsValue(costo));
 
-        return toDTO(festivalRepository.save(festival));
+        Set<Long> idUnidades = datos.getIdUnidades() == null
+                ? Set.of()
+                : datos.getIdUnidades().stream()
+                        .filter(java.util.Objects::nonNull)
+                        .collect(Collectors.toSet());
+        List<UnidadVenta> unidades = unidadVentaRepository.findAllById(idUnidades).stream().toList();
+        if (unidades.size() != idUnidades.size()) {
+            throw new IllegalArgumentException("Una o más unidades seleccionadas no existen");
+        }
+
+        Festival guardado = festivalRepository.save(festival);
+        Set<UnidadVenta> unidadesAnteriores = new java.util.HashSet<>(festival.getUnidades());
+        for (UnidadVenta unidadAnterior : unidadesAnteriores) {
+            if (unidades.stream().noneMatch(unidad -> unidad.getIdUnidad().equals(unidadAnterior.getIdUnidad()))) {
+                unidadAnterior.getFestivales().remove(guardado);
+            }
+        }
+        for (UnidadVenta unidad : unidades) {
+            unidad.getFestivales().add(guardado);
+        }
+        guardado.setUnidades(new java.util.HashSet<>(unidades));
+        Set<UnidadVenta> unidadesAfectadas = new java.util.HashSet<>(unidadesAnteriores);
+        unidadesAfectadas.addAll(unidades);
+        unidadVentaRepository.saveAll(unidadesAfectadas);
+
+        return toDTO(guardado);
     }
 
     @Override
     @Transactional
     public boolean eliminar(Long id) {
-        if (!festivalRepository.existsById(id)) {
+        Optional<Festival> resultado = festivalRepository.findById(id);
+        if (resultado.isEmpty() || !resultado.get().getPedidos().isEmpty()) {
             return false;
         }
+        Festival festival = resultado.get();
+        for (UnidadVenta unidad : festival.getUnidades()) {
+            unidad.getFestivales().remove(festival);
+        }
+        unidadVentaRepository.saveAll(festival.getUnidades());
         festivalRepository.deleteById(id);
         return true;
     }
@@ -143,6 +179,13 @@ public class FestivalService implements IFestivalService {
         dto.setFechaInicio(festival.getFechaInicio());
         dto.setFechaFin(festival.getFechaFin());
         dto.setActivo(festival.isActivo());
+        dto.setIdUnidades(festival.getUnidades().stream()
+                .map(UnidadVenta::getIdUnidad)
+                .toList());
+        dto.setNombresUnidades(festival.getUnidades().stream()
+                .map(UnidadVenta::getNombreComercial)
+                .sorted()
+                .toList());
         dto.setCostos(festival.getCostos().stream()
                 .filter(costo -> TipoCostoFestival.configurables().contains(costo.getTipoCosto()))
                 .map(costo -> {

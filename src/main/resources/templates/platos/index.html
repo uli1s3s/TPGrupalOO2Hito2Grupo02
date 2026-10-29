@@ -39,7 +39,13 @@
                         <td colspan="6" class="text-center">Todavía no hay platos registrados.</td>
                     </tr>
                     <tr th:each="plato : ${platos}">
-                        <td th:text="${plato.nombre}"></td>
+                        <td>
+                            <span th:text="${plato.nombre}"></span>
+                            <span th:if="${platosEstrella.contains(plato.idPlato)}"
+                                  class="text-warning"
+                                  title="Plato estrella: el más vendido de esta unidad"
+                                  aria-label="Plato estrella: el más vendido de esta unidad">&#9733;</span>
+                        </td>
                         <td th:text="${plato.nombreUnidad}"></td>
                         <td th:text="${#numbers.formatDecimal(plato.precioVenta, 1, 2)}"></td>
                         <td th:text="${#numbers.formatDecimal(plato.costoProduccion, 1, 2)}"></td>

@@ -10,8 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PlatoService implements IPlatoService {
@@ -32,6 +36,24 @@ public class PlatoService implements IPlatoService {
                 .stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set<Long> listarIdsPlatosEstrellaPorResponsable(String nombreResponsable) {
+        Set<Long> idsUnidades = unidadVentaService.listarPorResponsable(nombreResponsable)
+                .stream()
+                .map(UnidadVenta::getIdUnidad)
+                .collect(Collectors.toSet());
+        if (idsUnidades.isEmpty()) {
+            return Set.of();
+        }
+        Map<Long, Long> platoEstrellaPorUnidad = new LinkedHashMap<>();
+        platoRepository.buscarPlatosMasVendidosPorUnidad(idsUnidades).stream()
+                .filter(ranking -> idsUnidades.contains(ranking.getIdUnidad()))
+                .forEach(ranking -> platoEstrellaPorUnidad.putIfAbsent(
+                        ranking.getIdUnidad(), ranking.getIdPlato()));
+        return Set.copyOf(platoEstrellaPorUnidad.values());
     }
 
     @Override
