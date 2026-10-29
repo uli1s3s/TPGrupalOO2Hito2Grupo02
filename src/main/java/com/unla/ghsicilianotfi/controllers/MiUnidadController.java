@@ -113,4 +113,30 @@ public class MiUnidadController {
     private String tipoDe(Personal empleado) {
         return (empleado instanceof Cocinero) ? "Cocinero" : "Cajero";
     }
+    
+    // ==========================================
+    // Ver la rentabilidad neta de mi unidad en un festival
+    // ==========================================
+    @GetMapping("/{idUnidad}/rentabilidad")
+    public String verRentabilidad(@PathVariable("idUnidad") Long idUnidad,
+                                  @RequestParam(name = "festival", required = false) Long idFestival,
+                                  Model model,
+                                  Authentication authentication,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            model.addAttribute("rentabilidad",
+                    unidadVentaService.calcularRentabilidadNeta(idUnidad, idFestival, authentication.getName()));
+        } catch (IllegalArgumentException e) {
+            // Unidad ajena, festival en el que no participa, etc
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:" + ViewRouteHelper.MI_UNIDAD_ROOT;
+        }
+
+        // Datos para la barra de navegacion
+        model.addAttribute("username", authentication.getName());
+        model.addAttribute("rol", authentication.getAuthorities().stream()
+                .map(a -> a.getAuthority()).findFirst().orElse("SIN_ROL"));
+
+        return ViewRouteHelper.RENTABILIDAD_NETA;
+    }
 }

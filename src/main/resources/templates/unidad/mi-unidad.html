@@ -93,6 +93,22 @@
                 </tbody>
             </table>
 
+
+			<!-- RENTABILIDAD NETA POR FESTIVAL -->
+			<form th:unless="${#lists.isEmpty(unidad.festivales)}"
+			      th:action="@{/mi-unidad/{u}/rentabilidad(u=${unidad.idUnidad})}"
+			      method="get" class="form-inline mt-3">
+			    <label class="mr-2"><strong>Rentabilidad neta en:</strong></label>
+			    <select name="festival" class="form-control mr-2">
+			        <option th:each="f : ${unidad.festivales}"
+			                th:value="${f.idFestival}"
+			                th:text="${f.nombre}">
+			            Festival
+			        </option>
+			    </select>
+			    <button type="submit" class="btn boton-verde">Ver rentabilidad</button>
+			</form>
+			
             <!-- EMPLEADOS DE LA UNIDAD -->
             <div class="subtitulo">Empleados de la unidad</div>
             <div class="alert alert-info" th:if="${#lists.isEmpty(unidad.empleados)}">
