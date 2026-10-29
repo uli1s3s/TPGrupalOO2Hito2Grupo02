@@ -42,5 +42,10 @@ public interface IUnidadVentaService {
     
     // Rentabilidad neta de una unidad del responsable en uno de sus festivales
     RentabilidadNetaDTO calcularRentabilidadNeta(Long idUnidad, Long idFestival, String nombreResponsable);
+
+    // Saca al empleado de la unidad en la que esta asignado (si esta en alguna)
+    void desasignarEmpleado(Long idPersonal);
+    
+    
 }
 

@@ -59,4 +59,6 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
          + "AND l.festival.idFestival = :idFestival")
     Double sumarSueldos(@Param("idUnidad") Long idUnidad, @Param("idFestival") Long idFestival);
     
+    // Unidad en la que trabaja un empleado (si esta asignado a alguna)
+    Optional<UnidadVenta> findByEmpleados_IdPersonal(Long idPersonal);
 }

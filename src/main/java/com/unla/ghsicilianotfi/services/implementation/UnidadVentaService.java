@@ -395,7 +395,17 @@ public class UnidadVentaService implements IUnidadVentaService {
 
         unidadVentaRepository.save(unidad);
     }
-
+    
+    @Override
+    @Transactional
+    public void desasignarEmpleado(Long idPersonal) {
+        // Si el empleado esta en alguna unidad, se lo saca de su lista (id_unidad queda en NULL)
+        unidadVentaRepository.findByEmpleados_IdPersonal(idPersonal).ifPresent(unidad -> {
+            unidad.getEmpleados().removeIf(empleado -> empleado.getIdPersonal().equals(idPersonal));
+            unidadVentaRepository.save(unidad);
+        });
+    }
+    
     @Override
     @Transactional(readOnly = true)
     public Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad) {
