@@ -22,7 +22,7 @@ public class EmailService implements IEmailService {
 
     private final JavaMailSender mailSender;
 
-    // Cuenta desde la que se envían los mails (spring.mail.username)
+    // Cuenta desde la que se envian los mails (spring.mail.username)
     @Value("${spring.mail.username:}")
     private String remitente;
 
@@ -70,5 +70,20 @@ public class EmailService implements IEmailService {
             // No se corta el alta del empleado si el mail falla (por ejemplo, sin internet)
             log.error("No se pudo enviar el mail a {}: {}", destinatario, e.getMessage());
         }
+    }
+    
+    @Override
+    public void enviarCodigoVerificacion(String destinatario, String codigo) {
+
+        String asunto = "Código de verificación - Epicentro Gourmet";
+        String texto = "¡Hola!\n\n"
+                + "Gracias por registrarte como responsable en Epicentro Gourmet.\n\n"
+                + "Tu código de verificación es: " + codigo + "\n\n"
+                + "Ingresalo en la pantalla de verificación para activar tu cuenta.\n"
+                + "El código vence en 15 minutos.\n\n"
+                + "Si no fuiste vos, ignorá este mensaje.\n\n"
+                + "Saludos,\nEpicentro Gourmet";
+
+        enviar(destinatario, asunto, texto);
     }
 }

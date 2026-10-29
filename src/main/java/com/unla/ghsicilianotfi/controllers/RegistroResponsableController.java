@@ -6,6 +6,7 @@ import com.unla.ghsicilianotfi.entities.UnidadVenta;
 import com.unla.ghsicilianotfi.helpers.ViewRouteHelper;
 import com.unla.ghsicilianotfi.services.IFestivalService;
 import com.unla.ghsicilianotfi.services.IUnidadVentaService;
+import com.unla.ghsicilianotfi.services.IVerificacionEmailService;
 
 import jakarta.validation.Valid;
 
@@ -22,11 +23,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Registro publico: una persona sin usuario se registra como responsable
  * y da de alta su unidad de venta en un festival activo, en el mismo paso.
- * Si ya hay una sesión iniciada (por ejemplo un administrador), no se permite.
+ * Despues tiene que verificar su email con el codigo que se le envía.
+ * Si ya hay una sesion iniciada (por ejemplo un administrador), no se permite.
  */
 @Controller
 @RequestMapping("/registro-responsable")
@@ -34,11 +37,14 @@ public class RegistroResponsableController {
 
     private final IUnidadVentaService unidadVentaService;
     private final IFestivalService festivalService;
+    private final IVerificacionEmailService verificacionEmailService;
 
     public RegistroResponsableController(IUnidadVentaService unidadVentaService,
-                                         IFestivalService festivalService) {
+                                         IFestivalService festivalService,
+                                         IVerificacionEmailService verificacionEmailService) {
         this.unidadVentaService = unidadVentaService;
         this.festivalService = festivalService;
+        this.verificacionEmailService = verificacionEmailService;
     }
 
     // ==========================================
@@ -79,29 +85,95 @@ public class RegistroResponsableController {
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
 
-        // Errores de formato (campos vacios, email invalido, festival sin elegir, etc.)
+        // Errores de formato (campos vacíos, email invalido, festival sin elegir, etc.)
         if (resultado.hasErrors()) {
             cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
 
+        String email = registro.getEmailResponsable().trim().toLowerCase(Locale.ROOT);
+
         try {
-            UnidadVenta unidad = unidadVentaService.registrarUnidad(registro);
-            redirectAttributes.addFlashAttribute("codigoGenerado", unidad.getCodigoUnico());
-            redirectAttributes.addFlashAttribute("emailRegistrado",
-                    registro.getEmailResponsable().trim().toLowerCase());
-            return "redirect:" + ViewRouteHelper.REGISTRO_RESPONSABLE_ROOT + "/exito";
+            unidadVentaService.registrarUnidad(registro);
+
+            // Pasa a la pantalla para ingresar el codigo que se envió por mail
+            redirectAttributes.addAttribute("email", email);
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "Te enviamos un código de verificación a " + email + ".");
+            return "redirect:" + ViewRouteHelper.REGISTRO_RESPONSABLE_ROOT + "/verificar";
 
         } catch (IllegalArgumentException e) {
             // Errores de negocio: festival inactivo, email ya registrado, etc.
             model.addAttribute("error", e.getMessage());
+
+            // Si el email ya se registro pero nunca se verifico, se ofrece verificarlo
+            if (verificacionEmailService.estaPendienteDeVerificacion(email)) {
+                model.addAttribute("emailPendiente", email);
+            }
+
             cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
     }
 
     // ==========================================
-    // Pantalla de registro exitoso
+    // Pantalla para ingresar el codigo de verificación
+    // ==========================================
+    @GetMapping("/verificar")
+    public String mostrarVerificacion(@RequestParam(name = "email", required = false) String email,
+                                      Model model) {
+        model.addAttribute("email", email);
+        return ViewRouteHelper.REGISTRO_RESPONSABLE_VERIFICAR;
+    }
+
+    // ==========================================
+    // Verificar el codigo ingresado
+    // ==========================================
+    @PostMapping("/verificar")
+    public String verificar(@RequestParam("email") String email,
+                            @RequestParam("codigo") String codigo,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            verificacionEmailService.verificarCodigo(email, codigo);
+
+            // Datos para la pantalla de exito: email y codigo de la unidad registrada
+            String emailNormalizado = email.trim().toLowerCase(Locale.ROOT);
+            redirectAttributes.addFlashAttribute("emailRegistrado", emailNormalizado);
+
+            List<UnidadVenta> unidades = unidadVentaService.listarPorResponsable(emailNormalizado);
+            if (!unidades.isEmpty()) {
+                redirectAttributes.addFlashAttribute("codigoGenerado", unidades.get(0).getCodigoUnico());
+            }
+
+            return "redirect:" + ViewRouteHelper.REGISTRO_RESPONSABLE_ROOT + "/exito";
+
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("email", email);
+            return ViewRouteHelper.REGISTRO_RESPONSABLE_VERIFICAR;
+        }
+    }
+
+    // ==========================================
+    // Reenviar un codigo nuevo
+    // ==========================================
+    @PostMapping("/reenviar")
+    public String reenviar(@RequestParam("email") String email,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            verificacionEmailService.reenviarCodigo(email);
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "Te enviamos un código nuevo. El anterior ya no es válido.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        redirectAttributes.addAttribute("email", email);
+        return "redirect:" + ViewRouteHelper.REGISTRO_RESPONSABLE_ROOT + "/verificar";
+    }
+
+    // ==========================================
+    // Pantalla de registro exitoso (despues de verificar)
     // ==========================================
     @GetMapping("/exito")
     public String exito() {
