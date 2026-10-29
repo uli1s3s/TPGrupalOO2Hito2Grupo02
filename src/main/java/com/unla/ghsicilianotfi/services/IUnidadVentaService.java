@@ -10,6 +10,7 @@ import com.unla.ghsicilianotfi.entities.Personal;
 import java.math.BigDecimal;
 import java.util.Map;
 import com.unla.ghsicilianotfi.dtos.RentabilidadNetaDTO;
+import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
 
 public interface IUnidadVentaService {
 
@@ -42,5 +43,17 @@ public interface IUnidadVentaService {
     
     // Rentabilidad neta de una unidad del responsable en uno de sus festivales
     RentabilidadNetaDTO calcularRentabilidadNeta(Long idUnidad, Long idFestival, String nombreResponsable);
+
+    // Saca al empleado de la unidad en la que esta asignado (si esta en alguna)
+    void desasignarEmpleado(Long idPersonal);
+    
+    // Todo el personal con su estado (libre, ocupado en una unidad o dado de baja),
+    // filtrado por nombre, apellido o DNI (si la busqueda viene vacia, trae todos)
+    List<EstadoEmpleadoDTO> listarPersonalConEstado(String busqueda);
+    
+    // El responsable reactiva un empleado dado de baja y lo asigna a una de sus unidades
+    // (nueva contraseña temporal + aviso por mail)
+    void reactivarYAsignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
+    
 }
 

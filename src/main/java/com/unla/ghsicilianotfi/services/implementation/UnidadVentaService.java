@@ -44,6 +44,11 @@ import java.util.Map;
 import java.math.BigDecimal;
 
 import java.time.LocalDate;
+import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
+import com.unla.ghsicilianotfi.entities.Cocinero;
+import java.util.HashMap;
+import com.unla.ghsicilianotfi.services.IEmailService;
+import java.util.UUID;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -61,6 +66,7 @@ public class UnidadVentaService implements IUnidadVentaService {
     private final PasswordEncoder passwordEncoder;
     private final IFestivalRepository festivalRepository;
     private final IVerificacionEmailService verificacionEmailService;
+    private final IEmailService emailService;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
             IUsuarioRepository usuarioRepository,
@@ -68,15 +74,17 @@ public class UnidadVentaService implements IUnidadVentaService {
             PasswordEncoder passwordEncoder,
             ParametrosCanon parametrosCanon,
             IFestivalRepository festivalRepository,
-            IVerificacionEmailService verificacionEmailService) {
-	this.unidadVentaRepository = unidadVentaRepository;
-	this.usuarioRepository = usuarioRepository;
-	this.rolRepository = rolRepository;
-	this.passwordEncoder = passwordEncoder;
-	this.parametrosCanon = parametrosCanon;
-    this.festivalRepository = festivalRepository;
-    this.verificacionEmailService = verificacionEmailService;
-	}
+            IVerificacionEmailService verificacionEmailService,
+            IEmailService emailService) {
+        this.unidadVentaRepository = unidadVentaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.parametrosCanon = parametrosCanon;
+        this.festivalRepository = festivalRepository;
+        this.verificacionEmailService = verificacionEmailService;
+        this.emailService = emailService;
+    }
 
     @Override
     public List<UnidadVenta> listarUnidades() {
@@ -86,6 +94,55 @@ public class UnidadVentaService implements IUnidadVentaService {
     @Override
     public List<UnidadVenta> listarPorResponsable(String nombreUsuario) {
         return unidadVentaRepository.findByResponsable_Nombre(nombreUsuario);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstadoEmpleadoDTO> listarPersonalConEstado(String busqueda) {
+
+        // 1) Armo un mapa: id del empleado -> unidad donde trabaja
+        Map<Long, UnidadVenta> unidadDeCadaEmpleado = new HashMap<>();
+        for (UnidadVenta unidad : unidadVentaRepository.buscarUnidadesConEmpleados()) {
+            for (Personal empleado : unidad.getEmpleados()) {
+                unidadDeCadaEmpleado.put(empleado.getIdPersonal(), unidad);
+            }
+        }
+
+        // 2) Recorro todo el personal y le calculo el estado a cada uno
+        List<EstadoEmpleadoDTO> resultado = new ArrayList<>();
+        for (Personal empleado : unidadVentaRepository.buscarTodoElPersonal()) {
+
+            if (!coincideBusqueda(empleado, busqueda)) {
+                continue;
+            }
+
+            UnidadVenta unidad = unidadDeCadaEmpleado.get(empleado.getIdPersonal());
+
+            String estado;
+            if (!empleado.isActivo()) {
+                estado = EstadoEmpleadoDTO.DADO_DE_BAJA;
+            } else if (unidad != null) {
+                estado = EstadoEmpleadoDTO.OCUPADO;
+            } else {
+                estado = EstadoEmpleadoDTO.LIBRE;
+            }
+
+            // La unidad solo se informa si el empleado está trabajando ahí
+            boolean estaOcupado = EstadoEmpleadoDTO.OCUPADO.equals(estado);
+
+            resultado.add(new EstadoEmpleadoDTO(
+                    empleado.getIdPersonal(),
+                    empleado.getNombre(),
+                    empleado.getApellido(),
+                    empleado.getDni(),
+                    (empleado instanceof Cocinero) ? "Cocinero" : "Cajero",
+                    empleado.getCredenciales() != null ? empleado.getCredenciales().getEmail() : "-",
+                    estado,
+                    estaOcupado ? unidad.getIdUnidad() : null,
+                    estaOcupado ? unidad.getNombreComercial() : null));
+        }
+
+        return resultado;
     }
     
     @Override
@@ -395,7 +452,54 @@ public class UnidadVentaService implements IUnidadVentaService {
 
         unidadVentaRepository.save(unidad);
     }
+    
+    @Override
+    @Transactional
+    public void desasignarEmpleado(Long idPersonal) {
+        // Si el empleado esta en alguna unidad, se lo saca de su lista (id_unidad queda en NULL)
+        unidadVentaRepository.findByEmpleados_IdPersonal(idPersonal).ifPresent(unidad -> {
+            unidad.getEmpleados().removeIf(empleado -> empleado.getIdPersonal().equals(idPersonal));
+            unidadVentaRepository.save(unidad);
+        });
+    }
+    
+    @Override
+    @Transactional
+    public void reactivarYAsignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
 
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        Personal empleado = unidadVentaRepository.buscarEmpleadoPorId(idPersonal)
+                .orElseThrow(() -> new IllegalArgumentException("El empleado no existe"));
+
+        // Solo se reactiva a quien esta dado de baja
+        if (empleado.isActivo()) {
+            throw new IllegalArgumentException("El empleado ya está activo. Usá el botón Asignar.");
+        }
+
+        Usuario usuario = empleado.getCredenciales();
+        if (usuario == null) {
+            throw new IllegalArgumentException("El empleado no tiene un usuario para ingresar al sistema");
+        }
+
+        // 1) Si quedo asignado a alguna unidad antes de la baja, se lo saca de ahi
+        desasignarEmpleado(idPersonal);
+
+        // 2) Se reactiva el empleado y su usuario, con una contraseña temporal nueva
+        String contrasenaTemporal = UUID.randomUUID().toString().substring(0, 8);
+        empleado.setActivo(true);
+        usuario.setActivo(true);
+        usuario.setContrasena(passwordEncoder.encode(contrasenaTemporal));
+
+        // 3) Se asigna a la unidad del responsable
+        unidad.getEmpleados().add(empleado);
+        unidadVentaRepository.save(unidad);
+
+        // 4) Se le avisa por mail con sus nuevos datos de acceso
+        emailService.enviarAvisoReactivacion(usuario.getEmail(), usuario.getNombre(),
+                contrasenaTemporal, unidad.getNombreComercial());
+    }
+    
     @Override
     @Transactional(readOnly = true)
     public Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad) {
@@ -477,6 +581,17 @@ public class UnidadVentaService implements IUnidadVentaService {
             return unidad instanceof PuestoDesmontable;
         }
         return false;
+    }
+    
+    // True si el empleado coincide con lo buscado (nombre, apellido o DNI). Sin busqueda, coinciden todos.
+    private boolean coincideBusqueda(Personal empleado, String busqueda) {
+        if (busqueda == null || busqueda.isBlank()) {
+            return true;
+        }
+        String texto = busqueda.trim().toLowerCase(Locale.ROOT);
+        return empleado.getNombre().toLowerCase(Locale.ROOT).contains(texto)
+                || empleado.getApellido().toLowerCase(Locale.ROOT).contains(texto)
+                || empleado.getDni().contains(texto);
     }
     
     

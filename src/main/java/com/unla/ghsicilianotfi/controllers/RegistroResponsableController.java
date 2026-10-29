@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.dao.DataIntegrityViolationException;
 
 /**
  * Registro publico: una persona sin usuario se registra como responsable
@@ -85,7 +86,7 @@ public class RegistroResponsableController {
             return ViewRouteHelper.UNIDAD_NUEVA;
         }
 
-        // Errores de formato (campos vacíos, email invalido, festival sin elegir, etc.)
+        // Errores de formato (campos vacios, email invalido, festival sin elegir, etc.)
         if (resultado.hasErrors()) {
             cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
@@ -113,16 +114,35 @@ public class RegistroResponsableController {
 
             cargarFestivales(model);
             return ViewRouteHelper.UNIDAD_NUEVA;
+
+        } catch (DataIntegrityViolationException e) {
+            // El formulario se envio dos veces al mismo tiempo (doble clic):
+            // el primer envío ya registro la cuenta, este choca con el email repetido
+            model.addAttribute("error", "Ese email ya está registrado.");
+
+            if (verificacionEmailService.estaPendienteDeVerificacion(email)) {
+                model.addAttribute("emailPendiente", email);
+            }
+
+            cargarFestivales(model);
+            return ViewRouteHelper.UNIDAD_NUEVA;
         }
     }
-
     // ==========================================
     // Pantalla para ingresar el codigo de verificación
     // ==========================================
     @GetMapping("/verificar")
     public String mostrarVerificacion(@RequestParam(name = "email", required = false) String email,
+                                      @RequestParam(name = "pendiente", required = false) Boolean pendiente,
                                       Model model) {
         model.addAttribute("email", email);
+
+        // Llego desde el login con la cuenta sin verificar
+        if (Boolean.TRUE.equals(pendiente)) {
+            model.addAttribute("mensaje",
+                    "Tu cuenta todavía no está verificada. Ingresá el código que te enviamos por mail o pedí uno nuevo.");
+        }
+
         return ViewRouteHelper.REGISTRO_RESPONSABLE_VERIFICAR;
     }
 

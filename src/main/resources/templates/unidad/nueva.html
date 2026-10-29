@@ -121,11 +121,13 @@
                         <label for="contrasenaResponsable">Contraseña</label>
                         <input type="password" class="form-control" th:field="*{contrasenaResponsable}"/>
                         <small class="text-danger" th:if="${#fields.hasErrors('contrasenaResponsable')}" th:errors="*{contrasenaResponsable}"></small>
+						
                     </div>
                 </div>
 
                 <div class="d-flex">
-					<button type="submit" class="btn btn-success mr-2">Registrarme</button>
+					<form id="formRegistro" th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
+						<button type="submit" id="botonRegistrar" class="btn btn-success mr-2">Registrarme</button>
 					<a th:href="@{/login}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>
@@ -146,6 +148,15 @@
     }
     // Si el formulario vuelve con errores, mantiene visibles los campos del tipo elegido
     document.addEventListener('DOMContentLoaded', mostrarCampos);
+	// Evita que el formulario se envie dos veces (doble clic)
+	var formRegistro = document.getElementById('formRegistro');
+	if (formRegistro) {
+	    formRegistro.addEventListener('submit', function () {
+	        var boton = document.getElementById('botonRegistrar');
+	        boton.disabled = true;
+	        boton.innerText = 'Registrando...';
+	    });
+	}
 </script>
 </body>
 </html>

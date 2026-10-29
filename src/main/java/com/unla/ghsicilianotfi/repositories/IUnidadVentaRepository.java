@@ -1,4 +1,3 @@
-
 package com.unla.ghsicilianotfi.repositories;
 
 import com.unla.ghsicilianotfi.entities.Personal;
@@ -16,17 +15,17 @@ import java.util.Optional;
 @Repository("unidadVentaRepository")
 public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long> {
 
-    // Verifica si ya existe una unidad con ese código
+    // Verifica si ya existe una unidad con ese codigo
     boolean existsByCodigoUnico(String codigoUnico);
 
     // Unidades asignadas a un responsable (por su nombre de usuario)
     @EntityGraph(attributePaths = {"responsable", "festivales"})
     List<UnidadVenta> findByResponsable_Nombre(String nombreUsuario);
 
-    // Última unidad cargada con ese prefijo
+    // Ultima unidad cargada con ese prefijo
     Optional<UnidadVenta> findTopByCodigoUnicoStartingWithOrderByCodigoUnicoDesc(String prefijo);
 
-    // Empleados activos que no están asignados a ninguna unidad
+    // Empleados activos que no estan asignados a ninguna unidad
     @Query("SELECT p FROM Personal p WHERE p.activo = true "
             + "AND p.idPersonal NOT IN (SELECT e.idPersonal FROM UnidadVenta u JOIN u.empleados e)")
     List<Personal> buscarEmpleadosDisponibles();
@@ -35,7 +34,7 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
     @Query("SELECT p FROM Personal p WHERE p.idPersonal = :idPersonal")
     Optional<Personal> buscarEmpleadoPorId(@Param("idPersonal") Long idPersonal);
 
-    // Verifica si el empleado ya está asignado a alguna unidad
+    // Verifica si el empleado ya esta asignado a alguna unidad
     boolean existsByEmpleados_IdPersonal(Long idPersonal);
 
     // Unidades que participan de un festival
@@ -75,4 +74,15 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
     """)
     Optional<UnidadVenta> buscarUnidadDeEmpleado(
             @Param("username") String username);
+
+    // Unidad en la que trabaja un empleado (si esta asignado a alguna)
+    Optional<UnidadVenta> findByEmpleados_IdPersonal(Long idPersonal);
+
+    // Todo el personal (activo y dado de baja), ordenado por apellido y nombre
+    @Query("SELECT p FROM Personal p ORDER BY p.apellido, p.nombre")
+    List<Personal> buscarTodoElPersonal();
+
+    // Todas las unidades con sus empleados ya cargados (para saber quién trabaja en cada una)
+    @Query("SELECT DISTINCT u FROM UnidadVenta u LEFT JOIN FETCH u.empleados")
+    List<UnidadVenta> buscarUnidadesConEmpleados();
 }

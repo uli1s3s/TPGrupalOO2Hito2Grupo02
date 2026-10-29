@@ -109,49 +109,95 @@
 			    <button type="submit" class="btn boton-verde">Ver rentabilidad</button>
 			</form>
 			
-            <!-- EMPLEADOS DE LA UNIDAD -->
-            <div class="subtitulo">Empleados de la unidad</div>
-            <div class="alert alert-info" th:if="${#lists.isEmpty(unidad.empleados)}">
-                Todavía no asignaste empleados a esta unidad.
-            </div>
-            <table class="table tabla-mi-unidad" th:unless="${#lists.isEmpty(unidad.empleados)}">
-                <thead>
-                <tr><th>Empleado</th><th>DNI</th><th>Tipo</th><th>Email</th><th></th></tr>
-                </thead>
-                <tbody>
-                <tr th:each="empleado : ${unidad.empleados}">
-                    <td th:text="${empleado.apellido + ', ' + empleado.nombre}">Pérez, Juan</td>
-                    <td th:text="${empleado.dni}">30111222</td>
-                    <td th:text="${tipos[empleado.idPersonal]}">Cocinero</td>
-                    <td th:text="${empleado.credenciales != null ? empleado.credenciales.email : '-'}">mail</td>
-                    <td class="text-right">
-                        <form th:action="@{/mi-unidad/{u}/quitar/{p}(u=${unidad.idUnidad}, p=${empleado.idPersonal})}"
-                              method="post" style="display:inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+			<!-- EMPLEADOS DE LA UNIDAD (solo activos) -->
+			<div th:with="activos=${unidad.empleados.?[activo]}">
+			    <div class="subtitulo">Empleados de la unidad</div>
+			    <div class="alert alert-info" th:if="${#lists.isEmpty(activos)}">
+			        Todavía no asignaste empleados a esta unidad.
+			    </div>
+			    <table class="table tabla-mi-unidad" th:unless="${#lists.isEmpty(activos)}">
+			        <thead>
+			        <tr><th>Empleado</th><th>DNI</th><th>Tipo</th><th>Email</th><th></th></tr>
+			        </thead>
+			        <tbody>
+			        <tr th:each="empleado : ${activos}">
+			            <td th:text="${empleado.apellido + ', ' + empleado.nombre}">Pérez, Juan</td>
+			            <td th:text="${empleado.dni}">30111222</td>
+			            <td th:text="${tipos[empleado.idPersonal]}">Cocinero</td>
+			            <td th:text="${empleado.credenciales != null ? empleado.credenciales.email : '-'}">mail</td>
+			            <td class="text-right">
+			                <form th:action="@{/mi-unidad/{u}/quitar/{p}(u=${unidad.idUnidad}, p=${empleado.idPersonal})}"
+			                      method="post" style="display:inline">
+			                    <button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button>
+			                </form>
+			            </td>
+			        </tr>
+			        </tbody>
+			    </table>
+			</div>
 
-            <!-- ASIGNAR EMPLEADO DISPONIBLE -->
-            <div class="subtitulo">Asignar empleado disponible</div>
-            <div class="alert alert-warning" th:if="${#lists.isEmpty(disponibles)}">
-                No hay empleados disponibles (activos y sin unidad).
-                Podés dar de alta uno nuevo con el botón <strong>+ Nuevo empleado</strong>.
-            </div>
-            <form th:unless="${#lists.isEmpty(disponibles)}"
-                  th:action="@{/mi-unidad/{u}/asignar(u=${unidad.idUnidad})}"
-                  method="post" class="form-inline">
-                <select name="idPersonal" class="form-control mr-2" style="min-width: 320px">
-                    <option th:each="p : ${disponibles}"
-                            th:value="${p.idPersonal}"
-                            th:text="${p.apellido + ', ' + p.nombre + ' (' + tipos[p.idPersonal] + ' - DNI ' + p.dni + ')'}">
-                        Empleado
-                    </option>
-                </select>
-                <button type="submit" class="btn boton-verde">Asignar</button>
-            </form>
+			<!-- PERSONAL DEL PREDIO: todos los empleados con su estado -->
+			<div class="subtitulo">Personal del predio</div>
+
+			<!-- Buscador en vivo: filtra la tabla sin recargar la página -->
+			<div class="form-inline mb-3" th:unless="${#lists.isEmpty(personal)}">
+			    <input type="text" class="form-control buscador-personal" style="min-width: 280px"
+			           placeholder="Buscar por nombre, apellido o DNI"
+			           th:data-unidad="${unidad.idUnidad}">
+			</div>
+
+			<div class="alert alert-info" th:if="${#lists.isEmpty(personal)}">
+			    No se encontraron empleados.
+			</div>
+
+			<table class="table tabla-mi-unidad" th:unless="${#lists.isEmpty(personal)}"
+			       th:id="'tabla-personal-' + ${unidad.idUnidad}">
+			    <thead>
+			    <tr><th>Empleado</th><th>DNI</th><th>Tipo</th><th>Email</th><th>Estado</th><th></th></tr>
+			    </thead>
+			    <tbody>
+					<tr th:each="p : ${personal}" th:classappend="${p.dadoDeBaja} ? 'text-muted'"
+					    th:data-busqueda="${#strings.toLowerCase(p.apellido + ' ' + p.nombre + ' ' + p.dni)}">
+			        <td th:text="${p.apellido + ', ' + p.nombre}">Pérez, Juan</td>
+			        <td th:text="${p.dni}">30111222</td>
+			        <td th:text="${p.tipo}">Cocinero</td>
+			        <td th:text="${p.email}">mail</td>
+
+			        <!-- ESTADO -->
+			        <td>
+			            <span th:if="${p.libre}" class="badge badge-success">Libre</span>
+			            <span th:if="${p.ocupado and p.idUnidad == unidad.idUnidad}"
+			                  class="badge badge-primary">En esta unidad</span>
+			            <span th:if="${p.ocupado and p.idUnidad != unidad.idUnidad}"
+			                  class="badge badge-warning" th:text="${p.estadoTexto}">Ocupado en ...</span>
+			            <span th:if="${p.dadoDeBaja}" class="badge badge-secondary">Dado de baja</span>
+			        </td>
+
+			        <!-- ACCIÓN según el estado -->
+			        <td class="text-right">
+			            <form th:if="${p.libre}"
+			                  th:action="@{/mi-unidad/{u}/asignar(u=${unidad.idUnidad})}"
+			                  method="post" style="display:inline">
+			                <input type="hidden" name="idPersonal" th:value="${p.idPersonal}">
+			                <button type="submit" class="btn btn-sm boton-verde">Asignar</button>
+			            </form>
+
+			            <form th:if="${p.dadoDeBaja}"
+			                  th:action="@{/mi-unidad/{u}/reactivar(u=${unidad.idUnidad})}"
+			                  method="post" style="display:inline"
+			                  onsubmit="return confirm('El empleado se va a reactivar con una contraseña nueva y se le enviará un mail. ¿Continuar?');">
+			                <input type="hidden" name="idPersonal" th:value="${p.idPersonal}">
+			                <button type="submit" class="btn btn-sm btn-warning">Reactivar y asignar</button>
+			            </form>
+			        </td>
+			    </tr>
+			    </tbody>
+			</table>
+			
+			<div class="alert alert-info" style="display: none"
+			     th:id="'sin-resultados-' + ${unidad.idUnidad}">
+			    Ningún empleado coincide con la búsqueda.
+			</div>
 
         </div>
     </div>
@@ -160,5 +206,35 @@
 
 <footer th:replace="~{layout :: footer}"></footer>
 <div th:replace="~{layout :: scripts}"></div>
+
+<script>
+    // Filtro en vivo de "Personal del predio": oculta las filas que no coinciden, sin recargar la página
+    document.querySelectorAll('.buscador-personal').forEach(function (buscador) {
+        buscador.addEventListener('input', function () {
+            var idUnidad = buscador.dataset.unidad;
+            var tabla = document.getElementById('tabla-personal-' + idUnidad);
+            var sinResultados = document.getElementById('sin-resultados-' + idUnidad);
+            if (!tabla) {
+                return;
+            }
+
+            var texto = buscador.value.trim().toLowerCase();
+            var visibles = 0;
+
+            tabla.querySelectorAll('tbody tr').forEach(function (fila) {
+                var coincide = fila.dataset.busqueda.indexOf(texto) !== -1;
+                fila.style.display = coincide ? '' : 'none';
+                if (coincide) {
+                    visibles++;
+                }
+            });
+
+            // Si no quedó ninguna fila, se esconde la tabla y se muestra el cartel
+            tabla.style.display = (visibles === 0) ? 'none' : '';
+            sinResultados.style.display = (visibles === 0) ? '' : 'none';
+        });
+    });
+</script>
+
 </body>
 </html>
