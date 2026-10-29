@@ -24,7 +24,7 @@
     <div class="card form-card" th:unless="${bloqueado}">
         <div class="card-body">
 
-			<form th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
+			<form id="formRegistro" th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
 
                 <!-- ===== Datos de la unidad ===== -->
                 <h5 class="mb-3">Datos de la unidad</h5>
@@ -124,10 +124,9 @@
 						
                     </div>
                 </div>
-
+			
                 <div class="d-flex">
-					<form id="formRegistro" th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
-						<button type="submit" id="botonRegistrar" class="btn btn-success mr-2">Registrarme</button>
+					<button type="submit" id="botonRegistrar" class="btn btn-success mr-2">Registrarme</button>
 					<a th:href="@{/login}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>

@@ -182,7 +182,7 @@ public class UnidadVentaService implements IUnidadVentaService {
         // 6. Enviar el codigo para que el responsable verifique su email
         //    (la cuenta queda inactiva hasta que lo ingrese)
         verificacionEmailService.generarYEnviarCodigo(guardada.getResponsable());
-
+        
         return guardada;
     }
 
@@ -430,7 +430,7 @@ public class UnidadVentaService implements IUnidadVentaService {
 
         // Disponibilidad: un empleado solo puede trabajar en una unidad
         if (unidadVentaRepository.existsByEmpleados_IdPersonal(idPersonal)) {
-            throw new IllegalArgumentException("Esa unidad de venta no está a tu cargo");
+        	   throw new IllegalArgumentException("El empleado ya está asignado a una unidad de venta");
         }
 
         unidad.getEmpleados().add(empleado);
