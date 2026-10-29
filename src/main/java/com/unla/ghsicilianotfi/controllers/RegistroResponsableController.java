@@ -133,8 +133,16 @@ public class RegistroResponsableController {
     // ==========================================
     @GetMapping("/verificar")
     public String mostrarVerificacion(@RequestParam(name = "email", required = false) String email,
+                                      @RequestParam(name = "pendiente", required = false) Boolean pendiente,
                                       Model model) {
         model.addAttribute("email", email);
+
+        // Llego desde el login con la cuenta sin verificar
+        if (Boolean.TRUE.equals(pendiente)) {
+            model.addAttribute("mensaje",
+                    "Tu cuenta todavía no está verificada. Ingresá el código que te enviamos por mail o pedí uno nuevo.");
+        }
+
         return ViewRouteHelper.REGISTRO_RESPONSABLE_VERIFICAR;
     }
 

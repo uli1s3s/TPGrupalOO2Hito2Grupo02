@@ -23,9 +23,11 @@ import com.unla.ghsicilianotfi.services.implementation.UserService;
 public class SecurityConfiguration {
 
 	private final UserService userService;
+	private final LoginFallidoHandler loginFallidoHandler;
 
-	public SecurityConfiguration(UserService userService) {
+	public SecurityConfiguration(UserService userService, LoginFallidoHandler loginFallidoHandler) {
 		this.userService = userService;
+		this.loginFallidoHandler = loginFallidoHandler;
 	}
 
 	@Bean
@@ -126,7 +128,8 @@ public class SecurityConfiguration {
 					login.loginProcessingUrl("/loginprocess");
 					login.usernameParameter("username");
 					login.passwordParameter("password");
-					login.defaultSuccessUrl("/loginsuccess");
+					login.defaultSuccessUrl("/loginsuccess", true);
+					login.failureHandler(loginFallidoHandler);
 					login.permitAll();
 				})
 
