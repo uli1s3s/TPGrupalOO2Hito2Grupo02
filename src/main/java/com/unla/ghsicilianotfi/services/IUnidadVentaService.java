@@ -35,5 +35,8 @@ public interface IUnidadVentaService {
 
     // Canon que paga la unidad en cada uno de sus festivales (nombre del festival -> canon)
     Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad);
+    
+    // Unidades de venta que participan de un festival
+    List<UnidadVenta> listarPorFestival(Long idFestival);
 }
 
