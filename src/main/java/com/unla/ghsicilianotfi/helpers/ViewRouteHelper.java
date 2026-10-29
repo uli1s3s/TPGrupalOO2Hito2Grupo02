@@ -25,6 +25,8 @@ public class ViewRouteHelper {
 	public final static String UNIDAD_NUEVA = "unidad/nueva";
 	public final static String UNIDAD_LISTA = "unidad/lista";
 	
+	public final static String REGISTRO_RESPONSABLE_EXITO = "unidad/registro-exito";
+	
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
 	
@@ -37,6 +39,8 @@ public class ViewRouteHelper {
 	public final static String DEGREE_ROOT = "/degrees/";
 	public final static String PERSON_ROOT = "/person";
 	public final static String UNIDAD_ROOT = "/unidades";
+	
+	public final static String REGISTRO_RESPONSABLE_ROOT = "/registro-responsable";
 	
 	public final static String EMPLEADO_ROOT = "/empleados";
 }

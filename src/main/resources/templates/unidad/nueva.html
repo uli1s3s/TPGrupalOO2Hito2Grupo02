@@ -6,19 +6,25 @@
 
 <main class="container py-4">
 
-    <div class="page-header">
-        <h2>Registrar unidad de venta</h2>
-        <p class="text-muted">Alta de un food truck o puesto desmontable junto con su usuario responsable.</p>
-    </div>
+	<div class="page-header">
+	    <h2>Registrate como responsable</h2>
+	    <p class="text-muted">Creá tu usuario y registrá tu unidad de venta (food truck o puesto desmontable).</p>
+	</div>
 
-    <!-- Mensajes -->
+	<!-- Mensajes -->
+	<!-- Si ya hay una sesión iniciada no se permite el registro -->
+	<div class="alert alert-warning" th:if="${bloqueado}">
+	    Ya iniciaste sesión. Para registrar una unidad como responsable primero tenés que
+	    <strong>cerrar sesión</strong>.
+	</div>
+
     <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
 
-    <div class="card form-card">
+    <div class="card form-card" th:unless="${bloqueado}">
         <div class="card-body">
 
-            <form th:action="@{/unidades/nueva}" th:object="${registro}" method="post" novalidate>
+			<form th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
 
                 <!-- ===== Datos de la unidad ===== -->
                 <h5 class="mb-3">Datos de la unidad</h5>
@@ -39,18 +45,11 @@
                     <small class="text-danger" th:if="${#fields.hasErrors('nombreComercial')}" th:errors="*{nombreComercial}"></small>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="superficieM2">Superficie (m²)</label>
-                        <input type="number" step="0.01" min="0.01" class="form-control" th:field="*{superficieM2}"/>
-                        <small class="text-danger" th:if="${#fields.hasErrors('superficieM2')}" th:errors="*{superficieM2}"></small>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="codigoUnico">Código único</label>
-                        <input type="text" maxlength="10" class="form-control" th:field="*{codigoUnico}" placeholder="Ej: FT001"/>
-                        <small class="text-danger" th:if="${#fields.hasErrors('codigoUnico')}" th:errors="*{codigoUnico}"></small>
-                    </div>
-                </div>
+				<div class="form-group">
+				    <label for="superficieM2">Superficie (m²)</label>
+				    <input type="number" step="0.01" min="0.01" class="form-control" th:field="*{superficieM2}"/>
+				    <small class="text-danger" th:if="${#fields.hasErrors('superficieM2')}" th:errors="*{superficieM2}"></small>
+				</div>
 
                 <!-- Campos de FoodTruck -->
                 <div id="camposFoodTruck" style="display:none">
@@ -105,8 +104,8 @@
                 </div>
 
                 <div class="d-flex">
-                    <button type="submit" class="btn btn-success mr-2">Registrar</button>
-                    <a th:href="@{/unidades}" class="btn btn-outline-secondary">Cancelar</a>
+					<button type="submit" class="btn btn-success mr-2">Registrarme</button>
+					<a th:href="@{/login}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>
 

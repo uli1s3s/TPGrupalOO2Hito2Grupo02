@@ -44,4 +44,7 @@ public abstract class UnidadVenta {
     // Cada subclase describe sus datos propios
     public abstract String getDetalle();
     
+    // Prefijo del código único según el tipo de unidad (FT o PD)
+    public abstract String getPrefijoCodigo();
+    
 }

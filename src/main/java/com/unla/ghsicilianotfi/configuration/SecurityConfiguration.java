@@ -49,7 +49,10 @@ public class SecurityConfiguration {
 							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE");
 
 					auth.requestMatchers("/api/v1/**").permitAll();
-
+					
+					// Registro publico: cualquiera puede registrarse como responsable con su unidad
+					auth.requestMatchers("/registro-responsable", "/registro-responsable/**").permitAll();
+					
 					auth.anyRequest().authenticated();
 				})
 				.formLogin(login -> {
