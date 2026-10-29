@@ -275,15 +275,43 @@
 
                 <!-- RECIBOS: USUARIOS AUTORIZADOS -->
 
-                <li class="nav-item"
-                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
+				    <!-- RECIBOS: USUARIOS AUTORIZADOS -->
 
-                    <a class="nav-link"
-                       th:href="@{/recibos}">
-                        Recibos
-                    </a>
+				    <li class="nav-item"
+				        sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
 
-                </li>
+				        <a class="nav-link"
+				           th:href="@{/recibos}">
+				            Recibos
+				        </a>
+
+				    </li>
+
+				    <!-- UNIDADES DE VENTA: ADMINISTRADOR -->
+
+				    <li class="nav-item"
+				        sec:authorize="hasRole('ADMINISTRADOR')">
+
+				        <a class="nav-link"
+				           th:href="@{/unidades}">
+				            Unidades
+				        </a>
+
+				    </li>
+
+				    <!-- MI UNIDAD: RESPONSABLE -->
+
+				    <li class="nav-item"
+				        sec:authorize="hasRole('RESPONSABLE')">
+
+				        <a class="nav-link"
+				           th:href="@{/mi-unidad}">
+				            MiUnidad
+				        </a>
+
+				    </li>
+
+				</ul>
                 </li>
 
             </ul>
