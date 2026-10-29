@@ -256,7 +256,9 @@
                     <th>Código</th>
 
                     <th>Nombre comercial</th>
-
+	
+					<th>Festival</th>
+					
                     <th>Tipo</th>
 
                     <th>Detalle</th>
@@ -288,6 +290,13 @@
                         th:text="${unidad.nombreComercial}">
                         Nombre
                     </td>
+					
+
+					<!-- FESTIVAL -->
+
+					<td th:text="${unidad.festival.nombre}">
+					    Festival
+					</td>
 
                     <!-- TIPO -->
 
