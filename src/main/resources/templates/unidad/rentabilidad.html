@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .rentabilidad-contenedor {
+        margin-top: 25px;
+        margin-bottom: 50px;
+    }
+
+    .rentabilidad-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .rentabilidad-header h2 {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .rentabilidad-header p {
+        color: #e5e9e3;
+        margin-bottom: 0;
+    }
+
+    .rentabilidad-card {
+        background: white;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .tabla-rentabilidad {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .tabla-rentabilidad td {
+        padding: 15px;
+        border-bottom: 1px solid #e9ece8;
+    }
+
+    .tabla-rentabilidad td:last-child {
+        text-align: right;
+        font-weight: bold;
+    }
+
+    .resultado-final {
+        background-color: #26352b;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .resultado-final td {
+        border: none;
+    }
+
+    .boton-volver {
+        display: inline-block;
+        background-color: #d99a4e;
+        color: #26352b;
+        padding: 11px 22px;
+        border-radius: 6px;
+        font-weight: bold;
+        text-decoration: none;
+        margin-top: 25px;
+    }
+
+    .boton-volver:hover {
+        background-color: #e7ad65;
+        color: #26352b;
+        text-decoration: none;
+    }
+</style>
+
+<main class="container py-4 rentabilidad-contenedor">
+
+    <section class="rentabilidad-header">
+        <h2>Rentabilidad neta</h2>
+        <p>Resultado económico de la unidad de venta por festival.</p>
+    </section>
+
+    <section class="rentabilidad-card">
+
+        <h3 th:text="${rentabilidad.nombreUnidad}">
+            Nombre de la unidad
+        </h3>
+
+        <p>
+            <strong>Código:</strong>
+            <span th:text="${rentabilidad.codigoUnidad}"></span>
+        </p>
+
+        <p>
+            <strong>Festival:</strong>
+            <span th:text="${rentabilidad.nombreFestival}"></span>
+        </p>
+
+        <h5 class="mt-4">Detalle de rentabilidad</h5>
+
+        <table class="tabla-rentabilidad">
+            <tbody>
+            <tr>
+                <td>Ventas totales</td>
+                <td th:text="${'$ ' + #numbers.formatDecimal(rentabilidad.totalVentas, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+
+            <tr>
+                <td>Costo de producción de los platos</td>
+                <td th:text="${'$ ' + #numbers.formatDecimal(rentabilidad.costoPlatos, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+
+            <tr>
+                <td><strong>Ganancia bruta</strong></td>
+                <td th:text="${'$ ' + #numbers.formatDecimal(rentabilidad.gananciaBruta, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+
+            <tr>
+                <td>Sueldos y liquidaciones</td>
+                <td th:text="${'$ ' + #numbers.formatDecimal(rentabilidad.sueldos, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+
+            <tr>
+                <td>Canon del festival</td>
+                <td th:text="${'$ ' + #numbers.formatDecimal(rentabilidad.canon, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+
+            <tr class="resultado-final">
+                <td>RENTABILIDAD NETA</td>
+                <td th:text="${'$ ' + #numbers.formatDecimal(rentabilidad.rentabilidadNeta, 1, 'POINT', 2, 'COMMA')}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p class="mt-3 font-weight-bold"
+           th:style="${rentabilidad.positiva} ? 'color:#287a45' : 'color:#c0392b'"
+           th:text="${rentabilidad.positiva} ? 'Resultado positivo' : 'Resultado negativo'">
+        </p>
+
+        <a th:href="@{/mi-unidad}" class="boton-volver">
+            ← Volver a Mi Unidad
+        </a>
+
+    </section>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+</body>
+</html>
