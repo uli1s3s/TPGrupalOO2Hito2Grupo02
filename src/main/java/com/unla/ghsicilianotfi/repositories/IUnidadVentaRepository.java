@@ -36,4 +36,9 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
 
     // Verifica si el empleado ya está asignado a alguna unidad
     boolean existsByEmpleados_IdPersonal(Long idPersonal);
+    
+    // Unidades que participan de un festival (relación muchos a muchos)
+    @EntityGraph(attributePaths = {"responsable", "festivales"})
+    List<UnidadVenta> findDistinctByFestivales_IdFestival(Long idFestival);
+    
 }

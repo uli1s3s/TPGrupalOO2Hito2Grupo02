@@ -218,6 +218,27 @@
          th:if="${mensaje}"
          th:text="${mensaje}">
     </div>
+	
+
+	<!-- FILTRO POR FESTIVAL -->
+
+	<div class="card unidades-card">
+	    <div class="unidades-card-header">
+	        <form th:action="@{/unidades}" method="get" class="form-inline">
+	            <label for="festival" class="mr-2"><strong>Festival:</strong></label>
+	            <select id="festival" name="festival" class="form-control mr-2">
+	                <option value="">Todos los festivales</option>
+	                <option th:each="f : ${festivales}"
+	                        th:value="${f.idFestival}"
+	                        th:text="${f.nombre + (f.activo ? '' : ' (inactivo)')}"
+	                        th:selected="${f.idFestival == idFestival}">
+	                    Festival
+	                </option>
+	            </select>
+	            <button type="submit" class="boton-nueva-unidad">Filtrar</button>
+	        </form>
+	    </div>
+	</div>
 
     <!-- SIN UNIDADES REGISTRADAS -->
 

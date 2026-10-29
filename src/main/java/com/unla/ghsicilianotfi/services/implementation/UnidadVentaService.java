@@ -80,6 +80,12 @@ public class UnidadVentaService implements IUnidadVentaService {
     public List<UnidadVenta> listarPorResponsable(String nombreUsuario) {
         return unidadVentaRepository.findByResponsable_Nombre(nombreUsuario);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<UnidadVenta> listarPorFestival(Long idFestival) {
+        return unidadVentaRepository.findDistinctByFestivales_IdFestival(idFestival);
+    }
 
     @Override
     @Transactional
