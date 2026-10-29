@@ -247,8 +247,20 @@
 
         <div class="pedidos-card-body">
 
+            <!-- AVISO CUANDO LA CAJA ESTÁ CERRADA -->
+            <div class="alert alert-danger"
+                 role="alert"
+                 th:if="${cajaCerrada == true}">
+                <strong>Caja cerrada.</strong>
+                No es posible registrar nuevos pedidos porque
+                la caja de esta unidad está cerrada.
+                Para continuar, un cajero debe reabrirla.
+            </div>
+
+            <!-- OTROS AVISOS DEL SISTEMA -->
             <div class="alert alert-warning"
-                 th:if="${avisoPedido}"
+                 role="alert"
+                 th:if="${avisoPedido != null and cajaCerrada != true}"
                  th:text="${avisoPedido}">
             </div>
 
@@ -259,7 +271,9 @@
 
             <form method="post"
                   th:action="@{/pedidos/nuevo}"
-                  th:if="${!#lists.isEmpty(festivales) and !#lists.isEmpty(platos)}">
+                  th:if="${cajaCerrada != true
+              and !#lists.isEmpty(festivales)
+              and !#lists.isEmpty(platos)}">
 
                 <div class="form-row">
 

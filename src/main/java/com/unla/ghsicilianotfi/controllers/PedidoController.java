@@ -7,6 +7,7 @@ import com.unla.ghsicilianotfi.entities.Pedido;
 import com.unla.ghsicilianotfi.entities.Plato;
 import com.unla.ghsicilianotfi.entities.UnidadVenta;
 
+import com.unla.ghsicilianotfi.repositories.ICierreCajaRepository;
 import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
 import com.unla.ghsicilianotfi.repositories.IPedidoRepository;
 import com.unla.ghsicilianotfi.repositories.IPlatoRepository;
@@ -38,19 +39,22 @@ public class PedidoController {
     private final IFestivalRepository festivalRepository;
     private final IUnidadVentaRepository unidadVentaRepository;
     private final PedidoService pedidoService;
+    private final ICierreCajaRepository cierreCajaRepository;
 
     public PedidoController(
             IPedidoRepository pedidoRepository,
             IPlatoRepository platoRepository,
             IFestivalRepository festivalRepository,
             IUnidadVentaRepository unidadVentaRepository,
-            PedidoService pedidoService) {
+            PedidoService pedidoService,
+            ICierreCajaRepository cierreCajaRepository) {
 
         this.pedidoRepository = pedidoRepository;
         this.platoRepository = platoRepository;
         this.festivalRepository = festivalRepository;
         this.unidadVentaRepository = unidadVentaRepository;
         this.pedidoService = pedidoService;
+        this.cierreCajaRepository = cierreCajaRepository;
     }
 
     // ============================================
@@ -116,18 +120,12 @@ public class PedidoController {
 
         } catch (IllegalArgumentException ex) {
 
-            model.addAttribute("error", ex.getMessage());
-
-            cargarDatos(
-                    model,
-                    authentication,
-                    null,
-                    null,
-                    null,
-                    null
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    ex.getMessage()
             );
 
-            return "pedido/lista";
+            return "redirect:/pedidos";
         }
     }
 
@@ -156,9 +154,8 @@ public class PedidoController {
 
         model.addAttribute("esEmpleado", esEmpleado);
         model.addAttribute("esAdministrador", esAdministrador);
+        model.addAttribute("cajaCerrada", false);
 
-        // Los filtros de festival y unidad
-        // solamente corresponden al administrador.
         Long festivalAplicado = esAdministrador
                 ? idFestival
                 : null;
@@ -167,7 +164,6 @@ public class PedidoController {
                 ? idUnidad
                 : null;
 
-        // Conserva los filtros seleccionados.
         model.addAttribute("desde", desde);
         model.addAttribute("hasta", hasta);
         model.addAttribute("idFestivalFiltro", festivalAplicado);
@@ -182,18 +178,15 @@ public class PedidoController {
 
         if (esAdministrador) {
 
-            // El administrador puede consultar todas las unidades.
             unidadesAutorizadas = unidadVentaRepository.findAll();
 
         } else if (esResponsable) {
 
-            // El responsable consulta sus unidades.
             unidadesAutorizadas = unidadVentaRepository
                     .findByResponsable_Nombre(username);
 
         } else if (esEmpleado) {
 
-            // El empleado consulta su unidad asignada.
             unidadEmpleado = unidadVentaRepository
                     .buscarUnidadDeEmpleado(username);
 
@@ -212,14 +205,11 @@ public class PedidoController {
                 .toList();
 
         // ============================================
-        // OPCIONES DE LOS FILTROS
-        // SOLO ADMINISTRADOR
+        // FILTROS PARA ADMINISTRADOR
         // ============================================
 
         if (esAdministrador) {
 
-            // Incluye festivales activos e inactivos
-            // para permitir consultas históricas.
             List<Festival> festivalesFiltro =
                     festivalRepository.findAll();
 
@@ -235,14 +225,12 @@ public class PedidoController {
 
         } else {
 
-            // No se cargan filtros adicionales
-            // para responsables ni empleados.
             model.addAttribute("festivalesFiltro", List.of());
             model.addAttribute("unidadesFiltro", List.of());
         }
 
         // ============================================
-        // VALIDACIONES DE LA BÚSQUEDA
+        // CONSULTAR PEDIDOS
         // ============================================
 
         if (desde != null
@@ -258,14 +246,10 @@ public class PedidoController {
 
         } else if (!esAdministrador && idsUnidades.isEmpty()) {
 
-            // Sin unidades autorizadas no se muestran pedidos.
             model.addAttribute("pedidos", List.of());
 
         } else {
 
-            // El repositorio aplica los filtros.
-            // Para responsables y empleados, los filtros
-            // de festival y unidad siempre serán null.
             List<Long> idsConsulta = esAdministrador
                     ? List.of(-1L)
                     : idsUnidades;
@@ -283,8 +267,7 @@ public class PedidoController {
         }
 
         // ============================================
-        // FORMULARIO DE REGISTRO
-        // SOLO PARA EMPLEADOS
+        // FORMULARIO SOLO PARA EMPLEADOS
         // ============================================
 
         if (!esEmpleado) {
@@ -310,7 +293,37 @@ public class PedidoController {
 
         UnidadVenta unidad = unidadEmpleado.get();
 
-        // Solo festivales activos para registrar pedidos.
+        // ============================================
+        // VERIFICAR SI LA CAJA ESTÁ CERRADA
+        // ============================================
+
+        boolean cajaCerrada = cierreCajaRepository
+                .existsByUnidadVenta_IdUnidadAndFechaAndCerradaTrue(
+                        unidad.getIdUnidad(),
+                        LocalDate.now()
+                );
+
+        model.addAttribute("cajaCerrada", cajaCerrada);
+
+        if (cajaCerrada) {
+
+            model.addAttribute(
+                    "avisoPedido",
+                    "No es posible registrar nuevos pedidos porque "
+                            + "la caja de esta unidad está cerrada. "
+                            + "Para continuar, un cajero debe reabrirla."
+            );
+
+            model.addAttribute("platos", List.of());
+            model.addAttribute("festivales", List.of());
+
+            return;
+        }
+
+        // ============================================
+        // FESTIVALES ACTIVOS
+        // ============================================
+
         List<Festival> festivalesDisponibles =
                 festivalRepository.findByActivoTrue()
                         .stream()
@@ -326,7 +339,10 @@ public class PedidoController {
                         )
                         .toList();
 
-        // Platos activos de la unidad asignada.
+        // ============================================
+        // PLATOS ACTIVOS DE LA UNIDAD
+        // ============================================
+
         List<Plato> platosDisponibles =
                 platoRepository.findByActivoTrue()
                         .stream()
