@@ -33,6 +33,10 @@ import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
 import com.unla.ghsicilianotfi.entities.TipoUnidadAplicable;
 import com.unla.ghsicilianotfi.helpers.TarifaCanon;
 
+import com.unla.ghsicilianotfi.entities.Personal;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.math.BigDecimal;
 
 import java.time.LocalDate;
@@ -264,6 +268,85 @@ public class UnidadVentaService implements IUnidadVentaService {
     }
     
     // =====================================================
+    // MI UNIDAD: empleados disponibles, asignar, quitar y canon
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Personal> listarEmpleadosDisponibles() {
+        return unidadVentaRepository.buscarEmpleadosDisponibles();
+    }
+
+    @Override
+    @Transactional
+    public void asignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
+
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        Personal empleado = unidadVentaRepository.buscarEmpleadoPorId(idPersonal)
+                .orElseThrow(() -> new IllegalArgumentException("El empleado no existe"));
+
+        // Solo empleados activos
+        if (!empleado.isActivo()) {
+            throw new IllegalArgumentException("No se puede asignar un empleado dado de baja");
+        }
+
+        // Disponibilidad: un empleado solo puede trabajar en una unidad
+        if (unidadVentaRepository.existsByEmpleados_IdPersonal(idPersonal)) {
+            throw new IllegalArgumentException("El empleado ya está asignado a una unidad de venta");
+        }
+
+        unidad.getEmpleados().add(empleado);
+        unidadVentaRepository.save(unidad);
+    }
+
+    @Override
+    @Transactional
+    public void quitarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
+
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        boolean quitado = unidad.getEmpleados()
+                .removeIf(empleado -> empleado.getIdPersonal().equals(idPersonal));
+
+        if (!quitado) {
+            throw new IllegalArgumentException("El empleado no pertenece a esta unidad");
+        }
+
+        unidadVentaRepository.save(unidad);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad) {
+
+        UnidadVenta unidad = unidadVentaRepository.findById(idUnidad)
+                .orElseThrow(() -> new IllegalArgumentException("La unidad de venta no existe"));
+
+        // LinkedHashMap mantiene el orden en que se agregan los festivales
+        Map<String, BigDecimal> canones = new LinkedHashMap<>();
+
+        for (Festival festival : unidad.getFestivales()) {
+            canones.put(festival.getNombre(), unidad.calcularCanon(armarTarifa(unidad, festival)));
+        }
+
+        return canones;
+    }
+
+    // La unidad tiene que existir y estar a cargo del responsable que inicio sesión
+    private UnidadVenta buscarUnidadDelResponsable(Long idUnidad, String nombreResponsable) {
+
+        UnidadVenta unidad = unidadVentaRepository.findById(idUnidad)
+                .orElseThrow(() -> new IllegalArgumentException("La unidad de venta no existe"));
+
+        if (!unidad.getResponsable().getNombre().equals(nombreResponsable)) {
+            throw new IllegalArgumentException("No podés modificar una unidad que no está a tu cargo");
+        }
+
+        return unidad;
+    }
+    
+    // =====================================================
     // Arma la tarifa de canon de una unidad segun los costos de UN festival
     // =====================================================
     private TarifaCanon armarTarifa(UnidadVenta unidad, Festival festival) {
@@ -315,4 +398,6 @@ public class UnidadVentaService implements IUnidadVentaService {
         }
         return false;
     }
+    
+    
 }

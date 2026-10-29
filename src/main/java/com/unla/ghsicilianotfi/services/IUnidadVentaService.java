@@ -5,6 +5,10 @@ import com.unla.ghsicilianotfi.entities.UnidadVenta;
 
 import java.util.List;
 import com.unla.ghsicilianotfi.dtos.ReporteMayoresCanonDTO;
+import com.unla.ghsicilianotfi.entities.Personal;
+
+import java.math.BigDecimal;
+import java.util.Map;
 
 public interface IUnidadVentaService {
 
@@ -19,5 +23,17 @@ public interface IUnidadVentaService {
     
     // Las "cantidad" unidades de un festival que más pagan de canon, de mayor a menor
     List<ReporteMayoresCanonDTO> unidadesConMayorCanon(Long idFestival, int cantidad);
+    
+    // Empleados activos que no estAn asignados a ninguna unidad
+    List<Personal> listarEmpleadosDisponibles();
+
+    // El responsable asigna un empleado disponible a una de sus unidades
+    void asignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
+
+    // El responsable quita un empleado de una de sus unidades
+    void quitarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
+
+    // Canon que paga la unidad en cada uno de sus festivales (nombre del festival -> canon)
+    Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad);
 }
 
