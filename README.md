@@ -6,6 +6,10 @@ Aplicación Spring Boot para la gestión de Epicentro Gourmet.
 
 Los usuarios con rol `ADMINISTRADOR` pueden crear, consultar, modificar y eliminar festivales en `/festivales`. Cada festival puede tener costos opcionales de superficie, montaje y electricidad, aplicables a todas las unidades o a un tipo específico.
 
+## Administración de platos
+
+Los usuarios con rol `RESPONSABLE` pueden crear, consultar y modificar platos en `/platos`. Cada plato se asocia a una unidad de venta que pertenezca al responsable autenticado; las bajas son lógicas para conservar los platos vinculados con pedidos anteriores.
+
 ## Crear el administrador inicial
 
 El esquema de la base se crea/actualiza al iniciar la aplicación mediante Hibernate. Hay dos scripts disponibles para inicializar el usuario administrador:

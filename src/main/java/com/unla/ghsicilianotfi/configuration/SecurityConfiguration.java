@@ -91,6 +91,11 @@ public class SecurityConfiguration {
 							"/festivales/**"
 					).hasRole("ADMINISTRADOR");
 
+					auth.requestMatchers(
+							"/platos",
+							"/platos/**"
+					).hasRole("RESPONSABLE");
+
 					auth.requestMatchers("/api/v1/**").permitAll();
 
 					// RESTO DE LAS RUTAS
