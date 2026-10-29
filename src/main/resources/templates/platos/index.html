@@ -13,7 +13,11 @@
                 <h2>Gestión de platos</h2>
                 <p class="mb-0">Administrá los platos de tus unidades de venta.</p>
             </div>
-            <a class="btn btn-warning mt-3 mt-md-0" th:href="@{/platos/nuevo}">+ Alta de plato</a>
+            <div class="d-flex flex-wrap mt-3 mt-md-0">
+                <a class="btn btn-outline-light mr-2 mb-2"
+                   th:href="@{/platos/rentabilidad}">Ver rentabilidad de platos</a>
+                <a class="btn btn-warning mb-2" th:href="@{/platos/nuevo}">+ Alta de plato</a>
+            </div>
         </div>
     </section>
 
