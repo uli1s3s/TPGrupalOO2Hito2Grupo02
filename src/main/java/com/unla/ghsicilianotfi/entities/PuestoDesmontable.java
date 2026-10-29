@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import com.unla.ghsicilianotfi.configuration.ParametrosCanon;
+import com.unla.ghsicilianotfi.helpers.TarifaCanon;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -39,7 +39,7 @@ public class PuestoDesmontable extends UnidadVenta {
     
     // Canon = (superficie x costo por m2) - (minutos de montaje x descuento por minuto)
     @Override
-    public BigDecimal calcularCanon(ParametrosCanon parametros) {
+    public BigDecimal calcularCanon(TarifaCanon parametros) {
         BigDecimal canon = getSuperficieDecimal().multiply(parametros.getCostoPorM2());
 
         BigDecimal descuento = parametros.getDescuentoPorMinutoMontaje()

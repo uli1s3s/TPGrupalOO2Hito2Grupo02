@@ -17,7 +17,7 @@ public interface IUnidadVentaService {
     // Unidades asignadas a un responsable (por su nombre de usuario)
     List<UnidadVenta> listarPorResponsable(String nombreUsuario);
     
-    // Las cantidad unidades que más pagan de canon, de mayor a menor
-    List<ReporteMayoresCanonDTO> unidadesConMayorCanon(int cantidad);
+    // Las "cantidad" unidades de un festival que más pagan de canon, de mayor a menor
+    List<ReporteMayoresCanonDTO> unidadesConMayorCanon(Long idFestival, int cantidad);
 }
 

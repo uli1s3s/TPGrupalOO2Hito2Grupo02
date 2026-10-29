@@ -294,7 +294,7 @@
 
 					<!-- FESTIVAL -->
 
-					<td th:text="${unidad.festival.nombre}">
+					<td th:text="${#strings.listJoin(unidad.festivales.![nombre], ', ')}">
 					    Festival
 					</td>
 
