@@ -1,3 +1,4 @@
+
 package com.unla.ghsicilianotfi.configuration;
 
 import org.springframework.context.annotation.Bean;
@@ -28,33 +29,70 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
 		return http
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(AbstractHttpConfigurer::disable)
+
 				.authorizeHttpRequests(auth -> {
+
+					// RECURSOS ESTÁTICOS
 					auth.requestMatchers(
-							"/css/*",
-							"/imgs/*",
-							"/js/*",
-							"/vendor/bootstrap/css/*",
-							"/vendor/jquery/*",
-							"/vendor/bootstrap/js/*"
+							"/css/**",
+							"/imgs/**",
+							"/js/**",
+							"/vendor/**"
 					).permitAll();
 
-					auth.requestMatchers("/api/v1/pedidos", "/api/v1/pedidos/**")
-							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE", "EMPLEADO");
+					// PÁGINAS PÚBLICAS
+					auth.requestMatchers(
+							"/",
+							"/index",
+							"/login",
+							"/unidades/nueva"
+					).permitAll();
 
-					auth.requestMatchers("/empleados", "/empleados/**")
-							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE");
+					// REGISTRO PÚBLICO DE RESPONSABLES
+					// Incorporado desde develop
+					auth.requestMatchers(
+							"/registro-responsable",
+							"/registro-responsable/**"
+					).permitAll();
 
-					auth.requestMatchers("/api/v1/**").permitAll();
-					
-					// Registro publico: cualquiera puede registrarse como responsable con su unidad
-					auth.requestMatchers("/registro-responsable", "/registro-responsable/**").permitAll();
-					
+					// CAMBIAR CONTRASEÑA
+					// Cualquier usuario que haya iniciado sesión
+					auth.requestMatchers(
+							"/cambiar-contrasena"
+					).authenticated();
+
+					// PEDIDOS
+					auth.requestMatchers(
+							"/api/v1/pedidos",
+							"/api/v1/pedidos/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE",
+							"EMPLEADO"
+					);
+
+					// PERSONAL
+					auth.requestMatchers(
+							"/empleados",
+							"/empleados/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE"
+					);
+
+					// OTRAS API
+					auth.requestMatchers("/api/v1/**")
+							.permitAll();
+
+					// RESTO DE LAS RUTAS
 					auth.anyRequest().authenticated();
 				})
+
 				.formLogin(login -> {
 					login.loginPage("/login");
 					login.loginProcessingUrl("/loginprocess");
@@ -63,30 +101,37 @@ public class SecurityConfiguration {
 					login.defaultSuccessUrl("/loginsuccess");
 					login.permitAll();
 				})
+
 				.logout(logout -> {
 					logout.logoutUrl("/logout");
 					logout.logoutSuccessUrl("/login");
 					logout.permitAll();
 				})
+
 				.build();
 	}
 
 	@Bean
-	AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+	AuthenticationManager authenticationManager(
+			AuthenticationConfiguration authenticationConfiguration
+	) throws Exception {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 	@Bean
-	AuthenticationProvider authenticationProvider(){
-		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+	AuthenticationProvider authenticationProvider() {
+
+		DaoAuthenticationProvider provider =
+				new DaoAuthenticationProvider();
+
 		provider.setPasswordEncoder(passwordEncoder());
 		provider.setUserDetailsService(userService);
+
 		return provider;
 	}
 
 	@Bean
-	PasswordEncoder passwordEncoder(){
+	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 }
-

@@ -1,8 +1,10 @@
+
 package com.unla.ghsicilianotfi.controllers;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,12 +21,12 @@ import com.unla.ghsicilianotfi.services.IPersonService;
 public class HomeController {
 
 	private final IPersonService personService;
-	
+
 	public HomeController(IPersonService personService) {
 		this.personService = personService;
 	}
 
-	//GET Example: SERVER/index
+	// PÁGINA PRINCIPAL
 	@GetMapping("/index")
 	public ModelAndView index() {
 
@@ -34,7 +36,12 @@ public class HomeController {
 		Authentication authentication =
 				SecurityContextHolder.getContext().getAuthentication();
 
-		if (authentication != null && authentication.isAuthenticated()) {
+		boolean usuarioAutenticado =
+				authentication != null
+						&& authentication.isAuthenticated()
+						&& !(authentication instanceof AnonymousAuthenticationToken);
+
+		if (usuarioAutenticado) {
 
 			modelAndView.addObject(
 					"username",
@@ -50,33 +57,51 @@ public class HomeController {
 			modelAndView.addObject("rol", rol);
 
 		} else {
-			modelAndView.addObject("username", "anonymous");
-			modelAndView.addObject("rol", "SIN_ROL");
+
+			// VISITANTE SIN INICIAR SESIÓN
+			modelAndView.addObject("username", null);
+			modelAndView.addObject("rol", null);
 		}
 
-		modelAndView.addObject("persons", personService.getAll());
+		modelAndView.addObject(
+				"persons",
+				personService.getAll()
+		);
 
 		return modelAndView;
 	}
 
-	//GET Example: SERVER/hello?name=someName
+	// EJEMPLO: /hello?name=Juan
 	@GetMapping("/hello")
-	public ModelAndView helloParams1(@RequestParam(required=false, defaultValue="null") String name) {
-		ModelAndView mV = new ModelAndView(ViewRouteHelper.HELLO);
+	public ModelAndView helloParams1(
+			@RequestParam(required = false, defaultValue = "null")
+			String name) {
+
+		ModelAndView mV =
+				new ModelAndView(ViewRouteHelper.HELLO);
+
 		mV.addObject("name", name);
+
 		return mV;
 	}
 
-	//GET Example: SERVER/hello/someName
+	// EJEMPLO: /hello/Juan
 	@GetMapping("/hello/{name}")
-	public ModelAndView helloParams2(@PathVariable String name) {
-		ModelAndView mV = new ModelAndView(ViewRouteHelper.HELLO);
+	public ModelAndView helloParams2(
+			@PathVariable String name) {
+
+		ModelAndView mV =
+				new ModelAndView(ViewRouteHelper.HELLO);
+
 		mV.addObject("name", name);
+
 		return mV;
 	}
 
+	// REDIRECCIÓN DESDE / HACIA EL INDEX
 	@GetMapping("/")
 	public RedirectView redirectToHomeIndex() {
+
 		return new RedirectView(ViewRouteHelper.ROUTE);
 	}
 }
