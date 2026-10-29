@@ -180,6 +180,21 @@
 
     }
 
+	/* RESPONSABLE SIN VERIFICAR */
+
+	.badge-pendiente {
+	    display: inline-block;
+	    margin-top: 6px;
+	    background-color: #fff3cd;
+	    color: #856404;
+	    border: 1px solid #ffe08a;
+	    border-radius: 20px;
+	    padding: 3px 10px;
+	    font-size: 12px;
+	    font-weight: bold;
+	    white-space: nowrap;
+	}
+	
 </style>
 
 <main class="container py-4 unidades-contenedor">
@@ -344,10 +359,14 @@
 
                     <!-- RESPONSABLE -->
 
-                    <td th:text="${unidad.responsable.email}">
-                        resp@mail.com
-                    </td>
-
+					<td>
+					    <span th:text="${unidad.responsable.email}">resp@mail.com</span>
+					    <br/>
+					    <span class="badge-pendiente"
+					          th:if="${!unidad.responsable.activo}">
+					        Pendiente de verificación
+					    </span>
+					</td>
                 </tr>
 
                 </tbody>

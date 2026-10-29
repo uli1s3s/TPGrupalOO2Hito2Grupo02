@@ -31,8 +31,6 @@ public class ViewRouteHelper {
 	public final static String FESTIVAL_INDEX = "festival/index";
 	public final static String FESTIVAL_FORM = "festival/form";
 	
-	public final static String REGISTRO_RESPONSABLE_EXITO = "unidad/registro-exito";
-	
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
 
@@ -59,6 +57,8 @@ public class ViewRouteHelper {
 	public final static String MI_UNIDAD_ROOT = "/mi-unidad";
 	
 	public final static String REGISTRO_RESPONSABLE_ROOT = "/registro-responsable";
+	public final static String REGISTRO_RESPONSABLE_EXITO = "unidad/registro-exito";
+	public final static String REGISTRO_RESPONSABLE_VERIFICAR = "unidad/verificar-email";
 	
 	public final static String EMPLEADO_ROOT = "/empleados";
 	public final static String PLATO_ROOT = "/platos";
