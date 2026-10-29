@@ -48,6 +48,9 @@ public class SecurityConfiguration {
 					auth.requestMatchers("/empleados", "/empleados/**")
 							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE");
 
+					auth.requestMatchers("/festivales", "/festivales/**")
+							.hasRole("ADMINISTRADOR");
+
 					auth.requestMatchers("/api/v1/**").permitAll();
 
 					auth.anyRequest().authenticated();
@@ -86,4 +89,3 @@ public class SecurityConfiguration {
 		return new BCryptPasswordEncoder();
 	}
 }
-

@@ -183,11 +183,13 @@
 
                 <!-- FESTIVALES -->
 
-                <li class="nav-item">
+                <li class="nav-item"
+                    th:if="${rol == 'ROLE_ADMINISTRADOR'}">
 
-                    <span class="nav-link">
+                    <a class="nav-link"
+                       th:href="@{/festivales}">
                         Festivales
-                    </span>
+                    </a>
 
                 </li>
 

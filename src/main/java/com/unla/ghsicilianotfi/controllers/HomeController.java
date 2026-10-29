@@ -1,7 +1,6 @@
 package com.unla.ghsicilianotfi.controllers;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.unla.ghsicilianotfi.helpers.ViewRouteHelper;
+import com.unla.ghsicilianotfi.services.IFestivalService;
 import com.unla.ghsicilianotfi.services.IPersonService;
 
 @Controller
@@ -19,9 +19,11 @@ import com.unla.ghsicilianotfi.services.IPersonService;
 public class HomeController {
 
 	private final IPersonService personService;
+	private final IFestivalService festivalService;
 	
-	public HomeController(IPersonService personService) {
+	public HomeController(IPersonService personService, IFestivalService festivalService) {
 		this.personService = personService;
+		this.festivalService = festivalService;
 	}
 
 	//GET Example: SERVER/index
@@ -55,6 +57,7 @@ public class HomeController {
 		}
 
 		modelAndView.addObject("persons", personService.getAll());
+		modelAndView.addObject("festivales", festivalService.listarActivos());
 
 		return modelAndView;
 	}
