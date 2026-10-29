@@ -42,6 +42,12 @@ public class FestivalController {
         return ViewRouteHelper.FESTIVAL_INDEX;
     }
 
+    @GetMapping("/facturacion")
+    public String verFacturacion(Model model) {
+        model.addAttribute("reporte", festivalService.listarFacturacion());
+        return ViewRouteHelper.FESTIVAL_FACTURACION;
+    }
+
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         model.addAttribute("festival", nuevoFestival());
