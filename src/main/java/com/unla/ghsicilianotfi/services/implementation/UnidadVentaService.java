@@ -25,6 +25,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import com.unla.ghsicilianotfi.entities.Festival;
+import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
+
+import java.time.LocalDate;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -40,17 +44,20 @@ public class UnidadVentaService implements IUnidadVentaService {
     private final IUsuarioRepository usuarioRepository;
     private final IRolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
+    private final IFestivalRepository festivalRepository;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
             IUsuarioRepository usuarioRepository,
             IRolRepository rolRepository,
             PasswordEncoder passwordEncoder,
-            ParametrosCanon parametrosCanon) {
+            ParametrosCanon parametrosCanon,
+            IFestivalRepository festivalRepository) {
 	this.unidadVentaRepository = unidadVentaRepository;
 	this.usuarioRepository = usuarioRepository;
 	this.rolRepository = rolRepository;
 	this.passwordEncoder = passwordEncoder;
 	this.parametrosCanon = parametrosCanon;
+    this.festivalRepository = festivalRepository;
 	}
 
     @Override
@@ -70,6 +77,9 @@ public class UnidadVentaService implements IUnidadVentaService {
         if (datos == null) {
             throw new IllegalArgumentException("Los datos de la unidad son obligatorios");
         }
+        
+        // 0. El festival tiene que existir y estar activo
+        Festival festival = buscarFestivalActivo(datos.getIdFestival());
 
         // 1. Crear segun el tipo elegido
         UnidadVenta unidad = crearSegunTipo(datos);
@@ -77,6 +87,7 @@ public class UnidadVentaService implements IUnidadVentaService {
         // 2. Datos comunes
         unidad.setNombreComercial(datos.getNombreComercial().trim());
         unidad.setSuperficieM2(datos.getSuperficieM2());
+        unidad.setFestival(festival);
 
         // 3. Codigo unico generado por el sistema (FT00000001, PD00000001, ...)
         unidad.setCodigoUnico(generarCodigoUnico(unidad));
@@ -124,6 +135,29 @@ public class UnidadVentaService implements IUnidadVentaService {
         }
 
         throw new IllegalArgumentException("El tipo de unidad seleccionado no es válido");
+    }
+    
+    // =====================================================
+    // Validacion de carga: solo se puede registrar en un festival activo y vigente
+    // =====================================================
+    private Festival buscarFestivalActivo(Long idFestival) {
+
+        if (idFestival == null) {
+            throw new IllegalArgumentException("Seleccioná el festival en el que vas a participar");
+        }
+
+        Festival festival = festivalRepository.findById(idFestival)
+                .orElseThrow(() -> new IllegalArgumentException("El festival seleccionado no existe"));
+
+        if (!festival.isActivo()) {
+            throw new IllegalArgumentException("Solo podés registrarte en un festival activo");
+        }
+
+        if (festival.getFechaFin().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("El festival seleccionado ya finalizó");
+        }
+
+        return festival;
     }
     
     // =====================================================

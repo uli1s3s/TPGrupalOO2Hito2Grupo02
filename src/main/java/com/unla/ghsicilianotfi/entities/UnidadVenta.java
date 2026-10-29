@@ -34,6 +34,11 @@ public abstract class UnidadVenta {
     @JoinColumn(name = "id_responsable", nullable = false)
     private Usuario responsable;
     
+    // Festival en el que participa la unidad (solo puede registrarse en uno activo)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_festival", nullable = false)
+    private Festival festival;
+    
     // Empleados de la unidad. Cada empleado pertenece a una sola unidad.
     // La columna id_unidad queda en la tabla personal y es opcional.
     @OneToMany
