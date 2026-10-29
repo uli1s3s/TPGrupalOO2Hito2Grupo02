@@ -22,7 +22,7 @@ public class LiquidacionDeHaber {
     @JoinColumn(name = "id_personal", nullable = false)
     private Personal personal;
 
-    // Período liquidado, ej: "2026-10" o "Octubre 2026"
+    // Período liquidado, ej: "2026-10" o "Agosto 2026"
     @Column(nullable = false, length = 30)
     private String periodo;
 
@@ -52,10 +52,14 @@ public class LiquidacionDeHaber {
     @JoinColumn(name = "id_unidad", nullable = true)
     private UnidadVenta unidadVenta;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_festival", nullable = true)
+    private Festival festival;
+
     public LiquidacionDeHaber(Personal personal, String periodo, LocalDate fechaLiquidacion,
                               int diasTrabajados, double sueldoBase, double adicional,
                               String detalleAdicional, int porcentajeAplicado, double totalACobrar,
-                              UnidadVenta unidadVenta) {
+                              UnidadVenta unidadVenta, Festival festival) {
         this.personal = personal;
         this.periodo = periodo;
         this.fechaLiquidacion = fechaLiquidacion;
@@ -66,6 +70,6 @@ public class LiquidacionDeHaber {
         this.porcentajeAplicado = porcentajeAplicado;
         this.totalACobrar = totalACobrar;
         this.unidadVenta = unidadVenta;
+        this.festival = festival;
     }
 }
-

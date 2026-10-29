@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
-import com.unla.ghsicilianotfi.configuration.ParametrosCanon;
+import com.unla.ghsicilianotfi.helpers.TarifaCanon;
 import java.math.BigDecimal;
 
 @Entity
@@ -40,6 +40,9 @@ public abstract class UnidadVenta {
     @JoinColumn(name = "id_unidad")
     private Set<Personal> empleados = new HashSet<>();
 
+    
+    // Festivales en los que participa la unidad (muchos a muchos).
+    // Al registrarse, el responsable elige un festival activo y queda agregado aca
     @ManyToMany
     @JoinTable(
             name = "festival_unidad",
@@ -58,7 +61,7 @@ public abstract class UnidadVenta {
     public abstract String getPrefijoCodigo();
     
     // Cada tipo de unidad calcula su canon con su propia formula (polimorfismo)
-    public abstract BigDecimal calcularCanon(ParametrosCanon parametros);
+    public abstract BigDecimal calcularCanon(TarifaCanon tarifa);
 
     // Superficie como BigDecimal, para hacer cuentas de dinero sin errores de redondeo
     protected BigDecimal getSuperficieDecimal() {

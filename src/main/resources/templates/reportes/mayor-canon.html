@@ -73,24 +73,38 @@
     <!-- CANTIDAD A MOSTRAR -->
     <div class="card canon-card">
         <div class="canon-card-body">
-            <form th:action="@{/reportes/mayor-canon}" method="get" class="form-inline">
-                <label for="cantidad" class="canon-label mr-2">Cantidad de unidades a mostrar:</label>
-                <input type="number" id="cantidad" name="cantidad" min="1"
-                       th:value="${cantidad}" class="form-control mr-2" style="width:100px"/>
-                <button type="submit" class="btn boton-canon">Ver ranking</button>
-            </form>
+			<form th:action="@{/reportes/mayor-canon}" method="get" class="form-inline">
+			    <label for="festival" class="canon-label mr-2">Festival:</label>
+			    <select id="festival" name="festival" class="form-control mr-3">
+			        <option th:each="f : ${festivales}"
+			                th:value="${f.idFestival}"
+			                th:text="${f.nombre + (f.activo ? '' : ' (inactivo)')}"
+			                th:selected="${f.idFestival == idFestival}">
+			            Festival
+			        </option>
+			    </select>
 
-            <div class="formula-canon">
-                <strong>Food truck:</strong> (superficie × $500) + $2.000 si requiere electricidad.<br/>
-                <strong>Puesto desmontable:</strong> (superficie × $500) − (minutos de montaje × $10).
-            </div>
+			    <label for="cantidad" class="canon-label mr-2">Cantidad:</label>
+			    <input type="number" id="cantidad" name="cantidad" min="1"
+			           th:value="${cantidad}" class="form-control mr-2" style="width:90px"/>
+
+			    <button type="submit" class="btn boton-canon">Ver ranking</button>
+			</form>
+
+			<div class="formula-canon">
+			    <strong>Food truck:</strong> (superficie × costo por m²) + plus de electricidad si la requiere.<br/>
+			    <strong>Puesto desmontable:</strong> (superficie × costo por m²) − (minutos de montaje × costo de montaje).<br/>
+			    <span class="text-muted">Los montos son los costos configurados en el festival elegido.
+			    </span>
+				<!-- Si el festival no configuró alguno, se usa el valor por defecto ($500/m², $2.000 electricidad, $10 por minuto de montaje).-->
+			</div>
         </div>
     </div>
 
     <!-- SIN UNIDADES -->
-    <div class="alert alert-info" th:if="${#lists.isEmpty(reporte)} and ${error == null}">
-        Todavía no hay unidades de venta registradas.
-    </div>
+	<div class="alert alert-info" th:if="${#lists.isEmpty(reporte)} and ${error == null}">
+	    El festival elegido todavía no tiene unidades de venta.
+	</div>
 
     <!-- RANKING -->
     <div class="card canon-card" th:unless="${#lists.isEmpty(reporte)}">

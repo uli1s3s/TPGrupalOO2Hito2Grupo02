@@ -25,6 +25,30 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import com.unla.ghsicilianotfi.entities.Festival;
+import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
+
+import com.unla.ghsicilianotfi.entities.Costo;
+import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
+import com.unla.ghsicilianotfi.entities.TipoUnidadAplicable;
+import com.unla.ghsicilianotfi.helpers.TarifaCanon;
+
+import com.unla.ghsicilianotfi.entities.Personal;
+import com.unla.ghsicilianotfi.dtos.RentabilidadNetaDTO;
+import com.unla.ghsicilianotfi.services.IVerificacionEmailService;
+
+import java.math.RoundingMode;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.math.BigDecimal;
+
+import java.time.LocalDate;
+import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
+import com.unla.ghsicilianotfi.entities.Cocinero;
+import java.util.HashMap;
+import com.unla.ghsicilianotfi.services.IEmailService;
+import java.util.UUID;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -40,18 +64,27 @@ public class UnidadVentaService implements IUnidadVentaService {
     private final IUsuarioRepository usuarioRepository;
     private final IRolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
+    private final IFestivalRepository festivalRepository;
+    private final IVerificacionEmailService verificacionEmailService;
+    private final IEmailService emailService;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
             IUsuarioRepository usuarioRepository,
             IRolRepository rolRepository,
             PasswordEncoder passwordEncoder,
-            ParametrosCanon parametrosCanon) {
-	this.unidadVentaRepository = unidadVentaRepository;
-	this.usuarioRepository = usuarioRepository;
-	this.rolRepository = rolRepository;
-	this.passwordEncoder = passwordEncoder;
-	this.parametrosCanon = parametrosCanon;
-	}
+            ParametrosCanon parametrosCanon,
+            IFestivalRepository festivalRepository,
+            IVerificacionEmailService verificacionEmailService,
+            IEmailService emailService) {
+        this.unidadVentaRepository = unidadVentaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.parametrosCanon = parametrosCanon;
+        this.festivalRepository = festivalRepository;
+        this.verificacionEmailService = verificacionEmailService;
+        this.emailService = emailService;
+    }
 
     @Override
     public List<UnidadVenta> listarUnidades() {
@@ -62,6 +95,61 @@ public class UnidadVentaService implements IUnidadVentaService {
     public List<UnidadVenta> listarPorResponsable(String nombreUsuario) {
         return unidadVentaRepository.findByResponsable_Nombre(nombreUsuario);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstadoEmpleadoDTO> listarPersonalConEstado(String busqueda) {
+
+        // 1) Armo un mapa: id del empleado -> unidad donde trabaja
+        Map<Long, UnidadVenta> unidadDeCadaEmpleado = new HashMap<>();
+        for (UnidadVenta unidad : unidadVentaRepository.buscarUnidadesConEmpleados()) {
+            for (Personal empleado : unidad.getEmpleados()) {
+                unidadDeCadaEmpleado.put(empleado.getIdPersonal(), unidad);
+            }
+        }
+
+        // 2) Recorro todo el personal y le calculo el estado a cada uno
+        List<EstadoEmpleadoDTO> resultado = new ArrayList<>();
+        for (Personal empleado : unidadVentaRepository.buscarTodoElPersonal()) {
+
+            if (!coincideBusqueda(empleado, busqueda)) {
+                continue;
+            }
+
+            UnidadVenta unidad = unidadDeCadaEmpleado.get(empleado.getIdPersonal());
+
+            String estado;
+            if (!empleado.isActivo()) {
+                estado = EstadoEmpleadoDTO.DADO_DE_BAJA;
+            } else if (unidad != null) {
+                estado = EstadoEmpleadoDTO.OCUPADO;
+            } else {
+                estado = EstadoEmpleadoDTO.LIBRE;
+            }
+
+            // La unidad solo se informa si el empleado está trabajando ahí
+            boolean estaOcupado = EstadoEmpleadoDTO.OCUPADO.equals(estado);
+
+            resultado.add(new EstadoEmpleadoDTO(
+                    empleado.getIdPersonal(),
+                    empleado.getNombre(),
+                    empleado.getApellido(),
+                    empleado.getDni(),
+                    (empleado instanceof Cocinero) ? "Cocinero" : "Cajero",
+                    empleado.getCredenciales() != null ? empleado.getCredenciales().getEmail() : "-",
+                    estado,
+                    estaOcupado ? unidad.getIdUnidad() : null,
+                    estaOcupado ? unidad.getNombreComercial() : null));
+        }
+
+        return resultado;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<UnidadVenta> listarPorFestival(Long idFestival) {
+        return unidadVentaRepository.findDistinctByFestivales_IdFestival(idFestival);
+    }
 
     @Override
     @Transactional
@@ -70,6 +158,9 @@ public class UnidadVentaService implements IUnidadVentaService {
         if (datos == null) {
             throw new IllegalArgumentException("Los datos de la unidad son obligatorios");
         }
+        
+        // 0. El festival tiene que existir y estar activo
+        Festival festival = buscarFestivalActivo(datos.getIdFestival());
 
         // 1. Crear segun el tipo elegido
         UnidadVenta unidad = crearSegunTipo(datos);
@@ -77,6 +168,7 @@ public class UnidadVentaService implements IUnidadVentaService {
         // 2. Datos comunes
         unidad.setNombreComercial(datos.getNombreComercial().trim());
         unidad.setSuperficieM2(datos.getSuperficieM2());
+        unidad.getFestivales().add(festival);
 
         // 3. Codigo unico generado por el sistema (FT00000001, PD00000001, ...)
         unidad.setCodigoUnico(generarCodigoUnico(unidad));
@@ -84,8 +176,14 @@ public class UnidadVentaService implements IUnidadVentaService {
         // 4. Crear y asociar el usuario responsable
         unidad.setResponsable(crearResponsable(datos));
 
-        // 5. Guardar
-        return unidadVentaRepository.save(unidad);
+        // 5. Guardar la unidad
+        UnidadVenta guardada = unidadVentaRepository.save(unidad);
+
+        // 6. Enviar el codigo para que el responsable verifique su email
+        //    (la cuenta queda inactiva hasta que lo ingrese)
+        verificacionEmailService.generarYEnviarCodigo(guardada.getResponsable());
+        
+        return guardada;
     }
 
     // =====================================================
@@ -124,6 +222,29 @@ public class UnidadVentaService implements IUnidadVentaService {
         }
 
         throw new IllegalArgumentException("El tipo de unidad seleccionado no es válido");
+    }
+    
+    // =====================================================
+    // Validacion de carga: solo se puede registrar en un festival activo y vigente
+    // =====================================================
+    private Festival buscarFestivalActivo(Long idFestival) {
+
+        if (idFestival == null) {
+            throw new IllegalArgumentException("Seleccioná el festival en el que vas a participar");
+        }
+
+        Festival festival = festivalRepository.findById(idFestival)
+                .orElseThrow(() -> new IllegalArgumentException("El festival seleccionado no existe"));
+
+        if (!festival.isActivo()) {
+            throw new IllegalArgumentException("Solo podés registrarte en un festival activo");
+        }
+
+        if (festival.getFechaFin().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("El festival seleccionado ya finalizó");
+        }
+
+        return festival;
     }
     
     // =====================================================
@@ -180,7 +301,8 @@ public class UnidadVentaService implements IUnidadVentaService {
         responsable.setNombre(email);
         responsable.setEmail(email);
         responsable.setContrasena(passwordEncoder.encode(datos.getContrasenaResponsable()));
-        responsable.setActivo(true);
+        // Queda inactivo hasta que verifique su email con el codigo
+        responsable.setActivo(false);
         responsable.setRol(rolResponsable);
 
         return usuarioRepository.save(responsable);
@@ -188,31 +310,289 @@ public class UnidadVentaService implements IUnidadVentaService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<ReporteMayoresCanonDTO> unidadesConMayorCanon(int cantidad) {
+    public List<ReporteMayoresCanonDTO> unidadesConMayorCanon(Long idFestival, int cantidad) {
 
         if (cantidad < 1) {
             throw new IllegalArgumentException("La cantidad de unidades debe ser al menos 1");
         }
+        if (idFestival == null) {
+            throw new IllegalArgumentException("Seleccioná un festival");
+        }
 
-        // 1. Calcular el canon de cada unidad (cada tipo usa su propia formula)
+        Festival festival = festivalRepository.findById(idFestival)
+                .orElseThrow(() -> new IllegalArgumentException("El festival seleccionado no existe"));
+
+        // 1. Calcular el canon de cada unidad DEL festival, con los costos DE ESE festival
         List<ReporteMayoresCanonDTO> reporte = new ArrayList<>();
 
-        for (UnidadVenta unidad : unidadVentaRepository.findAll()) {
+        for (UnidadVenta unidad : festival.getUnidades()) {
             reporte.add(new ReporteMayoresCanonDTO(
                     unidad.getNombreComercial(),
                     unidad.getCodigoUnico(),
                     unidad.getTipo(),
-                    unidad.calcularCanon(parametrosCanon)
+                    unidad.calcularCanon(armarTarifa(unidad, festival))
             ));
         }
 
         // 2. Ordenar de mayor a menor canon
         reporte.sort(Comparator.comparing(ReporteMayoresCanonDTO::getCanon).reversed());
 
-        // 3. Devolver solo las primeras cantidad unidades
+        // 3. Devolver solo las primeras "cantidad" unidades
         if (reporte.size() > cantidad) {
             return new ArrayList<>(reporte.subList(0, cantidad));
         }
         return reporte;
     }
+    
+    // =====================================================
+    // RENTABILIDAD NETA = (ventas - costo de platos) - sueldos - canon
+    // =====================================================
+    @Override
+    @Transactional(readOnly = true)
+    public RentabilidadNetaDTO calcularRentabilidadNeta(Long idUnidad, Long idFestival, String nombreResponsable) {
+
+        // 1. La unidad tiene que ser del responsable que inició sesión
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        // 2. La unidad tiene que participar del festival elegido
+        if (idFestival == null) {
+            throw new IllegalArgumentException("Seleccioná un festival");
+        }
+
+        Festival festival = null;
+        for (Festival f : unidad.getFestivales()) {
+            if (f.getIdFestival().equals(idFestival)) {
+                festival = f;
+            }
+        }
+
+        if (festival == null) {
+            throw new IllegalArgumentException("La unidad no participa del festival seleccionado");
+        }
+
+        // 3. Ventas y costo de los platos vendidos
+        BigDecimal ventas = aDinero(unidadVentaRepository.sumarVentas(idUnidad, idFestival));
+        BigDecimal costoPlatos = aDinero(unidadVentaRepository.sumarCostoPlatos(idUnidad, idFestival));
+        BigDecimal gananciaBruta = ventas.subtract(costoPlatos);
+
+        // 4. Se restan obligatoriamente los sueldos y el canon
+        BigDecimal sueldos = aDinero(unidadVentaRepository.sumarSueldos(idUnidad, idFestival));
+        BigDecimal canon = unidad.calcularCanon(armarTarifa(unidad, festival));
+
+        BigDecimal rentabilidadNeta = gananciaBruta.subtract(sueldos).subtract(canon);
+
+        return new RentabilidadNetaDTO(
+                unidad.getIdUnidad(),
+                unidad.getNombreComercial(),
+                unidad.getCodigoUnico(),
+                festival.getIdFestival(),
+                festival.getNombre(),
+                ventas,
+                costoPlatos,
+                gananciaBruta,
+                sueldos,
+                canon,
+                rentabilidadNeta
+        );
+    }
+
+    // Pasa un importe que viene de la base (double) a BigDecimal con 2 decimales
+    private BigDecimal aDinero(Double valor) {
+        if (valor == null) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+        return BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP);
+    }
+    
+    // =====================================================
+    // MI UNIDAD: empleados disponibles, asignar, quitar y canon
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Personal> listarEmpleadosDisponibles() {
+        return unidadVentaRepository.buscarEmpleadosDisponibles();
+    }
+
+    @Override
+    @Transactional
+    public void asignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
+
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        Personal empleado = unidadVentaRepository.buscarEmpleadoPorId(idPersonal)
+                .orElseThrow(() -> new IllegalArgumentException("El empleado no existe"));
+
+        // Solo empleados activos
+        if (!empleado.isActivo()) {
+            throw new IllegalArgumentException("No se puede asignar un empleado dado de baja");
+        }
+
+        // Disponibilidad: un empleado solo puede trabajar en una unidad
+        if (unidadVentaRepository.existsByEmpleados_IdPersonal(idPersonal)) {
+        	   throw new IllegalArgumentException("El empleado ya está asignado a una unidad de venta");
+        }
+
+        unidad.getEmpleados().add(empleado);
+        unidadVentaRepository.save(unidad);
+    }
+
+    @Override
+    @Transactional
+    public void quitarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
+
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        boolean quitado = unidad.getEmpleados()
+                .removeIf(empleado -> empleado.getIdPersonal().equals(idPersonal));
+
+        if (!quitado) {
+            throw new IllegalArgumentException("El empleado no pertenece a esta unidad");
+        }
+
+        unidadVentaRepository.save(unidad);
+    }
+    
+    @Override
+    @Transactional
+    public void desasignarEmpleado(Long idPersonal) {
+        // Si el empleado esta en alguna unidad, se lo saca de su lista (id_unidad queda en NULL)
+        unidadVentaRepository.findByEmpleados_IdPersonal(idPersonal).ifPresent(unidad -> {
+            unidad.getEmpleados().removeIf(empleado -> empleado.getIdPersonal().equals(idPersonal));
+            unidadVentaRepository.save(unidad);
+        });
+    }
+    
+    @Override
+    @Transactional
+    public void reactivarYAsignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
+
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        Personal empleado = unidadVentaRepository.buscarEmpleadoPorId(idPersonal)
+                .orElseThrow(() -> new IllegalArgumentException("El empleado no existe"));
+
+        // Solo se reactiva a quien esta dado de baja
+        if (empleado.isActivo()) {
+            throw new IllegalArgumentException("El empleado ya está activo. Usá el botón Asignar.");
+        }
+
+        Usuario usuario = empleado.getCredenciales();
+        if (usuario == null) {
+            throw new IllegalArgumentException("El empleado no tiene un usuario para ingresar al sistema");
+        }
+
+        // 1) Si quedo asignado a alguna unidad antes de la baja, se lo saca de ahi
+        desasignarEmpleado(idPersonal);
+
+        // 2) Se reactiva el empleado y su usuario, con una contraseña temporal nueva
+        String contrasenaTemporal = UUID.randomUUID().toString().substring(0, 8);
+        empleado.setActivo(true);
+        usuario.setActivo(true);
+        usuario.setContrasena(passwordEncoder.encode(contrasenaTemporal));
+
+        // 3) Se asigna a la unidad del responsable
+        unidad.getEmpleados().add(empleado);
+        unidadVentaRepository.save(unidad);
+
+        // 4) Se le avisa por mail con sus nuevos datos de acceso
+        emailService.enviarAvisoReactivacion(usuario.getEmail(), usuario.getNombre(),
+                contrasenaTemporal, unidad.getNombreComercial());
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad) {
+
+        UnidadVenta unidad = unidadVentaRepository.findById(idUnidad)
+                .orElseThrow(() -> new IllegalArgumentException("La unidad de venta no existe"));
+
+        // LinkedHashMap mantiene el orden en que se agregan los festivales
+        Map<String, BigDecimal> canones = new LinkedHashMap<>();
+
+        for (Festival festival : unidad.getFestivales()) {
+            canones.put(festival.getNombre(), unidad.calcularCanon(armarTarifa(unidad, festival)));
+        }
+
+        return canones;
+    }
+
+    // La unidad tiene que existir y estar a cargo del responsable que inicio sesión
+    private UnidadVenta buscarUnidadDelResponsable(Long idUnidad, String nombreResponsable) {
+
+        UnidadVenta unidad = unidadVentaRepository.findById(idUnidad)
+                .orElseThrow(() -> new IllegalArgumentException("La unidad de venta no existe"));
+
+        if (!unidad.getResponsable().getNombre().equals(nombreResponsable)) {
+            throw new IllegalArgumentException("No podés modificar una unidad que no está a tu cargo");
+        }
+
+        return unidad;
+    }
+    
+    // =====================================================
+    // Arma la tarifa de canon de una unidad segun los costos de UN festival
+    // =====================================================
+    private TarifaCanon armarTarifa(UnidadVenta unidad, Festival festival) {
+
+        BigDecimal costoPorM2 = buscarMonto(festival, TipoCostoFestival.POR_SUPERFICIE,
+                unidad, parametrosCanon.getCostoPorM2());
+
+        BigDecimal plusElectricidad = buscarMonto(festival, TipoCostoFestival.USO_ELECTRICIDAD,
+                unidad, parametrosCanon.getPlusElectricidad());
+
+        BigDecimal descuentoMontaje = buscarMonto(festival, TipoCostoFestival.POR_MONTAJE,
+                unidad, parametrosCanon.getDescuentoPorMinutoMontaje());
+
+        return new TarifaCanon(costoPorM2, plusElectricidad, descuentoMontaje);
+    }
+
+    // Monto de un tipo de costo del festival:
+    // - si el festival lo tiene y aplica a esta unidad -> el monto del festival
+    // - si lo tiene pero es para el otro tipo de unidad -> 0
+    // - si el festival no lo configuro -> el valor por defecto del enunciado
+    private BigDecimal buscarMonto(Festival festival, TipoCostoFestival tipo,
+                                   UnidadVenta unidad, BigDecimal valorPorDefecto) {
+        if (festival == null) {
+            return valorPorDefecto;
+        }
+
+        for (Costo costo : festival.getCostos()) {
+            if (costo.getTipoCosto() == tipo) {
+                if (aplicaA(costo.getTipoUnidadAplicable(), unidad)) {
+                    return costo.getMonto();
+                }
+                return BigDecimal.ZERO;
+            }
+        }
+
+        return valorPorDefecto;
+    }
+
+    // ¿El costo aplica a este tipo de unidad?
+    private boolean aplicaA(TipoUnidadAplicable aplicable, UnidadVenta unidad) {
+        if (aplicable == TipoUnidadAplicable.TODAS) {
+            return true;
+        }
+        if (aplicable == TipoUnidadAplicable.FOOD_TRUCK) {
+            return unidad instanceof FoodTruck;
+        }
+        if (aplicable == TipoUnidadAplicable.PUESTO_DESMONTABLE) {
+            return unidad instanceof PuestoDesmontable;
+        }
+        return false;
+    }
+    
+    // True si el empleado coincide con lo buscado (nombre, apellido o DNI). Sin busqueda, coinciden todos.
+    private boolean coincideBusqueda(Personal empleado, String busqueda) {
+        if (busqueda == null || busqueda.isBlank()) {
+            return true;
+        }
+        String texto = busqueda.trim().toLowerCase(Locale.ROOT);
+        return empleado.getNombre().toLowerCase(Locale.ROOT).contains(texto)
+                || empleado.getApellido().toLowerCase(Locale.ROOT).contains(texto)
+                || empleado.getDni().contains(texto);
+    }
+    
+    
 }

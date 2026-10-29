@@ -5,6 +5,12 @@ import com.unla.ghsicilianotfi.entities.UnidadVenta;
 
 import java.util.List;
 import com.unla.ghsicilianotfi.dtos.ReporteMayoresCanonDTO;
+import com.unla.ghsicilianotfi.entities.Personal;
+
+import java.math.BigDecimal;
+import java.util.Map;
+import com.unla.ghsicilianotfi.dtos.RentabilidadNetaDTO;
+import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
 
 public interface IUnidadVentaService {
 
@@ -17,7 +23,37 @@ public interface IUnidadVentaService {
     // Unidades asignadas a un responsable (por su nombre de usuario)
     List<UnidadVenta> listarPorResponsable(String nombreUsuario);
     
-    // Las cantidad unidades que más pagan de canon, de mayor a menor
-    List<ReporteMayoresCanonDTO> unidadesConMayorCanon(int cantidad);
+    // Las "cantidad" unidades de un festival que más pagan de canon, de mayor a menor
+    List<ReporteMayoresCanonDTO> unidadesConMayorCanon(Long idFestival, int cantidad);
+    
+    // Empleados activos que no estAn asignados a ninguna unidad
+    List<Personal> listarEmpleadosDisponibles();
+
+    // El responsable asigna un empleado disponible a una de sus unidades
+    void asignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
+
+    // El responsable quita un empleado de una de sus unidades
+    void quitarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
+
+    // Canon que paga la unidad en cada uno de sus festivales (nombre del festival -> canon)
+    Map<String, BigDecimal> calcularCanonPorFestival(Long idUnidad);
+    
+    // Unidades de venta que participan de un festival
+    List<UnidadVenta> listarPorFestival(Long idFestival);
+    
+    // Rentabilidad neta de una unidad del responsable en uno de sus festivales
+    RentabilidadNetaDTO calcularRentabilidadNeta(Long idUnidad, Long idFestival, String nombreResponsable);
+
+    // Saca al empleado de la unidad en la que esta asignado (si esta en alguna)
+    void desasignarEmpleado(Long idPersonal);
+    
+    // Todo el personal con su estado (libre, ocupado en una unidad o dado de baja),
+    // filtrado por nombre, apellido o DNI (si la busqueda viene vacia, trae todos)
+    List<EstadoEmpleadoDTO> listarPersonalConEstado(String busqueda);
+    
+    // El responsable reactiva un empleado dado de baja y lo asigna a una de sus unidades
+    // (nueva contraseña temporal + aviso por mail)
+    void reactivarYAsignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
+    
 }
 

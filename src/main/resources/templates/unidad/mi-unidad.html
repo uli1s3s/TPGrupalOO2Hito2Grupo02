@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .mi-unidad-contenedor { margin-top: 25px; margin-bottom: 50px; }
+
+    .mi-unidad-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white; padding: 35px; border-radius: 12px; margin-bottom: 30px;
+    }
+    .mi-unidad-header h2 { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+    .mi-unidad-header p { color: #e5e9e3; margin-bottom: 0; }
+
+    .boton-naranja {
+        display: inline-block; background-color: #d99a4e; border: 1px solid #d99a4e;
+        color: #26352b; padding: 10px 20px; border-radius: 6px; font-weight: bold; text-decoration: none;
+    }
+    .boton-naranja:hover { background-color: #e7ad65; color: #26352b; text-decoration: none; }
+
+    .unidad-card, .unidad-card:hover {
+        background-color: white; border: none; border-top: 5px solid #d99a4e; border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); transform: none; transition: none;
+        margin-bottom: 30px; overflow: hidden;
+    }
+    .unidad-card-body { padding: 26px; }
+    .unidad-titulo { color: #26352b; font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+    .unidad-dato { color: #4a554b; font-size: 14px; margin-bottom: 4px; }
+    .subtitulo { color: #26352b; font-size: 17px; font-weight: bold; margin: 22px 0 12px; }
+
+    .tipo-unidad {
+        display: inline-block; background-color: #edf2ec; color: #425843; border-radius: 20px;
+        padding: 4px 12px; font-size: 13px; font-weight: bold;
+    }
+
+    .tabla-mi-unidad { width: 100%; font-size: 14px; margin-bottom: 0; }
+    .tabla-mi-unidad thead { background-color: #26352b; color: white; }
+    .tabla-mi-unidad thead th { padding: 12px; border: none; }
+    .tabla-mi-unidad tbody td { padding: 12px; vertical-align: middle; border-top: 1px solid #e9ece8; }
+
+    .boton-verde { background-color: #26352b; border-color: #26352b; color: white; font-weight: bold; }
+    .boton-verde:hover { background-color: #425843; color: white; }
+</style>
+
+<main class="container py-4 mi-unidad-contenedor">
+
+    <!-- ENCABEZADO -->
+    <section class="mi-unidad-header d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h2>Mi unidad de venta</h2>
+            <p>Consultá el canon de tu unidad y administrá tu personal.</p>
+        </div>
+        <a th:href="@{/empleados/nuevo}" class="boton-naranja mt-2">+ Nuevo empleado</a>
+    </section>
+
+    <!-- MENSAJES -->
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="alert alert-info" th:if="${#lists.isEmpty(unidades)}">
+        No tenés unidades de venta a tu cargo.
+    </div>
+
+    <!-- UNA TARJETA POR UNIDAD -->
+    <div class="card unidad-card" th:each="unidad : ${unidades}">
+        <div class="unidad-card-body">
+
+            <!-- DATOS DE LA UNIDAD -->
+            <div class="unidad-titulo" th:text="${unidad.nombreComercial}">Mi food truck</div>
+            <div class="unidad-dato">
+                <strong th:text="${unidad.codigoUnico}">FT00000001</strong> ·
+                <span class="tipo-unidad" th:text="${unidad.tipo}">Food truck</span> ·
+                <span th:text="${unidad.detalle}">Detalle</span> ·
+                <span th:text="${#numbers.formatDecimal(unidad.superficieM2, 1, 2)} + ' m²'">10 m²</span>
+            </div>
+
+            <!-- CANON POR FESTIVAL -->
+            <div class="subtitulo">Canon a pagar por festival</div>
+            <div class="alert alert-info" th:if="${#maps.isEmpty(canones[unidad.idUnidad])}">
+                La unidad todavía no participa de ningún festival.
+            </div>
+            <table class="table tabla-mi-unidad" th:unless="${#maps.isEmpty(canones[unidad.idUnidad])}">
+                <thead><tr><th>Festival</th><th class="text-right">Canon</th></tr></thead>
+                <tbody>
+                <tr th:each="canon : ${canones[unidad.idUnidad]}">
+                    <td th:text="${canon.key}">Festival</td>
+                    <td class="text-right">
+                        <strong th:text="'$ ' + ${#numbers.formatDecimal(canon.value, 1, 'POINT', 2, 'COMMA')}">$ 0,00</strong>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+
+			<!-- RENTABILIDAD NETA POR FESTIVAL -->
+			<form th:unless="${#lists.isEmpty(unidad.festivales)}"
+			      th:action="@{/mi-unidad/{u}/rentabilidad(u=${unidad.idUnidad})}"
+			      method="get" class="form-inline mt-3">
+			    <label class="mr-2"><strong>Rentabilidad neta en:</strong></label>
+			    <select name="festival" class="form-control mr-2">
+			        <option th:each="f : ${unidad.festivales}"
+			                th:value="${f.idFestival}"
+			                th:text="${f.nombre}">
+			            Festival
+			        </option>
+			    </select>
+			    <button type="submit" class="btn boton-verde">Ver rentabilidad</button>
+			</form>
+			
+			<!-- EMPLEADOS DE LA UNIDAD (solo activos) -->
+			<div th:with="activos=${unidad.empleados.?[activo]}">
+			    <div class="subtitulo">Empleados de la unidad</div>
+			    <div class="alert alert-info" th:if="${#lists.isEmpty(activos)}">
+			        Todavía no asignaste empleados a esta unidad.
+			    </div>
+			    <table class="table tabla-mi-unidad" th:unless="${#lists.isEmpty(activos)}">
+			        <thead>
+			        <tr><th>Empleado</th><th>DNI</th><th>Tipo</th><th>Email</th><th></th></tr>
+			        </thead>
+			        <tbody>
+			        <tr th:each="empleado : ${activos}">
+			            <td th:text="${empleado.apellido + ', ' + empleado.nombre}">Pérez, Juan</td>
+			            <td th:text="${empleado.dni}">30111222</td>
+			            <td th:text="${tipos[empleado.idPersonal]}">Cocinero</td>
+			            <td th:text="${empleado.credenciales != null ? empleado.credenciales.email : '-'}">mail</td>
+			            <td class="text-right">
+			                <form th:action="@{/mi-unidad/{u}/quitar/{p}(u=${unidad.idUnidad}, p=${empleado.idPersonal})}"
+			                      method="post" style="display:inline">
+			                    <button type="submit" class="btn btn-sm btn-outline-danger">Quitar</button>
+			                </form>
+			            </td>
+			        </tr>
+			        </tbody>
+			    </table>
+			</div>
+
+			<!-- PERSONAL DEL PREDIO: todos los empleados con su estado -->
+			<div class="subtitulo">Personal del predio</div>
+
+			<!-- Buscador en vivo: filtra la tabla sin recargar la página -->
+			<div class="form-inline mb-3" th:unless="${#lists.isEmpty(personal)}">
+			    <input type="text" class="form-control buscador-personal" style="min-width: 280px"
+			           placeholder="Buscar por nombre, apellido o DNI"
+			           th:data-unidad="${unidad.idUnidad}">
+			</div>
+
+			<div class="alert alert-info" th:if="${#lists.isEmpty(personal)}">
+			    No se encontraron empleados.
+			</div>
+
+			<table class="table tabla-mi-unidad" th:unless="${#lists.isEmpty(personal)}"
+			       th:id="'tabla-personal-' + ${unidad.idUnidad}">
+			    <thead>
+			    <tr><th>Empleado</th><th>DNI</th><th>Tipo</th><th>Email</th><th>Estado</th><th></th></tr>
+			    </thead>
+			    <tbody>
+					<tr th:each="p : ${personal}" th:classappend="${p.dadoDeBaja} ? 'text-muted'"
+					    th:data-busqueda="${#strings.toLowerCase(p.apellido + ' ' + p.nombre + ' ' + p.dni)}">
+			        <td th:text="${p.apellido + ', ' + p.nombre}">Pérez, Juan</td>
+			        <td th:text="${p.dni}">30111222</td>
+			        <td th:text="${p.tipo}">Cocinero</td>
+			        <td th:text="${p.email}">mail</td>
+
+			        <!-- ESTADO -->
+			        <td>
+			            <span th:if="${p.libre}" class="badge badge-success">Libre</span>
+			            <span th:if="${p.ocupado and p.idUnidad == unidad.idUnidad}"
+			                  class="badge badge-primary">En esta unidad</span>
+			            <span th:if="${p.ocupado and p.idUnidad != unidad.idUnidad}"
+			                  class="badge badge-warning" th:text="${p.estadoTexto}">Ocupado en ...</span>
+			            <span th:if="${p.dadoDeBaja}" class="badge badge-secondary">Dado de baja</span>
+			        </td>
+
+			        <!-- ACCIÓN según el estado -->
+			        <td class="text-right">
+			            <form th:if="${p.libre}"
+			                  th:action="@{/mi-unidad/{u}/asignar(u=${unidad.idUnidad})}"
+			                  method="post" style="display:inline">
+			                <input type="hidden" name="idPersonal" th:value="${p.idPersonal}">
+			                <button type="submit" class="btn btn-sm boton-verde">Asignar</button>
+			            </form>
+
+			            <form th:if="${p.dadoDeBaja}"
+			                  th:action="@{/mi-unidad/{u}/reactivar(u=${unidad.idUnidad})}"
+			                  method="post" style="display:inline"
+			                  onsubmit="return confirm('El empleado se va a reactivar con una contraseña nueva y se le enviará un mail. ¿Continuar?');">
+			                <input type="hidden" name="idPersonal" th:value="${p.idPersonal}">
+			                <button type="submit" class="btn btn-sm btn-warning">Reactivar y asignar</button>
+			            </form>
+			        </td>
+			    </tr>
+			    </tbody>
+			</table>
+			
+			<div class="alert alert-info" style="display: none"
+			     th:id="'sin-resultados-' + ${unidad.idUnidad}">
+			    Ningún empleado coincide con la búsqueda.
+			</div>
+
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+<script>
+    // Filtro en vivo de "Personal del predio": oculta las filas que no coinciden, sin recargar la página
+    document.querySelectorAll('.buscador-personal').forEach(function (buscador) {
+        buscador.addEventListener('input', function () {
+            var idUnidad = buscador.dataset.unidad;
+            var tabla = document.getElementById('tabla-personal-' + idUnidad);
+            var sinResultados = document.getElementById('sin-resultados-' + idUnidad);
+            if (!tabla) {
+                return;
+            }
+
+            var texto = buscador.value.trim().toLowerCase();
+            var visibles = 0;
+
+            tabla.querySelectorAll('tbody tr').forEach(function (fila) {
+                var coincide = fila.dataset.busqueda.indexOf(texto) !== -1;
+                fila.style.display = coincide ? '' : 'none';
+                if (coincide) {
+                    visibles++;
+                }
+            });
+
+            // Si no quedó ninguna fila, se esconde la tabla y se muestra el cartel
+            tabla.style.display = (visibles === 0) ? 'none' : '';
+            sinResultados.style.display = (visibles === 0) ? '' : 'none';
+        });
+    });
+</script>
+
+</body>
+</html>

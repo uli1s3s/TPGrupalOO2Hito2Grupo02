@@ -72,6 +72,7 @@ public class Pedido {
         this.fechaPedido = fechaPedido;
     }
 
+
     @Transient
     public double getTotal() {
 
@@ -79,9 +80,21 @@ public class Pedido {
 
         for (DetallePedido detalle : detalles) {
             total += detalle.getCantidad()
-                    * detalle.getPlato().getPrecioVenta();
+                    * detalle.getPrecioUnitario();
         }
 
         return total;
+    }
+
+
+    public void agregarDetalle(DetallePedido detalle) {
+        detalle.setPedido(this);
+        this.detalles.add(detalle);
+    }
+
+    public void quitarDetalle(DetallePedido detalle) {
+        if (this.detalles.remove(detalle)) {
+            detalle.setPedido(null);
+        }
     }
 }

@@ -23,9 +23,11 @@ import com.unla.ghsicilianotfi.services.implementation.UserService;
 public class SecurityConfiguration {
 
 	private final UserService userService;
+	private final LoginFallidoHandler loginFallidoHandler;
 
-	public SecurityConfiguration(UserService userService) {
+	public SecurityConfiguration(UserService userService, LoginFallidoHandler loginFallidoHandler) {
 		this.userService = userService;
+		this.loginFallidoHandler = loginFallidoHandler;
 	}
 
 	@Bean
@@ -50,10 +52,10 @@ public class SecurityConfiguration {
 							"/",
 							"/index",
 							"/login",
-							"/unidades/nueva"
+							"/error"
 					).permitAll();
 
-					// REGISTRO PÚBLICO DE RESPONSABLES
+					// REGISTRO PUBLICO DE RESPONSABLES
 					// Incorporado desde develop
 					auth.requestMatchers(
 							"/registro-responsable",
@@ -65,6 +67,13 @@ public class SecurityConfiguration {
 					auth.requestMatchers(
 							"/cambiar-contrasena"
 					).authenticated();
+
+					// RECUPERAR CONTRASEÑA
+                    // Acceso público sin iniciar sesión
+					auth.requestMatchers(
+							"/recuperar-contrasena",
+							"/restablecer-contrasena"
+					).permitAll();
 
 					// PEDIDOS
 					auth.requestMatchers(
@@ -83,6 +92,25 @@ public class SecurityConfiguration {
 					).hasAnyRole(
 							"ADMINISTRADOR",
 							"RESPONSABLE"
+					);
+
+					// LIQUIDACIONES: Administradores y Responsables
+					auth.requestMatchers(
+							"/liquidaciones",
+							"/liquidaciones/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE"
+					);
+
+					// RECIBOS DE SUELDO: Administradores, Responsables y Empleados
+					auth.requestMatchers(
+							"/recibos",
+							"/recibos/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE",
+							"EMPLEADO"
 					);
 
 					// GESTIÓN DE FESTIVALES: solo administradores
@@ -107,7 +135,8 @@ public class SecurityConfiguration {
 					login.loginProcessingUrl("/loginprocess");
 					login.usernameParameter("username");
 					login.passwordParameter("password");
-					login.defaultSuccessUrl("/loginsuccess");
+					login.defaultSuccessUrl("/loginsuccess", true);
+					login.failureHandler(loginFallidoHandler);
 					login.permitAll();
 				})
 

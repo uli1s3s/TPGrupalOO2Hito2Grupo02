@@ -24,11 +24,32 @@
     <div class="card form-card" th:unless="${bloqueado}">
         <div class="card-body">
 
-			<form th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
+			<form id="formRegistro" th:action="@{/registro-responsable}" th:object="${registro}" method="post" novalidate>
 
                 <!-- ===== Datos de la unidad ===== -->
                 <h5 class="mb-3">Datos de la unidad</h5>
 
+				<!-- Festival (solo activos) -->
+				<div class="alert alert-info" th:if="${#lists.isEmpty(festivales)}">
+				    No hay festivales activos en este momento. Volvé a intentarlo más adelante.
+				</div>
+
+				<div class="form-group">
+				    <label for="idFestival">Festival</label>
+				    <select class="form-control" th:field="*{idFestival}">
+				        <option value="">Seleccione el festival...</option>
+				        <option th:each="f : ${festivales}"
+				                th:value="${f.idFestival}"
+				                th:text="${f.nombre + ' (' + f.temporada + ') - del '
+				                         + #temporals.format(f.fechaInicio, 'dd/MM/yyyy') + ' al '
+				                         + #temporals.format(f.fechaFin, 'dd/MM/yyyy')}">
+				            Festival
+				        </option>
+				    </select>
+				    <small class="text-danger" th:if="${#fields.hasErrors('idFestival')}" th:errors="*{idFestival}"></small>
+				</div>
+				
+				
                 <div class="form-group">
                     <label for="tipoUnidad">Tipo de unidad</label>
                     <select class="form-control" th:field="*{tipoUnidad}" onchange="mostrarCampos()">
@@ -100,11 +121,12 @@
                         <label for="contrasenaResponsable">Contraseña</label>
                         <input type="password" class="form-control" th:field="*{contrasenaResponsable}"/>
                         <small class="text-danger" th:if="${#fields.hasErrors('contrasenaResponsable')}" th:errors="*{contrasenaResponsable}"></small>
+						
                     </div>
                 </div>
-
+			
                 <div class="d-flex">
-					<button type="submit" class="btn btn-success mr-2">Registrarme</button>
+					<button type="submit" id="botonRegistrar" class="btn btn-success mr-2">Registrarme</button>
 					<a th:href="@{/login}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
             </form>
@@ -125,6 +147,15 @@
     }
     // Si el formulario vuelve con errores, mantiene visibles los campos del tipo elegido
     document.addEventListener('DOMContentLoaded', mostrarCampos);
+	// Evita que el formulario se envie dos veces (doble clic)
+	var formRegistro = document.getElementById('formRegistro');
+	if (formRegistro) {
+	    formRegistro.addEventListener('submit', function () {
+	        var boton = document.getElementById('botonRegistrar');
+	        boton.disabled = true;
+	        boton.innerText = 'Registrando...';
+	    });
+	}
 </script>
 </body>
 </html>

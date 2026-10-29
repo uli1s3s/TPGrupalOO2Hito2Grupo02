@@ -180,16 +180,32 @@
 
     }
 
+    /* RESPONSABLE SIN VERIFICAR */
+
+    .badge-pendiente {
+        display: inline-block;
+        margin-top: 6px;
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffe08a;
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
 </style>
 
 <main class="container py-4 unidades-contenedor">
+
 
     <!-- ENCABEZADO -->
 
     <section class="unidades-header">
 
         <div class="d-flex justify-content-between
-                    align-items-center flex-wrap">
+                align-items-center flex-wrap">
 
             <div>
 
@@ -201,22 +217,56 @@
                 </p>
 
             </div>
-			
-			<!-- REPORTE DE CANON -->
-			<a th:href="@{/reportes/mayor-canon}"
-			   class="boton-nueva-unidad">
-			    Ver mayor canon
-			</a>
+
+            <!-- BOTONES DE REPORTES -->
+            <div class="d-flex align-items-center flex-wrap"
+                 style="gap: 10px;">
+
+                <!-- REPORTE DE CANON -->
+                <a th:href="@{/reportes/mayor-canon}"
+                   class="boton-nueva-unidad">
+                    Ver mayor canon
+                </a>
+
+                <!-- RANKING DE UNIDADES POR VENTAS -->
+                <a th:href="@{/ranking-unidades}"
+                   class="boton-nueva-unidad">
+                    Ver ranking de ventas
+                </a>
+
+            </div>
 
         </div>
 
     </section>
+
 
     <!-- MENSAJE DE ÉXITO -->
 
     <div class="alert alert-success alerta-unidades"
          th:if="${mensaje}"
          th:text="${mensaje}">
+    </div>
+
+
+    <!-- FILTRO POR FESTIVAL -->
+
+    <div class="card unidades-card">
+        <div class="unidades-card-header">
+            <form th:action="@{/unidades}" method="get" class="form-inline">
+                <label for="festival" class="mr-2"><strong>Festival:</strong></label>
+                <select id="festival" name="festival" class="form-control mr-2">
+                    <option value="">Todos los festivales</option>
+                    <option th:each="f : ${festivales}"
+                            th:value="${f.idFestival}"
+                            th:text="${f.nombre + (f.activo ? '' : ' (inactivo)')}"
+                            th:selected="${f.idFestival == idFestival}">
+                        Festival
+                    </option>
+                </select>
+                <button type="submit" class="boton-nueva-unidad">Filtrar</button>
+            </form>
+        </div>
     </div>
 
     <!-- SIN UNIDADES REGISTRADAS -->
@@ -257,6 +307,8 @@
 
                     <th>Nombre comercial</th>
 
+                    <th>Festival</th>
+
                     <th>Tipo</th>
 
                     <th>Detalle</th>
@@ -264,7 +316,7 @@
                     <th>Superficie (m²)</th>
 
                     <th>Responsable</th>
-					
+
 
 
                 </tr>
@@ -287,6 +339,13 @@
                     <td class="nombre-unidad"
                         th:text="${unidad.nombreComercial}">
                         Nombre
+                    </td>
+
+
+                    <!-- FESTIVAL -->
+
+                    <td th:text="${#strings.listJoin(unidad.festivales.![nombre], ', ')}">
+                        Festival
                     </td>
 
                     <!-- TIPO -->
@@ -314,10 +373,14 @@
 
                     <!-- RESPONSABLE -->
 
-                    <td th:text="${unidad.responsable.email}">
-                        resp@mail.com
+                    <td>
+                        <span th:text="${unidad.responsable.email}">resp@mail.com</span>
+                        <br/>
+                        <span class="badge-pendiente"
+                              th:if="${!unidad.responsable.activo}">
+					        Pendiente de verificación
+					    </span>
                     </td>
-
                 </tr>
 
                 </tbody>

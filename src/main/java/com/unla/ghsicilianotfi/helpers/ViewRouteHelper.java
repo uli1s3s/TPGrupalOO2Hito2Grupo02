@@ -24,16 +24,20 @@ public class ViewRouteHelper {
 	//UNIDAD DE VENTA
 	public final static String UNIDAD_NUEVA = "unidad/nueva";
 	public final static String UNIDAD_LISTA = "unidad/lista";
+	public final static String MI_UNIDAD = "unidad/mi-unidad";
+	public final static String RENTABILIDAD_NETA = "unidad/rentabilidad";
 
 	//FESTIVAL
 	public final static String FESTIVAL_INDEX = "festival/index";
 	public final static String FESTIVAL_FORM = "festival/form";
 	public final static String FESTIVAL_FACTURACION = "festival/facturacion";
 	
-	public final static String REGISTRO_RESPONSABLE_EXITO = "unidad/registro-exito";
-	
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
+
+	//RECIBO DE SUELDO
+	public final static String RECIBO_LISTA = "recibos/mis-recibos";
+	public final static String RECIBO_ROOT = "/recibos";
 	
 	//REPORTES
 	public final static String REPORTE_MAYOR_CANON = "reportes/mayor-canon";
@@ -51,8 +55,11 @@ public class ViewRouteHelper {
 	public final static String DEGREE_ROOT = "/degrees/";
 	public final static String PERSON_ROOT = "/person";
 	public final static String UNIDAD_ROOT = "/unidades";
+	public final static String MI_UNIDAD_ROOT = "/mi-unidad";
 	
 	public final static String REGISTRO_RESPONSABLE_ROOT = "/registro-responsable";
+	public final static String REGISTRO_RESPONSABLE_EXITO = "unidad/registro-exito";
+	public final static String REGISTRO_RESPONSABLE_VERIFICAR = "unidad/verificar-email";
 	
 	public final static String EMPLEADO_ROOT = "/empleados";
 	public final static String PLATO_ROOT = "/platos";

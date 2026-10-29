@@ -239,6 +239,8 @@
 
                 <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
 
+                <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
+
                 <li class="nav-item"
                     sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
 
@@ -257,6 +259,59 @@
                        th:href="@{/platos}">
                         Platos
                     </a>
+                </li>
+
+                <!-- LIQUIDACIONES: ADMINISTRADOR Y RESPONSABLE -->
+
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
+
+                    <a class="nav-link"
+                       th:href="@{/liquidaciones}">
+                        Liquidaciones
+                    </a>
+
+                </li>
+
+                <!-- RECIBOS: USUARIOS AUTORIZADOS -->
+
+				    <!-- RECIBOS: USUARIOS AUTORIZADOS -->
+
+				    <li class="nav-item"
+				        sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
+
+				        <a class="nav-link"
+				           th:href="@{/recibos}">
+				            Recibos
+				        </a>
+
+				    </li>
+
+				    <!-- UNIDADES DE VENTA: ADMINISTRADOR -->
+
+				    <li class="nav-item"
+				        sec:authorize="hasRole('ADMINISTRADOR')">
+
+				        <a class="nav-link"
+				           th:href="@{/unidades}">
+				            Unidades
+				        </a>
+
+				    </li>
+
+				    <!-- MI UNIDAD: RESPONSABLE -->
+
+				    <li class="nav-item"
+				        sec:authorize="hasRole('RESPONSABLE')">
+
+				        <a class="nav-link"
+				           th:href="@{/mi-unidad}">
+				            MiUnidad
+				        </a>
+
+				    </li>
+
+				</ul>
                 </li>
 
             </ul>
@@ -278,10 +333,10 @@
                 <li class="nav-item">
 
                     <a class="nav-link btn-registro-navbar"
-                       th:href="@{/unidades/nueva}">
+                       th:href="@{/registro-responsable}">
                         Registrar unidad
                     </a>
-
+		
                 </li>
 
             </ul>

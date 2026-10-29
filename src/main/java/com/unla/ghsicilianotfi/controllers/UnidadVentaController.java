@@ -1,6 +1,8 @@
 package com.unla.ghsicilianotfi.controllers;
 
+import com.unla.ghsicilianotfi.entities.UnidadVenta;
 import com.unla.ghsicilianotfi.helpers.ViewRouteHelper;
+import com.unla.ghsicilianotfi.services.IFestivalService;
 import com.unla.ghsicilianotfi.services.IUnidadVentaService;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,9 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * Consulta de unidades de venta para el administrador.
+ * Puede ver todas o solo las de un festival.
  * El alta de unidades la hace el responsable desde el registro público
  * (ver RegistroResponsableController): el administrador no puede registrarlas.
  */
@@ -21,17 +27,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UnidadVentaController {
 
     private final IUnidadVentaService unidadVentaService;
+    private final IFestivalService festivalService;
 
-    public UnidadVentaController(IUnidadVentaService unidadVentaService) {
+    public UnidadVentaController(IUnidadVentaService unidadVentaService,
+                                 IFestivalService festivalService) {
         this.unidadVentaService = unidadVentaService;
+        this.festivalService = festivalService;
     }
 
     // ==========================================
-    // Listar todas las unidades de venta
+    // Listar unidades de venta (todas o filtradas por festival)
     // ==========================================
     @GetMapping
-    public String listarUnidades(Model model, Authentication authentication) {
-        model.addAttribute("unidades", unidadVentaService.listarUnidades());
+    public String listarUnidades(@RequestParam(name = "festival", required = false) Long idFestival,
+                                 Model model,
+                                 Authentication authentication) {
+
+        List<UnidadVenta> unidades = (idFestival == null)
+                ? unidadVentaService.listarUnidades()
+                : unidadVentaService.listarPorFestival(idFestival);
+
+        model.addAttribute("unidades", unidades);
+        model.addAttribute("festivales", festivalService.listar());
+        model.addAttribute("idFestival", idFestival);
         agregarDatosUsuario(model, authentication);
         return ViewRouteHelper.UNIDAD_LISTA;
     }

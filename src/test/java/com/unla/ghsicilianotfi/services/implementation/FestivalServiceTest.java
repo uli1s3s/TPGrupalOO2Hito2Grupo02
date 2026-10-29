@@ -27,13 +27,13 @@ import static org.mockito.Mockito.when;
 class FestivalServiceTest {
 
     private IFestivalRepository festivalRepository;
-    private IUnidadVentaRepository unidadVentaRepository;
+    private com.unla.ghsicilianotfi.repositories.IUnidadVentaRepository unidadVentaRepository;
     private FestivalService festivalService;
 
     @BeforeEach
     void setUp() {
         festivalRepository = org.mockito.Mockito.mock(IFestivalRepository.class);
-        unidadVentaRepository = org.mockito.Mockito.mock(IUnidadVentaRepository.class);
+        unidadVentaRepository = org.mockito.Mockito.mock(com.unla.ghsicilianotfi.repositories.IUnidadVentaRepository.class);
         festivalService = new FestivalService(festivalRepository, unidadVentaRepository);
     }
 
