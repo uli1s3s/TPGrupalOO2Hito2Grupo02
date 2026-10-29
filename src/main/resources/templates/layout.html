@@ -249,6 +249,16 @@
 
                 </li>
 
+                <!-- PLATOS: RESPONSABLE -->
+
+                <li class="nav-item"
+                    sec:authorize="hasRole('RESPONSABLE')">
+                    <a class="nav-link"
+                       th:href="@{/platos}">
+                        Platos
+                    </a>
+                </li>
+
             </ul>
 
             <!-- VISITANTE SIN INICIAR SESIÓN -->

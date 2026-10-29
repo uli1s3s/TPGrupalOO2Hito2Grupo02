@@ -30,6 +30,7 @@
                 <th>Temporada</th>
                 <th>Fecha de inicio</th>
                 <th>Fecha de fin</th>
+                <th>Unidades participantes</th>
                 <th>Estado</th>
                 <th>Costos</th>
                 <th>Acciones</th>
@@ -41,6 +42,11 @@
                 <td th:text="${festival.temporada}"></td>
                 <td th:text="${festival.fechaInicio}"></td>
                 <td th:text="${festival.fechaFin}"></td>
+                <td>
+                    <span th:if="${#lists.isEmpty(festival.nombresUnidades)}">Sin unidades</span>
+                    <span th:unless="${#lists.isEmpty(festival.nombresUnidades)}"
+                          th:text="${#strings.listJoin(festival.nombresUnidades, ', ')}"></span>
+                </td>
                 <td>
                     <span class="badge"
                           th:classappend="${festival.activo} ? 'badge-success' : 'badge-secondary'"
@@ -60,7 +66,7 @@
                     <form class="d-inline"
                           th:action="@{/festivales/{id}/eliminar(id=${festival.idFestival})}"
                           method="post"
-                          onsubmit="return confirm('¿Eliminar este festival y sus costos?');">
+                          onsubmit="return confirm('¿Eliminar este festival, sus costos y sus unidades participantes?');">
                         <button class="btn btn-sm btn-outline-danger mb-1" type="submit">Eliminar</button>
                     </form>
                 </td>

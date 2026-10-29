@@ -40,4 +40,8 @@ public class FestivalFormDTO {
 
     @Valid
     private List<CostoFestivalFormDTO> costos = new ArrayList<>();
+
+    private List<Long> idUnidades = new ArrayList<>();
+
+    private List<String> nombresUnidades = new ArrayList<>();
 }

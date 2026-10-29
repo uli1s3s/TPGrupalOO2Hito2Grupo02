@@ -23,6 +23,14 @@ public class Pedido {
     @Column(nullable = false)
     protected LocalDate fechaPedido;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "festival_id")
+    protected Festival festival;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unidad_venta_id")
+    protected UnidadVenta unidadVenta;
+
     @OneToMany(
             mappedBy = "pedido",
             cascade = CascadeType.ALL,

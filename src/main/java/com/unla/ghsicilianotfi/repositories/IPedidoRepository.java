@@ -11,6 +11,11 @@ import java.util.List;
 public interface IPedidoRepository extends JpaRepository<Pedido, Long> {
 
     @Override
-    @EntityGraph(attributePaths = {"detalles", "detalles.plato"})
+    @EntityGraph(attributePaths = {
+            "detalles",
+            "detalles.plato",
+            "unidadVenta",
+            "festival"
+    })
     List<Pedido> findAll();
 }

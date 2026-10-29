@@ -11,6 +11,10 @@ import java.util.List;
 @NoArgsConstructor
 public class RegistrarPedidoDTO {
 
+    private Long idFestival;
+
+    private Long idUnidad;
+
     private List<DetallePedidoDTO> detalles;
 
 }

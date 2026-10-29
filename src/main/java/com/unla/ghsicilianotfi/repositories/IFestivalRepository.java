@@ -10,13 +10,13 @@ import java.util.Optional;
 public interface IFestivalRepository extends JpaRepository<Festival, Long> {
 
     @Override
-    @EntityGraph(attributePaths = "costos")
+    @EntityGraph(attributePaths = {"costos", "unidades", "unidades.responsable"})
     List<Festival> findAll();
 
-    @EntityGraph(attributePaths = "costos")
+    @EntityGraph(attributePaths = {"costos", "unidades", "unidades.responsable"})
     List<Festival> findByActivoTrue();
 
     @Override
-    @EntityGraph(attributePaths = "costos")
+    @EntityGraph(attributePaths = {"costos", "unidades", "unidades.responsable"})
     Optional<Festival> findById(Long id);
 }

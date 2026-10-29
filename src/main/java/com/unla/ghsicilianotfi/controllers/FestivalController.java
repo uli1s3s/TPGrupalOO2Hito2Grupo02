@@ -6,6 +6,7 @@ import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
 import com.unla.ghsicilianotfi.entities.TipoUnidadAplicable;
 import com.unla.ghsicilianotfi.helpers.ViewRouteHelper;
 import com.unla.ghsicilianotfi.services.IFestivalService;
+import com.unla.ghsicilianotfi.services.IUnidadVentaService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -27,9 +28,12 @@ import java.util.Map;
 public class FestivalController {
 
     private final IFestivalService festivalService;
+    private final IUnidadVentaService unidadVentaService;
 
-    public FestivalController(IFestivalService festivalService) {
+    public FestivalController(IFestivalService festivalService,
+                              IUnidadVentaService unidadVentaService) {
         this.festivalService = festivalService;
+        this.unidadVentaService = unidadVentaService;
     }
 
     @GetMapping
@@ -92,7 +96,8 @@ public class FestivalController {
         if (festivalService.eliminar(id)) {
             redirectAttributes.addFlashAttribute("mensajeExito", "Festival eliminado correctamente.");
         } else {
-            redirectAttributes.addFlashAttribute("mensajeError", "No se encontró el festival.");
+            redirectAttributes.addFlashAttribute("mensajeError",
+                    "No se encontró el festival o tiene pedidos asociados y no se puede eliminar.");
         }
         return "redirect:/festivales";
     }
@@ -126,5 +131,6 @@ public class FestivalController {
 
     private void agregarOpcionesFormulario(Model model) {
         model.addAttribute("tiposUnidadAplicable", TipoUnidadAplicable.values());
+        model.addAttribute("unidadesDisponibles", unidadVentaService.listarUnidades());
     }
 }

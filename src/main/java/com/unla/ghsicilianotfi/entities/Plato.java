@@ -29,6 +29,10 @@ public class Plato {
     @Column(nullable = false)
     private boolean activo = true;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_unidad")
+    private UnidadVenta unidadVenta;
+
     // Constructor sin ID
     public Plato(String nombre, double precioVenta,
                  double costoProduccion) {
