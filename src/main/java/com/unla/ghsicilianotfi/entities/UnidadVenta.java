@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
-import com.unla.ghsicilianotfi.configuration.ParametrosCanon;
+import com.unla.ghsicilianotfi.helpers.TarifaCanon;
 import java.math.BigDecimal;
 
 @Entity
@@ -62,8 +62,8 @@ public abstract class UnidadVenta {
     // Prefijo del código unico según el tipo de unidad (FT o PD)
     public abstract String getPrefijoCodigo();
     
-    // Cada tipo de unidad calcula su canon con su propia formula (polimorfismo)
-    public abstract BigDecimal calcularCanon(ParametrosCanon parametros);
+    // Cada tipo de unidad calcula su canon con su propia fórmula (polimorfismo)
+    public abstract BigDecimal calcularCanon(TarifaCanon tarifa);
 
     // Superficie como BigDecimal, para hacer cuentas de dinero sin errores de redondeo
     protected BigDecimal getSuperficieDecimal() {

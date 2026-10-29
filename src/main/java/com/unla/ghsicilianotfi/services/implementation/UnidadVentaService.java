@@ -28,6 +28,13 @@ import java.util.Optional;
 import com.unla.ghsicilianotfi.entities.Festival;
 import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
 
+import com.unla.ghsicilianotfi.entities.Costo;
+import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
+import com.unla.ghsicilianotfi.entities.TipoUnidadAplicable;
+import com.unla.ghsicilianotfi.helpers.TarifaCanon;
+
+import java.math.BigDecimal;
+
 import java.time.LocalDate;
 
 @Service("unidadVentaService")
@@ -236,7 +243,7 @@ public class UnidadVentaService implements IUnidadVentaService {
                     unidad.getNombreComercial(),
                     unidad.getCodigoUnico(),
                     unidad.getTipo(),
-                    unidad.calcularCanon(parametrosCanon)
+                    unidad.calcularCanon(armarTarifa(unidad))
             ));
         }
 
@@ -248,5 +255,59 @@ public class UnidadVentaService implements IUnidadVentaService {
             return new ArrayList<>(reporte.subList(0, cantidad));
         }
         return reporte;
+    }
+    
+    // =====================================================
+    // Arma la tarifa de canon de una unidad según los costos de su festival
+    // =====================================================
+    private TarifaCanon armarTarifa(UnidadVenta unidad) {
+        Festival festival = unidad.getFestival();
+
+        BigDecimal costoPorM2 = buscarMonto(festival, TipoCostoFestival.POR_SUPERFICIE,
+                unidad, parametrosCanon.getCostoPorM2());
+
+        BigDecimal plusElectricidad = buscarMonto(festival, TipoCostoFestival.USO_ELECTRICIDAD,
+                unidad, parametrosCanon.getPlusElectricidad());
+
+        BigDecimal descuentoMontaje = buscarMonto(festival, TipoCostoFestival.POR_MONTAJE,
+                unidad, parametrosCanon.getDescuentoPorMinutoMontaje());
+
+        return new TarifaCanon(costoPorM2, plusElectricidad, descuentoMontaje);
+    }
+
+    // Monto de un tipo de costo del festival:
+    // - si el festival lo tiene y aplica a esta unidad -> el monto del festival
+    // - si lo tiene pero es para el otro tipo de unidad -> 0
+    // - si el festival no lo configuro -> el valor por defecto del enunciado
+    private BigDecimal buscarMonto(Festival festival, TipoCostoFestival tipo,
+                                   UnidadVenta unidad, BigDecimal valorPorDefecto) {
+        if (festival == null) {
+            return valorPorDefecto;
+        }
+
+        for (Costo costo : festival.getCostos()) {
+            if (costo.getTipoCosto() == tipo) {
+                if (aplicaA(costo.getTipoUnidadAplicable(), unidad)) {
+                    return costo.getMonto();
+                }
+                return BigDecimal.ZERO;
+            }
+        }
+
+        return valorPorDefecto;
+    }
+
+    // ¿El costo aplica a este tipo de unidad?
+    private boolean aplicaA(TipoUnidadAplicable aplicable, UnidadVenta unidad) {
+        if (aplicable == TipoUnidadAplicable.TODAS) {
+            return true;
+        }
+        if (aplicable == TipoUnidadAplicable.FOOD_TRUCK) {
+            return unidad instanceof FoodTruck;
+        }
+        if (aplicable == TipoUnidadAplicable.PUESTO_DESMONTABLE) {
+            return unidad instanceof PuestoDesmontable;
+        }
+        return false;
     }
 }
