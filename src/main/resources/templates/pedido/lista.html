@@ -279,10 +279,9 @@
             <!-- SIN PLATOS ACTIVOS -->
 
             <div class="alert alert-info"
-                 th:if="${#lists.isEmpty(platos)}">
+                 th:if="${#lists.isEmpty(festivales) or #lists.isEmpty(platos)}">
 
-                No hay platos activos disponibles.
-                Primero cargá un plato en la base de datos.
+                No hay festivales con unidades y platos activos disponibles para registrar pedidos.
 
             </div>
 
@@ -290,7 +289,31 @@
 
             <form method="post"
                   th:action="@{/pedidos/nuevo}"
-                  th:unless="${#lists.isEmpty(platos)}">
+                  th:unless="${#lists.isEmpty(festivales) or #lists.isEmpty(platos)}">
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="form-label" for="festival-selector">Festival</label>
+                        <select id="festival-selector" class="form-control" name="idFestival" required>
+                            <option value="">Seleccioná un festival</option>
+                            <option th:each="festival : ${festivales}"
+                                    th:value="${festival.idFestival}"
+                                    th:text="${festival.nombre}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="form-label" for="unidad-selector">Unidad de venta</label>
+                        <select id="unidad-selector" class="form-control" name="idUnidad" required>
+                            <option value="">Seleccioná una unidad</option>
+                            <optgroup th:each="festival : ${festivales}" th:label="${festival.nombre}">
+                                <option th:each="unidad : ${festival.unidades}"
+                                        th:value="${unidad.idUnidad}"
+                                        th:attr="data-festival-id=${festival.idFestival}"
+                                        th:text="|${unidad.nombreComercial} (${unidad.codigoUnico})|"></option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
 
                 <div id="filas-detalle">
 
@@ -316,6 +339,7 @@
 
                                 <option th:each="plato : ${platos}"
                                         th:value="${plato.idPlato}"
+                                        th:attr="data-unidad-id=${plato.unidadVenta != null ? plato.unidadVenta.idUnidad : ''}"
                                         th:text="${plato.nombre + ' - $' + plato.precioVenta}">
                                 </option>
 
@@ -423,6 +447,12 @@
                   th:text="${pedido.fechaPedido}">
                 Fecha
             </span>
+            <span th:if="${pedido.unidadVenta != null}"
+                  class="fecha-pedido"
+                  th:text="${pedido.unidadVenta.nombreComercial}"></span>
+            <span th:if="${pedido.festival != null}"
+                  class="fecha-pedido"
+                  th:text="${pedido.festival.nombre}"></span>
 
         </div>
 
@@ -514,6 +544,51 @@
 
         }
 
+        function actualizarPlatos() {
+            var idUnidad = document.getElementById('unidad-selector').value;
+            var selectores = document.querySelectorAll('.selector-plato');
+            selectores.forEach(function (selector) {
+                var opcionesDisponibles = [];
+                Array.prototype.forEach.call(selector.options, function (opcion, indice) {
+                    if (indice === 0) {
+                        opcion.hidden = false;
+                        return;
+                    }
+                    var disponible = opcion.dataset.unidadId === idUnidad;
+                    opcion.hidden = !disponible;
+                    opcion.disabled = !disponible;
+                    if (disponible) {
+                        opcionesDisponibles.push(opcion);
+                    }
+                });
+                if (!opcionesDisponibles.some(function (opcion) { return opcion.value === selector.value; })) {
+                    selector.value = '';
+                }
+            });
+        }
+
+        function actualizarUnidades() {
+            var idFestival = document.getElementById('festival-selector').value;
+            var selector = document.getElementById('unidad-selector');
+            var disponibles = [];
+            Array.prototype.forEach.call(selector.options, function (opcion, indice) {
+                if (indice === 0) {
+                    opcion.hidden = false;
+                    return;
+                }
+                var disponible = opcion.dataset.festivalId === idFestival;
+                opcion.hidden = !disponible;
+                opcion.disabled = !disponible;
+                if (disponible && opcion.tagName === 'OPTION') {
+                    disponibles.push(opcion);
+                }
+            });
+            if (!disponibles.some(function (opcion) { return opcion.value === selector.value; })) {
+                selector.value = disponibles.length ? disponibles[0].value : '';
+            }
+            actualizarPlatos();
+        }
+
     }
 
     function agregarFila() {
@@ -529,6 +604,7 @@
         contenedor.appendChild(fila);
 
         actualizarIndices();
+        actualizarPlatos();
 
     }
 
@@ -544,6 +620,14 @@
 
         }
 
+    }
+
+    var festivalSelector = document.getElementById('festival-selector');
+    var unidadSelector = document.getElementById('unidad-selector');
+    if (festivalSelector && unidadSelector) {
+        festivalSelector.addEventListener('change', actualizarUnidades);
+        unidadSelector.addEventListener('change', actualizarPlatos);
+        actualizarUnidades();
     }
 
 </script>

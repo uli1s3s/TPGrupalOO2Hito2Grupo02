@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <section class="mb-4 p-4 rounded text-white" style="background: linear-gradient(135deg, #26352b, #425843);">
+        <h2 th:text="${esEdicion ? 'Modificar plato' : 'Alta de plato'}">Alta de plato</h2>
+        <p class="mb-0">Completá los datos del plato y asignalo a una de tus unidades.</p>
+    </section>
+
+    <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="@{/platos/guardar}" th:object="${plato}" method="post">
+                <input type="hidden" th:field="*{idPlato}"/>
+
+                <div class="form-group">
+                    <label for="nombre">Nombre del plato</label>
+                    <input id="nombre" type="text" class="form-control" th:field="*{nombre}" maxlength="100"/>
+                    <small class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="precioVenta">Precio de venta</label>
+                        <input id="precioVenta" type="number" class="form-control" th:field="*{precioVenta}"
+                               min="0" step="0.01"/>
+                        <small class="text-danger" th:if="${#fields.hasErrors('precioVenta')}"
+                               th:errors="*{precioVenta}"></small>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="costoProduccion">Costo de producción</label>
+                        <input id="costoProduccion" type="number" class="form-control" th:field="*{costoProduccion}"
+                               min="0" step="0.01"/>
+                        <small class="text-danger" th:if="${#fields.hasErrors('costoProduccion')}"
+                               th:errors="*{costoProduccion}"></small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="idUnidad">Unidad de venta</label>
+                    <select id="idUnidad" class="form-control" th:field="*{idUnidad}">
+                        <option value="">Seleccioná una unidad</option>
+                        <option th:each="unidad : ${unidades}"
+                                th:value="${unidad.idUnidad}"
+                                th:text="${unidad.nombreComercial}"></option>
+                    </select>
+                    <small class="text-danger" th:if="${#fields.hasErrors('idUnidad')}"
+                           th:errors="*{idUnidad}"></small>
+                </div>
+
+                <button type="submit" class="btn btn-success"
+                        th:text="${esEdicion ? 'Guardar cambios' : 'Dar de alta'}">Guardar</button>
+                <a class="btn btn-outline-secondary" th:href="@{/platos}">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+</body>
+</html>

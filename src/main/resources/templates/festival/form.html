@@ -49,6 +49,23 @@
             <label class="form-check-label" for="activo">Festival activo</label>
         </div>
 
+        <h2 class="h4 mt-4">Unidades participantes</h2>
+        <p class="text-muted">Seleccioná las unidades de venta que participan del festival.</p>
+        <div class="form-group">
+            <div class="form-check" th:each="unidad : ${unidadesDisponibles}">
+                <input class="form-check-input" type="checkbox"
+                       th:field="*{idUnidades}"
+                       th:value="${unidad.idUnidad}"
+                       th:id="|unidad-${unidad.idUnidad}|"/>
+                <label class="form-check-label"
+                       th:for="|unidad-${unidad.idUnidad}|"
+                       th:text="|${unidad.nombreComercial} (${unidad.codigoUnico})|"></label>
+            </div>
+            <p class="text-muted mb-0" th:if="${#lists.isEmpty(unidadesDisponibles)}">
+                Todavía no hay unidades de venta registradas.
+            </p>
+        </div>
+
         <h2 class="h4 mt-4">Costos del festival</h2>
         <p class="text-muted">Marca cada concepto para habilitar el monto y seleccionar a qué tipo de unidad se aplica. El sueldo base no se configura como costo del festival.</p>
 

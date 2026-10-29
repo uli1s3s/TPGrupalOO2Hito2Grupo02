@@ -39,6 +39,14 @@ public abstract class UnidadVenta {
     @OneToMany
     @JoinColumn(name = "id_unidad")
     private Set<Personal> empleados = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "festival_unidad",
+            joinColumns = @JoinColumn(name = "id_unidad"),
+            inverseJoinColumns = @JoinColumn(name = "id_festival")
+    )
+    private Set<Festival> festivales = new HashSet<>();
     
     // polimorfismo
     public abstract String getTipo();
