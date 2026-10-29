@@ -4,6 +4,7 @@ import com.unla.ghsicilianotfi.dtos.RegistroUnidadVentaDTO;
 import com.unla.ghsicilianotfi.entities.UnidadVenta;
 
 import java.util.List;
+import com.unla.ghsicilianotfi.dtos.ReporteMayoresCanonDTO;
 
 public interface IUnidadVentaService {
 
@@ -15,4 +16,8 @@ public interface IUnidadVentaService {
     
     // Unidades asignadas a un responsable (por su nombre de usuario)
     List<UnidadVenta> listarPorResponsable(String nombreUsuario);
+    
+    // Las cantidad unidades que más pagan de canon, de mayor a menor
+    List<ReporteMayoresCanonDTO> unidadesConMayorCanon(int cantidad);
 }
+

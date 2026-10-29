@@ -29,6 +29,27 @@
                 <!-- ===== Datos de la unidad ===== -->
                 <h5 class="mb-3">Datos de la unidad</h5>
 
+				<!-- Festival (solo activos) -->
+				<div class="alert alert-info" th:if="${#lists.isEmpty(festivales)}">
+				    No hay festivales activos en este momento. Volvé a intentarlo más adelante.
+				</div>
+
+				<div class="form-group">
+				    <label for="idFestival">Festival</label>
+				    <select class="form-control" th:field="*{idFestival}">
+				        <option value="">Seleccione el festival...</option>
+				        <option th:each="f : ${festivales}"
+				                th:value="${f.idFestival}"
+				                th:text="${f.nombre + ' (' + f.temporada + ') - del '
+				                         + #temporals.format(f.fechaInicio, 'dd/MM/yyyy') + ' al '
+				                         + #temporals.format(f.fechaFin, 'dd/MM/yyyy')}">
+				            Festival
+				        </option>
+				    </select>
+				    <small class="text-danger" th:if="${#fields.hasErrors('idFestival')}" th:errors="*{idFestival}"></small>
+				</div>
+				
+				
                 <div class="form-group">
                     <label for="tipoUnidad">Tipo de unidad</label>
                     <select class="form-control" th:field="*{tipoUnidad}" onchange="mostrarCampos()">

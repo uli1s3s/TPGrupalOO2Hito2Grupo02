@@ -1,6 +1,8 @@
 
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:fragment="head">
 
@@ -19,9 +21,7 @@
     <link rel="stylesheet"
           th:href="@{/css/modern-business.css}"/>
 
-    <!-- Estilos generales -->
     <style>
-
         body {
             background-color: #f7f5f0;
             color: #26352b;
@@ -96,6 +96,35 @@
             background-color: #f0f2ed;
         }
 
+        /* BOTONES DE VISITANTES */
+
+        .navbar-epicentro .btn-login-navbar {
+            border: 1px solid #e8ece7;
+            border-radius: 7px;
+            padding: 8px 15px !important;
+            margin: 4px;
+            text-align: center;
+        }
+
+        .navbar-epicentro .btn-login-navbar:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .navbar-epicentro .btn-registro-navbar {
+            background-color: #d99a4e;
+            color: #26352b !important;
+            border-radius: 7px;
+            padding: 8px 15px !important;
+            margin: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .navbar-epicentro .btn-registro-navbar:hover {
+            background-color: #e2ae69;
+            color: #26352b !important;
+        }
+
         /* PIE DE PÁGINA */
 
         .footer-epicentro {
@@ -126,9 +155,7 @@
                 display: inline-block;
                 margin: 8px 0;
             }
-
         }
-
     </style>
 
 </head>
@@ -142,7 +169,7 @@
 
     <div class="container">
 
-        <!-- LOGO / NOMBRE -->
+        <!-- LOGO -->
 
         <a class="navbar-brand"
            th:href="@{/index}">
@@ -170,30 +197,38 @@
 
             <ul class="navbar-nav mr-auto">
 
-                <!-- INICIO -->
+                <!-- INICIO: TODOS -->
 
                 <li class="nav-item">
-
                     <a class="nav-link"
                        th:href="@{/index}">
                         Inicio
                     </a>
-
                 </li>
 
-                <!-- FESTIVALES -->
+                <!-- FESTIVALES DISPONIBLES: TODOS -->
 
                 <li class="nav-item">
-
-                    <span class="nav-link">
+                    <a class="nav-link"
+                       th:href="@{/index#festivales}">
                         Festivales
-                    </span>
-
+                    </a>
                 </li>
 
-                <!-- PEDIDOS -->
+                <!-- GESTIÓN DE FESTIVALES: ADMINISTRADOR -->
 
-                <li class="nav-item">
+                <li class="nav-item"
+                    sec:authorize="hasRole('ADMINISTRADOR')">
+                    <a class="nav-link"
+                       th:href="@{/festivales}">
+                        Administrar festivales
+                    </a>
+                </li>
+
+                <!-- PEDIDOS: USUARIOS AUTORIZADOS -->
+
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
 
                     <a class="nav-link"
                        th:href="@{/pedidos}">
@@ -202,9 +237,12 @@
 
                 </li>
 
-                <!-- PERSONAL -->
+                <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
 
-                <li class="nav-item" sec:authorize="hasAnyRole('ROLE_ADMINISTRADOR', 'ROLE_RESPONSABLE')">
+                <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
+
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
 
                     <a class="nav-link"
                        th:href="@{/empleados}">
@@ -213,9 +251,20 @@
 
                 </li>
 
-                <!-- LIQUIDACIONES -->
+                <!-- PLATOS: RESPONSABLE -->
 
-                <li class="nav-item" sec:authorize="hasAnyRole('ROLE_ADMINISTRADOR', 'ROLE_RESPONSABLE')">
+                <li class="nav-item"
+                    sec:authorize="hasRole('RESPONSABLE')">
+                    <a class="nav-link"
+                       th:href="@{/platos}">
+                        Platos
+                    </a>
+                </li>
+
+                <!-- LIQUIDACIONES: ADMINISTRADOR Y RESPONSABLE -->
+
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
 
                     <a class="nav-link"
                        th:href="@{/liquidaciones}">
@@ -224,9 +273,10 @@
 
                 </li>
 
-                <!-- RECIBOS -->
+                <!-- RECIBOS: USUARIOS AUTORIZADOS -->
 
-                <li class="nav-item">
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
 
                     <a class="nav-link"
                        th:href="@{/recibos}">
@@ -234,12 +284,44 @@
                     </a>
 
                 </li>
+                </li>
 
             </ul>
 
-            <!-- INFORMACIÓN DEL USUARIO -->
+            <!-- VISITANTE SIN INICIAR SESIÓN -->
 
-            <ul class="navbar-nav align-items-lg-center">
+            <ul class="navbar-nav align-items-lg-center"
+                sec:authorize="isAnonymous()">
+
+                <li class="nav-item">
+
+                    <a class="nav-link btn-login-navbar"
+                       th:href="@{/login}">
+                        Iniciar sesión
+                    </a>
+
+                </li>
+
+                <li class="nav-item">
+
+                    <a class="nav-link btn-registro-navbar"
+                       th:href="@{/unidades/nueva}">
+                        Registrar unidad
+                    </a>
+		
+                </li>
+				
+				<a class="nav-link btn-registro-navbar"
+				   th:href="@{/registro-responsable}">
+				    Registrar unidad
+				</a>
+
+            </ul>
+
+            <!-- USUARIO AUTENTICADO -->
+
+            <ul class="navbar-nav align-items-lg-center"
+                sec:authorize="isAuthenticated()">
 
                 <!-- ROL -->
 
@@ -255,14 +337,14 @@
                                 #strings.replace(rol, 'ROLE_', '')
                             )
                         )}">
-                            Sin rol
+                            Usuario
                         </strong>
 
                     </span>
 
                 </li>
 
-                <!-- USUARIO AUTENTICADO -->
+                <!-- MENÚ DEL USUARIO -->
 
                 <li class="nav-item dropdown">
 
@@ -274,7 +356,7 @@
                        aria-haspopup="true"
                        aria-expanded="false">
 
-                        <span th:text="${username != null ? username : 'Usuario'}">
+                        <span sec:authentication="name">
                             Usuario
                         </span>
 
@@ -282,6 +364,15 @@
 
                     <div class="dropdown-menu dropdown-menu-right"
                          aria-labelledby="usuarioDropdown">
+
+                        <!-- CAMBIAR CONTRASEÑA -->
+
+                        <a class="dropdown-item"
+                           th:href="@{/cambiar-contrasena}">
+                            Cambiar contraseña
+                        </a>
+
+                        <div class="dropdown-divider"></div>
 
                         <!-- CERRAR SESIÓN -->
 
@@ -315,7 +406,6 @@
     <div class="container">
 
         <p>
-
             &copy; 2026
 
             <span class="marca-footer">
@@ -323,7 +413,6 @@
             </span>
 
             - Sistema de Gestión de Festivales
-
         </p>
 
     </div>

@@ -201,6 +201,12 @@
                 </p>
 
             </div>
+			
+			<!-- REPORTE DE CANON -->
+			<a th:href="@{/reportes/mayor-canon}"
+			   class="boton-nueva-unidad">
+			    Ver mayor canon
+			</a>
 
         </div>
 
@@ -250,7 +256,9 @@
                     <th>Código</th>
 
                     <th>Nombre comercial</th>
-
+	
+					<th>Festival</th>
+					
                     <th>Tipo</th>
 
                     <th>Detalle</th>
@@ -258,6 +266,8 @@
                     <th>Superficie (m²)</th>
 
                     <th>Responsable</th>
+					
+
 
                 </tr>
 
@@ -280,6 +290,13 @@
                         th:text="${unidad.nombreComercial}">
                         Nombre
                     </td>
+					
+
+					<!-- FESTIVAL -->
+
+					<td th:text="${unidad.festival.nombre}">
+					    Festival
+					</td>
 
                     <!-- TIPO -->
 

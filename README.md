@@ -1,2 +1,4 @@
 # TPGrupalOO2Hito2Grupo02
-Repositorio para del grupo 2 para el hito 2.
+
+Aplicación Spring Boot para la gestión de Epicentro Gourmet.
+

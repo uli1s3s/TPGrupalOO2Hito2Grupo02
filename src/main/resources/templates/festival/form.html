@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <h1 th:text="${festival.idFestival == null} ? 'Nuevo festival' : 'Editar festival'"></h1>
+    <p class="text-muted">Completa los datos del festival y activa solo los costos que correspondan.</p>
+
+    <form th:action="@{/festivales/guardar}" th:object="${festival}" method="post">
+        <input type="hidden" th:field="*{idFestival}"/>
+
+        <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}">
+            <p class="mb-0" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" class="form-control" type="text" th:field="*{nombre}" maxlength="100"/>
+            <small class="text-danger" th:errors="*{nombre}"></small>
+        </div>
+
+        <div class="form-group">
+            <label for="temporada">Temporada</label>
+            <input id="temporada" class="form-control" type="text" th:field="*{temporada}" maxlength="50"
+                   placeholder="Ej.: 2026"/>
+            <small class="text-danger" th:errors="*{temporada}"></small>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="fechaInicio">Fecha de inicio</label>
+                <input id="fechaInicio" class="form-control" type="date" th:field="*{fechaInicio}"/>
+                <small class="text-danger" th:errors="*{fechaInicio}"></small>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="fechaFin">Fecha de fin</label>
+                <input id="fechaFin" class="form-control" type="date" th:field="*{fechaFin}"/>
+                <small class="text-danger" th:errors="*{fechaFin}"></small>
+            </div>
+        </div>
+
+        <div class="form-group form-check">
+            <input id="activo" class="form-check-input" type="checkbox" th:field="*{activo}"/>
+            <label class="form-check-label" for="activo">Festival activo</label>
+        </div>
+
+        <h2 class="h4 mt-4">Unidades participantes</h2>
+        <p class="text-muted">Seleccioná las unidades de venta que participan del festival.</p>
+        <div class="form-group">
+            <div class="form-check" th:each="unidad : ${unidadesDisponibles}">
+                <input class="form-check-input" type="checkbox"
+                       th:field="*{idUnidades}"
+                       th:value="${unidad.idUnidad}"
+                       th:id="|unidad-${unidad.idUnidad}|"/>
+                <label class="form-check-label"
+                       th:for="|unidad-${unidad.idUnidad}|"
+                       th:text="|${unidad.nombreComercial} (${unidad.codigoUnico})|"></label>
+            </div>
+            <p class="text-muted mb-0" th:if="${#lists.isEmpty(unidadesDisponibles)}">
+                Todavía no hay unidades de venta registradas.
+            </p>
+        </div>
+
+        <h2 class="h4 mt-4">Costos del festival</h2>
+        <p class="text-muted">Marca cada concepto para habilitar el monto y seleccionar a qué tipo de unidad se aplica. El sueldo base no se configura como costo del festival.</p>
+
+        <div th:each="costo, iter : ${festival.costos}" class="card mb-3">
+            <div class="card-body">
+                <input type="hidden" th:field="*{costos[__${iter.index}__].tipoCosto}"/>
+
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox"
+                               th:field="*{costos[__${iter.index}__].aplicar}"
+                               data-toggle-costo/>
+                        <span th:text="|Aplicar ${costo.tipoCosto.descripcion}|"></span>
+                    </label>
+                </div>
+
+                <div class="form-row mt-3"
+                     data-configuracion-costo
+                     th:classappend="${!costo.aplicar} ? ' d-none'">
+                    <div class="form-group col-md-6 mb-md-0">
+                        <label>
+                            Unidad de venta
+                            <select class="form-control"
+                                    th:field="*{costos[__${iter.index}__].tipoUnidadAplicable}"
+                                    th:disabled="${!costo.aplicar}"
+                                    data-campo-costo>
+                                <option th:each="tipoUnidad : ${tiposUnidadAplicable}"
+                                        th:value="${tipoUnidad}"
+                                        th:text="${tipoUnidad.descripcion}">
+                                </option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-group col-md-6 mb-0">
+                        <label>
+                            Monto
+                            <input class="form-control" type="number" min="0" step="0.01"
+                                   th:field="*{costos[__${iter.index}__].monto}"
+                                   th:disabled="${!costo.aplicar}"
+                                   data-campo-costo/>
+                        </label>
+                        <small class="text-danger"
+                               th:errors="*{costos[__${iter.index}__].monto}"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-outline-secondary" th:href="@{/festivales}">Cancelar</a>
+            <button class="btn btn-success" type="submit">Guardar festival</button>
+        </div>
+    </form>
+</main>
+
+<script>
+    document.querySelectorAll('[data-toggle-costo]').forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            const card = checkbox.closest('.card');
+            const configuration = card.querySelector('[data-configuracion-costo]');
+            const enabled = checkbox.checked;
+
+            configuration.classList.toggle('d-none', !enabled);
+            configuration.querySelectorAll('[data-campo-costo]').forEach(function (field) {
+                field.disabled = !enabled;
+                field.required = enabled && field.type === 'number';
+            });
+        });
+    });
+</script>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+</body>
+</html>

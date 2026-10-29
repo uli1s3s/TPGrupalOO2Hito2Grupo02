@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.unla.ghsicilianotfi.configuration.ParametrosCanon;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "food_truck")
@@ -33,5 +36,17 @@ public class FoodTruck extends UnidadVenta {
     @Override
     public String getPrefijoCodigo() {
         return "FT";
+    }
+    
+    // Canon = (superficie x costo por m2) + plus si requiere electricidad
+    @Override
+    public BigDecimal calcularCanon(ParametrosCanon parametros) {
+        BigDecimal canon = getSuperficieDecimal().multiply(parametros.getCostoPorM2());
+
+        if (Boolean.TRUE.equals(electricidad)) {
+            canon = canon.add(parametros.getPlusElectricidad());
+        }
+
+        return canon.setScale(2, RoundingMode.HALF_UP);
     }
 }

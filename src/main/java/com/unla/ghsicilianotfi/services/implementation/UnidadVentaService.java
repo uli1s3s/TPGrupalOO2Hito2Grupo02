@@ -1,6 +1,7 @@
 package com.unla.ghsicilianotfi.services.implementation;
 
 import com.unla.ghsicilianotfi.dtos.RegistroUnidadVentaDTO;
+
 import com.unla.ghsicilianotfi.entities.FoodTruck;
 import com.unla.ghsicilianotfi.entities.PuestoDesmontable;
 import com.unla.ghsicilianotfi.entities.Rol;
@@ -15,9 +16,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.unla.ghsicilianotfi.configuration.ParametrosCanon;
+import com.unla.ghsicilianotfi.dtos.ReporteMayoresCanonDTO;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import com.unla.ghsicilianotfi.entities.Festival;
+import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
+
+import java.time.LocalDate;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -27,21 +38,27 @@ public class UnidadVentaService implements IUnidadVentaService {
     private static final String ROL_RESPONSABLE = "RESPONSABLE";
     // Lógica de validación propia del código: 2 letras del tipo + 8 dígitos (10 caracteres)
     private static final String FORMATO_CODIGO = "^(FT|PD)\\d{8}$";
+    private final ParametrosCanon parametrosCanon;
 
     private final IUnidadVentaRepository unidadVentaRepository;
     private final IUsuarioRepository usuarioRepository;
     private final IRolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
+    private final IFestivalRepository festivalRepository;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
-                              IUsuarioRepository usuarioRepository,
-                              IRolRepository rolRepository,
-                              PasswordEncoder passwordEncoder) {
-        this.unidadVentaRepository = unidadVentaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.rolRepository = rolRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+            IUsuarioRepository usuarioRepository,
+            IRolRepository rolRepository,
+            PasswordEncoder passwordEncoder,
+            ParametrosCanon parametrosCanon,
+            IFestivalRepository festivalRepository) {
+	this.unidadVentaRepository = unidadVentaRepository;
+	this.usuarioRepository = usuarioRepository;
+	this.rolRepository = rolRepository;
+	this.passwordEncoder = passwordEncoder;
+	this.parametrosCanon = parametrosCanon;
+    this.festivalRepository = festivalRepository;
+	}
 
     @Override
     public List<UnidadVenta> listarUnidades() {
@@ -60,6 +77,9 @@ public class UnidadVentaService implements IUnidadVentaService {
         if (datos == null) {
             throw new IllegalArgumentException("Los datos de la unidad son obligatorios");
         }
+        
+        // 0. El festival tiene que existir y estar activo
+        Festival festival = buscarFestivalActivo(datos.getIdFestival());
 
         // 1. Crear segun el tipo elegido
         UnidadVenta unidad = crearSegunTipo(datos);
@@ -67,6 +87,7 @@ public class UnidadVentaService implements IUnidadVentaService {
         // 2. Datos comunes
         unidad.setNombreComercial(datos.getNombreComercial().trim());
         unidad.setSuperficieM2(datos.getSuperficieM2());
+        unidad.setFestival(festival);
 
         // 3. Codigo unico generado por el sistema (FT00000001, PD00000001, ...)
         unidad.setCodigoUnico(generarCodigoUnico(unidad));
@@ -114,6 +135,29 @@ public class UnidadVentaService implements IUnidadVentaService {
         }
 
         throw new IllegalArgumentException("El tipo de unidad seleccionado no es válido");
+    }
+    
+    // =====================================================
+    // Validacion de carga: solo se puede registrar en un festival activo y vigente
+    // =====================================================
+    private Festival buscarFestivalActivo(Long idFestival) {
+
+        if (idFestival == null) {
+            throw new IllegalArgumentException("Seleccioná el festival en el que vas a participar");
+        }
+
+        Festival festival = festivalRepository.findById(idFestival)
+                .orElseThrow(() -> new IllegalArgumentException("El festival seleccionado no existe"));
+
+        if (!festival.isActivo()) {
+            throw new IllegalArgumentException("Solo podés registrarte en un festival activo");
+        }
+
+        if (festival.getFechaFin().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("El festival seleccionado ya finalizó");
+        }
+
+        return festival;
     }
     
     // =====================================================
@@ -174,5 +218,35 @@ public class UnidadVentaService implements IUnidadVentaService {
         responsable.setRol(rolResponsable);
 
         return usuarioRepository.save(responsable);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteMayoresCanonDTO> unidadesConMayorCanon(int cantidad) {
+
+        if (cantidad < 1) {
+            throw new IllegalArgumentException("La cantidad de unidades debe ser al menos 1");
+        }
+
+        // 1. Calcular el canon de cada unidad (cada tipo usa su propia formula)
+        List<ReporteMayoresCanonDTO> reporte = new ArrayList<>();
+
+        for (UnidadVenta unidad : unidadVentaRepository.findAll()) {
+            reporte.add(new ReporteMayoresCanonDTO(
+                    unidad.getNombreComercial(),
+                    unidad.getCodigoUnico(),
+                    unidad.getTipo(),
+                    unidad.calcularCanon(parametrosCanon)
+            ));
+        }
+
+        // 2. Ordenar de mayor a menor canon
+        reporte.sort(Comparator.comparing(ReporteMayoresCanonDTO::getCanon).reversed());
+
+        // 3. Devolver solo las primeras cantidad unidades
+        if (reporte.size() > cantidad) {
+            return new ArrayList<>(reporte.subList(0, cantidad));
+        }
+        return reporte;
     }
 }

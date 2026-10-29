@@ -1,3 +1,4 @@
+
 package com.unla.ghsicilianotfi.configuration;
 
 import org.springframework.context.annotation.Bean;
@@ -28,39 +29,97 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
 		return http
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(AbstractHttpConfigurer::disable)
+
 				.authorizeHttpRequests(auth -> {
+
+					// RECURSOS ESTÁTICOS
 					auth.requestMatchers(
-							"/css/*",
-							"/imgs/*",
-							"/js/*",
-							"/vendor/bootstrap/css/*",
-							"/vendor/jquery/*",
-							"/vendor/bootstrap/js/*"
+							"/css/**",
+							"/imgs/**",
+							"/js/**",
+							"/vendor/**"
 					).permitAll();
 
-					auth.requestMatchers("/api/v1/pedidos", "/api/v1/pedidos/**")
-							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE", "EMPLEADO");
+					// PÁGINAS PÚBLICAS
+					auth.requestMatchers(
+							"/",
+							"/index",
+							"/login"
+					).permitAll();
 
-					auth.requestMatchers("/recibos", "/recibos/**")
-							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE", "EMPLEADO");
+					// REGISTRO PUBLICO DE RESPONSABLES
+					// Incorporado desde develop
+					auth.requestMatchers(
+							"/registro-responsable",
+							"/registro-responsable/**"
+					).permitAll();
 
-					auth.requestMatchers("/liquidaciones", "/liquidaciones/**")
-							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE");
+					// CAMBIAR CONTRASEÑA
+					// Cualquier usuario que haya iniciado sesión
+					auth.requestMatchers(
+							"/cambiar-contrasena"
+					).authenticated();
 
-					auth.requestMatchers("/empleados", "/empleados/**")
-							.hasAnyRole("ADMINISTRADOR", "RESPONSABLE");
+					// PEDIDOS
+					auth.requestMatchers(
+							"/api/v1/pedidos",
+							"/api/v1/pedidos/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE",
+							"EMPLEADO"
+					);
+
+					// PERSONAL
+					auth.requestMatchers(
+							"/empleados",
+							"/empleados/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE"
+					);
+
+					// LIQUIDACIONES: Administradores y Responsables
+					auth.requestMatchers(
+							"/liquidaciones",
+							"/liquidaciones/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE"
+					);
+
+					// RECIBOS DE SUELDO: Administradores, Responsables y Empleados
+					auth.requestMatchers(
+							"/recibos",
+							"/recibos/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE",
+							"EMPLEADO"
+					);
+
+					// GESTIÓN DE FESTIVALES: solo administradores
+					auth.requestMatchers(
+							"/festivales",
+							"/festivales/**"
+					).hasRole("ADMINISTRADOR");
+
+					auth.requestMatchers(
+							"/platos",
+							"/platos/**"
+					).hasRole("RESPONSABLE");
 
 					auth.requestMatchers("/api/v1/**").permitAll();
-					
-					// Registro publico: cualquiera puede registrarse como responsable con su unidad
-					auth.requestMatchers("/registro-responsable", "/registro-responsable/**").permitAll();
-					
+
+					// RESTO DE LAS RUTAS
 					auth.anyRequest().authenticated();
 				})
+
 				.formLogin(login -> {
 					login.loginPage("/login");
 					login.loginProcessingUrl("/loginprocess");
@@ -69,30 +128,37 @@ public class SecurityConfiguration {
 					login.defaultSuccessUrl("/loginsuccess");
 					login.permitAll();
 				})
+
 				.logout(logout -> {
 					logout.logoutUrl("/logout");
 					logout.logoutSuccessUrl("/login");
 					logout.permitAll();
 				})
+
 				.build();
 	}
 
 	@Bean
-	AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+	AuthenticationManager authenticationManager(
+			AuthenticationConfiguration authenticationConfiguration
+	) throws Exception {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 	@Bean
-	AuthenticationProvider authenticationProvider(){
-		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+	AuthenticationProvider authenticationProvider() {
+
+		DaoAuthenticationProvider provider =
+				new DaoAuthenticationProvider();
+
 		provider.setPasswordEncoder(passwordEncoder());
 		provider.setUserDetailsService(userService);
+
 		return provider;
 	}
 
 	@Bean
-	PasswordEncoder passwordEncoder(){
+	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 }
-

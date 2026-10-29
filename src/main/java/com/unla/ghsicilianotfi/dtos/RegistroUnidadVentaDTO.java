@@ -56,4 +56,7 @@ public class RegistroUnidadVentaDTO {
     @NotBlank(message = "La contraseña del responsable es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String contrasenaResponsable;
+    
+    @NotNull(message = "Selecciona el festival en el que vas a participar")
+    private Long idFestival;
 }
