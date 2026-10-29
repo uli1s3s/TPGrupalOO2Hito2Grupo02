@@ -49,7 +49,8 @@ public class SecurityConfiguration {
 					auth.requestMatchers(
 							"/",
 							"/index",
-							"/login"
+							"/login",
+							"/error"
 					).permitAll();
 
 					// REGISTRO PUBLICO DE RESPONSABLES
