@@ -38,9 +38,12 @@ public class PedidoService {
     }
 
     @Transactional
-    public Pedido registrarPedido(RegistrarPedidoDTO datos) {
+    public Pedido registrarPedido(RegistrarPedidoDTO datos, String username) {
 
-        if (datos == null || datos.getIdFestival() == null || datos.getIdUnidad() == null
+        // Validación de datos obligatorios
+        if (datos == null
+                || datos.getIdFestival() == null
+                || datos.getIdUnidad() == null
                 || datos.getDetalles() == null
                 || datos.getDetalles().isEmpty()) {
 
@@ -49,23 +52,54 @@ public class PedidoService {
             );
         }
 
+        // Verifica que el festival exista y esté activo
         Festival festival = festivalRepository.findById(datos.getIdFestival())
                 .filter(Festival::isActivo)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "El festival seleccionado no existe o no está activo"));
+                        "El festival seleccionado no existe o no está activo"
+                ));
+
+        // Busca la unidad de venta seleccionada
         UnidadVenta unidad = unidadVentaRepository.findById(datos.getIdUnidad())
-                .orElseThrow(() -> new IllegalArgumentException("La unidad seleccionada no existe"));
-        if (festival.getUnidades().stream()
-                .noneMatch(unidadParticipante -> unidadParticipante.getIdUnidad().equals(unidad.getIdUnidad()))) {
-            throw new IllegalArgumentException("La unidad seleccionada no participa en el festival");
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "La unidad seleccionada no existe"
+                ));
+
+        // NUEVA VALIDACIÓN:
+        // Busca la unidad asignada al empleado autenticado
+        UnidadVenta unidadEmpleado = unidadVentaRepository
+                .buscarUnidadDeEmpleado(username)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "El empleado no tiene una unidad de venta asignada"
+                ));
+
+        // Comprueba que el empleado registre pedidos en su propia unidad
+        if (!unidadEmpleado.getIdUnidad().equals(unidad.getIdUnidad())) {
+
+            throw new IllegalArgumentException(
+                    "No podés registrar pedidos en una unidad de venta diferente a la asignada"
+            );
         }
 
+        // Verifica que la unidad participe en el festival
+        if (festival.getUnidades().stream()
+                .noneMatch(unidadParticipante ->
+                        unidadParticipante.getIdUnidad().equals(unidad.getIdUnidad()))) {
+
+            throw new IllegalArgumentException(
+                    "La unidad seleccionada no participa en el festival"
+            );
+        }
+
+        // Crea el pedido
         Pedido pedido = new Pedido(LocalDate.now());
         pedido.setFestival(festival);
         pedido.setUnidadVenta(unidad);
 
+        // Registra los detalles del pedido
         for (DetallePedidoDTO detalleDTO : datos.getDetalles()) {
 
+            // Verifica que el plato y la cantidad sean válidos
             if (detalleDTO == null
                     || detalleDTO.getIdPlato() == null
                     || detalleDTO.getCantidad() <= 0) {
@@ -75,34 +109,43 @@ public class PedidoService {
                 );
             }
 
+            // Busca el plato seleccionado
             Plato plato = platoRepository
                     .findById(detalleDTO.getIdPlato())
-                    .orElseThrow(() ->
-                            new IllegalArgumentException(
-                                    "El plato no existe"
-                            )
-                    );
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "El plato no existe"
+                    ));
 
+            // Verifica que el plato esté activo
             if (!plato.isActivo()) {
+
                 throw new IllegalArgumentException(
                         "El plato no está disponible"
                 );
             }
+
+            // Verifica que el plato pertenezca a la unidad seleccionada
             if (plato.getUnidadVenta() == null
-                    || !plato.getUnidadVenta().getIdUnidad().equals(unidad.getIdUnidad())) {
+                    || !plato.getUnidadVenta().getIdUnidad()
+                    .equals(unidad.getIdUnidad())) {
+
                 throw new IllegalArgumentException(
-                        "Todos los platos del pedido deben pertenecer a la unidad seleccionada");
+                        "Todos los platos del pedido deben pertenecer a la unidad seleccionada"
+                );
             }
 
+            // Crea el detalle y conserva el precio y costo de ese momento
             DetallePedido detalle = new DetallePedido(
                     detalleDTO.getCantidad(),
                     pedido,
                     plato
             );
 
-            pedido.getDetalles().add(detalle);
+            // Agrega el detalle al pedido
+            pedido.agregarDetalle(detalle);
         }
 
+        // Guarda el pedido y sus detalles mediante CascadeType.ALL
         return pedidoRepository.save(pedido);
     }
 }
