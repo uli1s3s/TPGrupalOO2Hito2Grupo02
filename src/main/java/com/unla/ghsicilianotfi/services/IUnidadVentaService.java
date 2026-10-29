@@ -51,6 +51,9 @@ public interface IUnidadVentaService {
     // filtrado por nombre, apellido o DNI (si la busqueda viene vacia, trae todos)
     List<EstadoEmpleadoDTO> listarPersonalConEstado(String busqueda);
     
+    // El responsable reactiva un empleado dado de baja y lo asigna a una de sus unidades
+    // (nueva contraseña temporal + aviso por mail)
+    void reactivarYAsignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable);
     
 }
 

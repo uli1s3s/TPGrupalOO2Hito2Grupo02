@@ -47,6 +47,8 @@ import java.time.LocalDate;
 import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
 import com.unla.ghsicilianotfi.entities.Cocinero;
 import java.util.HashMap;
+import com.unla.ghsicilianotfi.services.IEmailService;
+import java.util.UUID;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -64,6 +66,7 @@ public class UnidadVentaService implements IUnidadVentaService {
     private final PasswordEncoder passwordEncoder;
     private final IFestivalRepository festivalRepository;
     private final IVerificacionEmailService verificacionEmailService;
+    private final IEmailService emailService;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
             IUsuarioRepository usuarioRepository,
@@ -71,15 +74,17 @@ public class UnidadVentaService implements IUnidadVentaService {
             PasswordEncoder passwordEncoder,
             ParametrosCanon parametrosCanon,
             IFestivalRepository festivalRepository,
-            IVerificacionEmailService verificacionEmailService) {
-	this.unidadVentaRepository = unidadVentaRepository;
-	this.usuarioRepository = usuarioRepository;
-	this.rolRepository = rolRepository;
-	this.passwordEncoder = passwordEncoder;
-	this.parametrosCanon = parametrosCanon;
-    this.festivalRepository = festivalRepository;
-    this.verificacionEmailService = verificacionEmailService;
-	}
+            IVerificacionEmailService verificacionEmailService,
+            IEmailService emailService) {
+        this.unidadVentaRepository = unidadVentaRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.parametrosCanon = parametrosCanon;
+        this.festivalRepository = festivalRepository;
+        this.verificacionEmailService = verificacionEmailService;
+        this.emailService = emailService;
+    }
 
     @Override
     public List<UnidadVenta> listarUnidades() {
@@ -456,6 +461,43 @@ public class UnidadVentaService implements IUnidadVentaService {
             unidad.getEmpleados().removeIf(empleado -> empleado.getIdPersonal().equals(idPersonal));
             unidadVentaRepository.save(unidad);
         });
+    }
+    
+    @Override
+    @Transactional
+    public void reactivarYAsignarEmpleado(Long idUnidad, Long idPersonal, String nombreResponsable) {
+
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        Personal empleado = unidadVentaRepository.buscarEmpleadoPorId(idPersonal)
+                .orElseThrow(() -> new IllegalArgumentException("El empleado no existe"));
+
+        // Solo se reactiva a quien esta dado de baja
+        if (empleado.isActivo()) {
+            throw new IllegalArgumentException("El empleado ya está activo. Usá el botón Asignar.");
+        }
+
+        Usuario usuario = empleado.getCredenciales();
+        if (usuario == null) {
+            throw new IllegalArgumentException("El empleado no tiene un usuario para ingresar al sistema");
+        }
+
+        // 1) Si quedo asignado a alguna unidad antes de la baja, se lo saca de ahi
+        desasignarEmpleado(idPersonal);
+
+        // 2) Se reactiva el empleado y su usuario, con una contraseña temporal nueva
+        String contrasenaTemporal = UUID.randomUUID().toString().substring(0, 8);
+        empleado.setActivo(true);
+        usuario.setActivo(true);
+        usuario.setContrasena(passwordEncoder.encode(contrasenaTemporal));
+
+        // 3) Se asigna a la unidad del responsable
+        unidad.getEmpleados().add(empleado);
+        unidadVentaRepository.save(unidad);
+
+        // 4) Se le avisa por mail con sus nuevos datos de acceso
+        emailService.enviarAvisoReactivacion(usuario.getEmail(), usuario.getNombre(),
+                contrasenaTemporal, unidad.getNombreComercial());
     }
     
     @Override

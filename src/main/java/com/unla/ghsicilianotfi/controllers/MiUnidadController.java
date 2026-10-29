@@ -109,6 +109,24 @@ public class MiUnidadController {
         }
         return "redirect:" + ViewRouteHelper.MI_UNIDAD_ROOT;
     }
+    
+    // ==========================================
+    // Reactivar un empleado dado de baja y asignarlo a mi unidad
+    // ==========================================
+    @PostMapping("/{idUnidad}/reactivar")
+    public String reactivarEmpleado(@PathVariable("idUnidad") Long idUnidad,
+                                    @RequestParam("idPersonal") Long idPersonal,
+                                    Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            unidadVentaService.reactivarYAsignarEmpleado(idUnidad, idPersonal, authentication.getName());
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "Empleado reactivado y asignado. Le enviamos un mail con su nueva contraseña.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:" + ViewRouteHelper.MI_UNIDAD_ROOT;
+    }
 
     private String tipoDe(Personal empleado) {
         return (empleado instanceof Cocinero) ? "Cocinero" : "Cajero";

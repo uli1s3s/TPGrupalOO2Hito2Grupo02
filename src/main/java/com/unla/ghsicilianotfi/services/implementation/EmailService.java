@@ -86,4 +86,22 @@ public class EmailService implements IEmailService {
 
         enviar(destinatario, asunto, texto);
     }
+    
+    @Override
+    public void enviarAvisoReactivacion(String destinatario, String username, String contrasenaPlana, String nombreUnidad) {
+
+        String asunto = "Tu cuenta de Epicentro Gourmet fue reactivada";
+        String texto = "¡Hola!\n\n"
+                + "Te volvieron a dar de alta en el equipo de trabajo de Epicentro Gourmet.\n"
+                + "Unidad de venta asignada: " + nombreUnidad + "\n\n"
+                + "Estos son tus nuevos datos para iniciar sesión:\n"
+                + "Usuario: " + username + "\n"
+                + "Contraseña temporal: " + contrasenaPlana + "\n\n"
+                + "Tu contraseña anterior ya no funciona.\n"
+                + "Podés ingresar en: http://localhost:8080/login\n"
+                + "Te recomendamos cambiar la contraseña desde tu perfil.\n\n"
+                + "Saludos,\nEpicentro Gourmet";
+
+        enviar(destinatario, asunto, texto);
+    }
 }
