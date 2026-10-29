@@ -1,183 +1,626 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
+
 <body>
-    <nav th:replace="~{layout :: navbar}"></nav>
 
-    <main class="container py-4">
+<nav th:replace="~{layout :: navbar}"></nav>
 
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
+<style>
+    .empleados-contenedor {
+        max-width: 1000px;
+        margin: 25px auto 50px;
+    }
 
-                <!-- Mensaje de Error si ocurrió alguno -->
-                <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error: </strong><span th:text="${mensajeError}"></span>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+    .empleados-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 40px 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
 
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0" th:text="${esEdicion ? 'Modificar Empleado' : 'Formulario de Alta de Empleado'}">Formulario de Alta de Empleado</h4>
-                    </div>
+    .empleados-header h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
 
-                    <div class="card-body">
-                        <p class="text-muted small" th:if="${!esEdicion}">
-                            Al registrar el empleado, el sistema generará automáticamente su cuenta de usuario y le enviará un correo electrónico con sus credenciales de acceso.
-                        </p>
+    .empleados-header p {
+        color: #e5e9e3;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
 
-                        <form th:action="@{/empleados/guardar}" th:object="${empleado}" method="post">
-                            <input type="hidden" th:field="*{idPersonal}"/>
-                            <input type="hidden" th:if="${esEdicion}" th:field="*{tipoEmpleado}"/>
+    .empleados-card,
+    .empleados-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+    }
 
-                            <!-- Sección 1: Datos Personales Básicos -->
-                            <h5 class="text-secondary border-bottom pb-2 mb-3">1. Datos Personales</h5>
+    .empleados-card-body {
+        padding: 35px;
+    }
 
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="nombre">Nombre <span class="text-danger">*</span></label>
-                                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control"
-                                           placeholder="Ej: Juan" required/>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="apellido">Apellido <span class="text-danger">*</span></label>
-                                    <input type="text" id="apellido" th:field="*{apellido}" class="form-control"
-                                           placeholder="Ej: Pérez" required/>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></small>
-                                </div>
-                            </div>
+    .seccion-titulo {
+        color: #26352b;
+        font-size: 20px;
+        font-weight: bold;
+        padding-bottom: 12px;
+        margin-bottom: 25px;
+        margin-top: 30px;
+        border-bottom: 2px solid #e5e9e3;
+    }
 
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="dni">DNI <span class="text-danger">*</span></label>
-                                    <input type="text" id="dni" th:field="*{dni}" class="form-control"
-                                           placeholder="Ej: 35123456" required/>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></small>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="fechaNacimiento">Fecha Nacimiento <span class="text-danger">*</span></label>
-                                    <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" class="form-control" required/>
-                                    <small class="text-muted d-block small">Mayor de 18 años</small>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}"></small>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="fechaIngreso">Fecha Ingreso <span class="text-danger">*</span></label>
-                                    <input type="date" id="fechaIngreso" th:field="*{fechaIngreso}" class="form-control" required/>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('fechaIngreso')}" th:errors="*{fechaIngreso}"></small>
-                                </div>
-                            </div>
+    .seccion-titulo:first-child {
+        margin-top: 0;
+    }
 
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="sueldoBase">Sueldo Base ($) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" id="sueldoBase" th:field="*{sueldoBase}" class="form-control" required/>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('sueldoBase')}" th:errors="*{sueldoBase}"></small>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="email">Email del Empleado <span class="text-danger">*</span></label>
-                                    <input type="email" id="email" th:field="*{email}" class="form-control"
-                                           placeholder="empleado@epicentro.com" required th:readonly="${esEdicion}"/>
-                                    <small class="text-muted d-block small">Se usará como nombre de usuario para el login</small>
-                                    <small class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
-                                </div>
-                            </div>
+    .empleados-card label {
+        color: #26352b;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
 
-                            <!-- Sección 2: Puesto / Rol Operativo -->
-                            <h5 class="text-secondary border-bottom pb-2 mt-4 mb-3">2. Puesto de Trabajo</h5>
+    .empleados-card .form-control {
+        border: 1px solid #ced5cd;
+        border-radius: 6px;
+        min-height: 43px;
+    }
 
-                            <div class="form-group">
-                                <label class="font-weight-bold">Tipo de Empleado <span class="text-danger">*</span></label>
-                                <div>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" id="tipoCocinero" th:field="*{tipoEmpleado}" value="COCINERO"
-                                               class="custom-control-input" onchange="toggleCamposTipo()"/>
-                                        <label class="custom-control-label" for="tipoCocinero">Cocinero</label>
-                                    </div>
-                                    <div class="custom-control custom-radio custom-control-inline">
-                                        <input type="radio" id="tipoCajero" th:field="*{tipoEmpleado}" value="CAJERO"
-                                               class="custom-control-input" onchange="toggleCamposTipo()"/>
-                                        <label class="custom-control-label" for="tipoCajero">Cajero</label>
-                                    </div>
-                                </div>
-                            </div>
+    .empleados-card .form-control:focus {
+        border-color: #425843;
+        box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
+    }
 
-                            <!-- Campos condicionales para Cocinero -->
-                            <div id="seccionCocinero" class="p-3 bg-light rounded border mb-3">
-                                <h6 class="text-primary font-weight-bold">Detalles de Cocina</h6>
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="idCategoria">Categoría de Cocina <span class="text-danger">*</span></label>
-                                        <select id="idCategoria" th:field="*{idCategoria}" class="form-control">
-                                            <option value="">-- Seleccionar categoría --</option>
-                                            <option th:each="cat : ${categorias}"
-                                                    th:value="${cat.idCategoria}"
-                                                    th:text="${cat.nombre}">
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="especialidad">Especialidad</label>
-                                        <input type="text" id="especialidad" th:field="*{especialidad}" class="form-control"
-                                               placeholder="Ej: Pastas, Parrilla, Repostería"/>
-                                    </div>
-                                </div>
-                            </div>
+    .empleados-card .form-group {
+        margin-bottom: 22px;
+    }
 
-                            <!-- Campos condicionales para Cajero -->
-                            <div id="seccionCajero" class="p-3 bg-light rounded border mb-3" style="display: none;">
-                                <h6 class="text-info font-weight-bold">Detalles de Caja</h6>
-                                <div class="form-group mb-0">
-                                    <label for="turno">Turno de Trabajo <span class="text-danger">*</span></label>
-                                    <select id="turno" th:field="*{turno}" class="form-control">
-                                        <option value="MAÑANA">Mañana</option>
-                                        <option value="NOCHE">Noche</option>
-                                    </select>
-                                </div>
-                            </div>
+    .empleados-card .custom-control-label {
+        font-weight: normal;
+        cursor: pointer;
+    }
 
-                            <!-- Botones de Acción -->
-                            <div class="d-flex justify-content-between mt-4">
-                                <a th:href="@{/empleados}" class="btn btn-outline-secondary">Cancelar</a>
-                                <button type="submit" class="btn btn-primary px-4"
-                                        th:text="${esEdicion ? 'Guardar Cambios' : 'Dar de Alta y Enviar Credenciales'}">
-                                    Dar de Alta y Enviar Credenciales
-                                </button>
-                            </div>
+    .empleados-card .custom-control-input:checked
+    ~ .custom-control-label::before {
+        background-color: #26352b;
+        border-color: #26352b;
+    }
 
-                        </form>
-                    </div>
-                </div>
+    .empleados-card .custom-control-input:focus
+    ~ .custom-control-label::before {
+        box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
+    }
 
-            </div>
-        </div>
+    .detalle-empleado {
+        background-color: #f7f8f5;
+        border: 1px solid #e5e9e3;
+        border-left: 4px solid #d99a4e;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
 
-    </main>
+    .detalle-empleado h6 {
+        color: #26352b;
+        font-size: 17px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
 
-    <footer th:replace="~{layout :: footer}"></footer>
-    <div th:replace="~{layout :: scripts}"></div>
+    .aviso-credenciales {
+        background-color: #edf2ec;
+        border-left: 4px solid #425843;
+        color: #425843;
+        padding: 17px 20px;
+        border-radius: 6px;
+        margin-bottom: 30px;
+        font-size: 14px;
+    }
 
-    <!-- Script para alternar campos condicionales -->
-    <script>
-        function toggleCamposTipo() {
-            var esCocinero = document.getElementById('tipoCocinero').checked;
-            var secCocinero = document.getElementById('seccionCocinero');
-            var secCajero = document.getElementById('seccionCajero');
+    .boton-guardar {
+        background-color: #26352b;
+        border: 1px solid #26352b;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
 
-            if (esCocinero) {
-                secCocinero.style.display = 'block';
-                secCajero.style.display = 'none';
-            } else {
-                secCocinero.style.display = 'none';
-                secCajero.style.display = 'block';
-            }
+    .boton-guardar:hover {
+        background-color: #425843;
+        border-color: #425843;
+        color: white;
+    }
+
+    .boton-cancelar {
+        background-color: white;
+        border: 1px solid #425843;
+        color: #26352b;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .boton-cancelar:hover {
+        background-color: #edf2ec;
+        color: #26352b;
+    }
+
+    .empleados-acciones {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #e5e9e3;
+    }
+
+    @media (max-width: 768px) {
+        .empleados-header {
+            padding: 30px 22px;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            toggleCamposTipo();
-        });
-    </script>
+        .empleados-header h2 {
+            font-size: 25px;
+        }
+
+        .empleados-card-body {
+            padding: 22px 18px;
+        }
+
+        .detalle-empleado {
+            padding: 18px;
+        }
+    }
+</style>
+
+<main class="container py-4 empleados-contenedor">
+
+    <!-- ENCABEZADO -->
+
+    <section class="empleados-header">
+
+        <h2 th:text="${esEdicion ? 'Modificar empleado' : 'Alta de empleado'}">
+            Alta de empleado
+        </h2>
+
+        <p>
+            Registro y administración del personal gastronómico.
+        </p>
+
+    </section>
+
+    <!-- MENSAJE DE ERROR -->
+
+    <div th:if="${mensajeError}"
+         class="alert alert-danger alert-dismissible fade show"
+         role="alert">
+
+        <strong>Error: </strong>
+
+        <span th:text="${mensajeError}"></span>
+
+        <button type="button"
+                class="close"
+                data-dismiss="alert"
+                aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+        </button>
+
+    </div>
+
+    <!-- FORMULARIO -->
+
+    <div class="card empleados-card">
+
+        <div class="empleados-card-body">
+
+            <!-- AVISO DE CREDENCIALES -->
+
+            <div class="aviso-credenciales"
+                 th:if="${!esEdicion}">
+
+                Al registrar el empleado, el sistema generará
+                automáticamente su cuenta de usuario y le enviará
+                un correo electrónico con sus credenciales de acceso.
+
+            </div>
+
+            <form th:action="@{/empleados/guardar}"
+                  th:object="${empleado}"
+                  method="post">
+
+                <input type="hidden"
+                       th:field="*{idPersonal}"/>
+
+                <input type="hidden"
+                       th:if="${esEdicion}"
+                       th:field="*{tipoEmpleado}"/>
+
+                <!-- DATOS PERSONALES -->
+
+                <h3 class="seccion-titulo">
+                    1. Datos personales
+                </h3>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-6">
+
+                        <label for="nombre">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="text"
+                               id="nombre"
+                               th:field="*{nombre}"
+                               class="form-control"
+                               placeholder="Ej: Juan"
+                               required/>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('nombre')}"
+                               th:errors="*{nombre}">
+                        </small>
+
+                    </div>
+
+                    <div class="form-group col-md-6">
+
+                        <label for="apellido">
+                            Apellido <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="text"
+                               id="apellido"
+                               th:field="*{apellido}"
+                               class="form-control"
+                               placeholder="Ej: Pérez"
+                               required/>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('apellido')}"
+                               th:errors="*{apellido}">
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-4">
+
+                        <label for="dni">
+                            DNI <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="text"
+                               id="dni"
+                               th:field="*{dni}"
+                               class="form-control"
+                               placeholder="Ej: 35123456"
+                               required/>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('dni')}"
+                               th:errors="*{dni}">
+                        </small>
+
+                    </div>
+
+                    <div class="form-group col-md-4">
+
+                        <label for="fechaNacimiento">
+                            Fecha de nacimiento
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="date"
+                               id="fechaNacimiento"
+                               th:field="*{fechaNacimiento}"
+                               class="form-control"
+                               required/>
+
+                        <small class="text-muted d-block">
+                            Mayor de 18 años
+                        </small>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('fechaNacimiento')}"
+                               th:errors="*{fechaNacimiento}">
+                        </small>
+
+                    </div>
+
+                    <div class="form-group col-md-4">
+
+                        <label for="fechaIngreso">
+                            Fecha de ingreso
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="date"
+                               id="fechaIngreso"
+                               th:field="*{fechaIngreso}"
+                               class="form-control"
+                               required/>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('fechaIngreso')}"
+                               th:errors="*{fechaIngreso}">
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group col-md-6">
+
+                        <label for="sueldoBase">
+                            Sueldo base ($)
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="number"
+                               step="0.01"
+                               id="sueldoBase"
+                               th:field="*{sueldoBase}"
+                               class="form-control"
+                               required/>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('sueldoBase')}"
+                               th:errors="*{sueldoBase}">
+                        </small>
+
+                    </div>
+
+                    <div class="form-group col-md-6">
+
+                        <label for="email">
+                            Email del empleado
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="email"
+                               id="email"
+                               th:field="*{email}"
+                               class="form-control"
+                               placeholder="empleado@epicentro.com"
+                               required
+                               th:readonly="${esEdicion}"/>
+
+                        <small class="text-muted d-block">
+                            Se usará como nombre de usuario para el login
+                        </small>
+
+                        <small class="text-danger"
+                               th:if="${#fields.hasErrors('email')}"
+                               th:errors="*{email}">
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <!-- PUESTO DE TRABAJO -->
+
+                <h3 class="seccion-titulo">
+                    2. Puesto de trabajo
+                </h3>
+
+                <div class="form-group">
+
+                    <label>
+                        Tipo de empleado
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <div>
+
+                        <div class="custom-control custom-radio custom-control-inline">
+
+                            <input type="radio"
+                                   id="tipoCocinero"
+                                   th:field="*{tipoEmpleado}"
+                                   value="COCINERO"
+                                   class="custom-control-input"
+                                   onchange="toggleCamposTipo()"/>
+
+                            <label class="custom-control-label"
+                                   for="tipoCocinero">
+                                Cocinero
+                            </label>
+
+                        </div>
+
+                        <div class="custom-control custom-radio custom-control-inline">
+
+                            <input type="radio"
+                                   id="tipoCajero"
+                                   th:field="*{tipoEmpleado}"
+                                   value="CAJERO"
+                                   class="custom-control-input"
+                                   onchange="toggleCamposTipo()"/>
+
+                            <label class="custom-control-label"
+                                   for="tipoCajero">
+                                Cajero
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- CAMPOS DE COCINERO -->
+
+                <div id="seccionCocinero"
+                     class="detalle-empleado">
+
+                    <h6>Detalles de cocina</h6>
+
+                    <div class="form-row">
+
+                        <div class="form-group col-md-6">
+
+                            <label for="idCategoria">
+                                Categoría de cocina
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select id="idCategoria"
+                                    th:field="*{idCategoria}"
+                                    class="form-control">
+
+                                <option value="">
+                                    -- Seleccionar categoría --
+                                </option>
+
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.idCategoria}"
+                                        th:text="${cat.nombre}">
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group col-md-6">
+
+                            <label for="especialidad">
+                                Especialidad
+                            </label>
+
+                            <input type="text"
+                                   id="especialidad"
+                                   th:field="*{especialidad}"
+                                   class="form-control"
+                                   placeholder="Ej: Pastas, Parrilla, Repostería"/>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- CAMPOS DE CAJERO -->
+
+                <div id="seccionCajero"
+                     class="detalle-empleado"
+                     style="display: none;">
+
+                    <h6>Detalles de caja</h6>
+
+                    <div class="form-group mb-0">
+
+                        <label for="turno">
+                            Turno de trabajo
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select id="turno"
+                                th:field="*{turno}"
+                                class="form-control">
+
+                            <option value="MAÑANA">
+                                Mañana
+                            </option>
+
+                            <option value="NOCHE">
+                                Noche
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <!-- BOTONES -->
+
+                <div class="empleados-acciones">
+
+                    <a th:href="@{/empleados}"
+                       class="btn boton-cancelar">
+                        Cancelar
+                    </a>
+
+                    <button type="submit"
+                            class="btn boton-guardar"
+                            th:text="${esEdicion ? 'Guardar Cambios' : 'Dar de Alta y Enviar Credenciales'}">
+
+                        Dar de Alta y Enviar Credenciales
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
+<!-- CAMPOS SEGÚN TIPO DE EMPLEADO -->
+
+<script>
+
+    function toggleCamposTipo() {
+
+        var esCocinero =
+            document.getElementById('tipoCocinero').checked;
+
+        var secCocinero =
+            document.getElementById('seccionCocinero');
+
+        var secCajero =
+            document.getElementById('seccionCajero');
+
+        if (esCocinero) {
+
+            secCocinero.style.display = 'block';
+            secCajero.style.display = 'none';
+
+        } else {
+
+            secCocinero.style.display = 'none';
+            secCajero.style.display = 'block';
+
+        }
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        toggleCamposTipo();
+
+    });
+
+</script>
+
 </body>
 </html>
-

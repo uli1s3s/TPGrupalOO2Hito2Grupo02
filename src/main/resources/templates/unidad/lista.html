@@ -1,61 +1,330 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
+
 <body>
+
 <nav th:replace="~{layout :: navbar}"></nav>
 
-<main class="container py-4">
-	
-	<style>
-	    /* La tabla del listado no se mueve al pasar el mouse */
-	    .card.tabla-fija,
-	    .card.tabla-fija:hover {
-	        transform: none;
-	        box-shadow: var(--shadow);
-	        transition: none;
-	    }
-	</style>
+<style>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Unidades de venta</h2>
-    </div>
+    /* CONTENEDOR */
 
-    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    .unidades-contenedor {
+        margin-top: 25px;
+        margin-bottom: 50px;
+    }
 
-    <div class="alert alert-info" th:if="${#lists.isEmpty(unidades)}">
-        Todavía no hay unidades de venta registradas.
-    </div>
+    /* ENCABEZADO */
 
-       <div class="card tabla-fija" th:unless="${#lists.isEmpty(unidades)}">
-        <div class="table-responsive">
-            <table class="table table-striped mb-0">
-                <thead class="thead-dark">
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre comercial</th>
-                    <th>Tipo</th>
-                    <th>Detalle</th>
-                    <th>Superficie (m²)</th>
-                    <th>Responsable</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="unidad : ${unidades}">
-                    <td th:text="${unidad.codigoUnico}">FT001</td>
-                    <td th:text="${unidad.nombreComercial}">Nombre</td>
-                    <td th:text="${unidad.tipo}">Food truck</td>
-                    <td th:text="${unidad.detalle}">Detalle</td>
-                    <td th:text="${#numbers.formatDecimal(unidad.superficieM2, 1, 2)}">0.00</td>
-                    <td th:text="${unidad.responsable.email}">resp@mail.com</td>
-                </tr>
-                </tbody>
-            </table>
+    .unidades-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 40px 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .unidades-header h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .unidades-header p {
+        color: #e5e9e3;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+
+    /* BOTONES */
+
+    .boton-nueva-unidad {
+        display: inline-block;
+        background-color: #d99a4e;
+        border: 1px solid #d99a4e;
+        color: #26352b;
+        padding: 11px 22px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .boton-nueva-unidad:hover {
+        background-color: #e7ad65;
+        border-color: #e7ad65;
+        color: #26352b;
+        text-decoration: none;
+    }
+
+    /* TARJETA DEL LISTADO */
+
+    .unidades-card,
+    .unidades-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .unidades-card-header {
+        background-color: white;
+        padding: 22px 25px;
+        border-bottom: 1px solid #e9ece8;
+    }
+
+    .unidades-card-header h3 {
+        color: #26352b;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+
+    /* TABLA */
+
+    .tabla-unidades {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    .tabla-unidades thead {
+        background-color: #26352b;
+        color: white;
+    }
+
+    .tabla-unidades thead th {
+        padding: 16px 14px;
+        border: none;
+        font-weight: bold;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .tabla-unidades tbody td {
+        padding: 16px 14px;
+        vertical-align: middle;
+        border-top: 1px solid #e9ece8;
+    }
+
+    .tabla-unidades tbody tr:nth-child(even) {
+        background-color: #f7f8f5;
+    }
+
+    .tabla-unidades tbody tr:hover {
+        background-color: #edf2ec;
+    }
+
+    /* DATOS DESTACADOS */
+
+    .codigo-unidad {
+        color: #26352b;
+        font-weight: bold;
+    }
+
+    .nombre-unidad {
+        color: #26352b;
+        font-weight: bold;
+    }
+
+    .tipo-unidad {
+        display: inline-block;
+        background-color: #edf2ec;
+        color: #425843;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    /* ALERTAS */
+
+    .alerta-unidades {
+        border-radius: 8px;
+        padding: 18px 20px;
+        margin-bottom: 25px;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 768px) {
+
+        .unidades-header {
+            padding: 30px 22px;
+        }
+
+        .unidades-header h2 {
+            font-size: 25px;
+        }
+
+        .boton-nueva-unidad {
+            margin-top: 20px;
+        }
+
+        .unidades-card-header {
+            padding: 18px;
+        }
+
+        .tabla-unidades {
+            font-size: 13px;
+        }
+
+    }
+
+</style>
+
+<main class="container py-4 unidades-contenedor">
+
+    <!-- ENCABEZADO -->
+
+    <section class="unidades-header">
+
+        <div class="d-flex justify-content-between
+                    align-items-center flex-wrap">
+
+            <div>
+
+                <h2>Unidades de venta</h2>
+
+                <p>
+                    Consulta y gestión de puestos gastronómicos
+                    registrados en el sistema.
+                </p>
+
+            </div>
+
         </div>
+
+    </section>
+
+    <!-- MENSAJE DE ÉXITO -->
+
+    <div class="alert alert-success alerta-unidades"
+         th:if="${mensaje}"
+         th:text="${mensaje}">
+    </div>
+
+    <!-- SIN UNIDADES REGISTRADAS -->
+
+    <div class="alert alert-info alerta-unidades"
+         th:if="${#lists.isEmpty(unidades)}">
+
+        Todavía no hay unidades de venta registradas.
+
+    </div>
+
+    <!-- LISTADO DE UNIDADES -->
+
+    <div class="card unidades-card"
+         th:unless="${#lists.isEmpty(unidades)}">
+
+        <!-- TÍTULO DE LA TABLA -->
+
+        <div class="unidades-card-header">
+
+            <h3>
+                Listado de unidades registradas
+            </h3>
+
+        </div>
+
+        <!-- TABLA -->
+
+        <div class="table-responsive">
+
+            <table class="table tabla-unidades">
+
+                <thead>
+
+                <tr>
+
+                    <th>Código</th>
+
+                    <th>Nombre comercial</th>
+
+                    <th>Tipo</th>
+
+                    <th>Detalle</th>
+
+                    <th>Superficie (m²)</th>
+
+                    <th>Responsable</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr th:each="unidad : ${unidades}">
+
+                    <!-- CÓDIGO -->
+
+                    <td class="codigo-unidad"
+                        th:text="${unidad.codigoUnico}">
+                        FT001
+                    </td>
+
+                    <!-- NOMBRE COMERCIAL -->
+
+                    <td class="nombre-unidad"
+                        th:text="${unidad.nombreComercial}">
+                        Nombre
+                    </td>
+
+                    <!-- TIPO -->
+
+                    <td>
+
+                        <span class="tipo-unidad"
+                              th:text="${unidad.tipo}">
+                            Food truck
+                        </span>
+
+                    </td>
+
+                    <!-- DETALLE -->
+
+                    <td th:text="${unidad.detalle}">
+                        Detalle
+                    </td>
+
+                    <!-- SUPERFICIE -->
+
+                    <td th:text="${#numbers.formatDecimal(unidad.superficieM2, 1, 2)}">
+                        0.00
+                    </td>
+
+                    <!-- RESPONSABLE -->
+
+                    <td th:text="${unidad.responsable.email}">
+                        resp@mail.com
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
     </div>
 
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>
+
 <div th:replace="~{layout :: scripts}"></div>
+
 </body>
 </html>

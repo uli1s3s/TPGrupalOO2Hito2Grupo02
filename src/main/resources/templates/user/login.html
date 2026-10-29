@@ -1,47 +1,302 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Iniciar sesión - Epicentro Gourmet</title>
-    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}"/>
-    <link rel="stylesheet" th:href="@{/css/modern-business.css}"/>
+
+    <link rel="stylesheet"
+          th:href="@{/vendor/bootstrap/css/bootstrap.min.css}"/>
+
+    <link rel="stylesheet"
+          th:href="@{/css/modern-business.css}"/>
+
+    <style>
+
+        /* FONDO */
+
+        body {
+            background: linear-gradient(135deg, #f7f5f0, #e8eee6);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 25px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* CONTENEDOR */
+
+        .login-container {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+
+        /* TARJETA */
+
+        .login-card,
+        .login-card:hover {
+            background-color: white;
+            border: none;
+            border-top: 6px solid #d99a4e;
+            border-radius: 14px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.10);
+            transform: none;
+            transition: none;
+            overflow: hidden;
+        }
+
+        .login-card .card-body {
+            padding: 40px 35px;
+        }
+
+        /* ENCABEZADO */
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-icono {
+            width: 75px;
+            height: 75px;
+            background-color: #edf2ec;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            margin: 0 auto 20px;
+        }
+
+        .login-header h2 {
+            color: #26352b;
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        /* FORMULARIO */
+
+        .login-label {
+            color: #26352b;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .login-input {
+            height: 46px;
+            border: 1px solid #ced5cd;
+            border-radius: 7px;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+
+        .login-input:focus {
+            border-color: #425843;
+            box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
+        }
+
+        .login-form-group {
+            margin-bottom: 22px;
+        }
+
+        /* BOTÓN */
+
+        .boton-ingresar {
+            background-color: #26352b;
+            border: 1px solid #26352b;
+            color: white;
+            width: 100%;
+            padding: 13px;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .boton-ingresar:hover,
+        .boton-ingresar:focus {
+            background-color: #425843;
+            border-color: #425843;
+            color: white;
+        }
+
+        /* MENSAJES */
+
+        .login-alerta {
+            border-radius: 7px;
+            font-size: 14px;
+            padding: 13px 15px;
+            margin-bottom: 25px;
+        }
+
+        /* PIE INFORMATIVO */
+
+        .login-footer {
+            text-align: center;
+            margin-top: 28px;
+            padding-top: 22px;
+            border-top: 1px solid #e9ece8;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .login-footer strong {
+            color: #425843;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 576px) {
+
+            .login-card .card-body {
+                padding: 30px 22px;
+            }
+
+            .login-header h2 {
+                font-size: 23px;
+            }
+
+        }
+
+    </style>
+
 </head>
-<body class="bg-light">
 
-    <div class="login-container">
-        <div class="card login-card">
-            <div class="card-body">
-                <div class="login-header">
-                    <h3>EPICENTRO GOURMET</h3>
-                    <p class="text-muted">Iniciá sesión para continuar</p>
+<body>
+
+<div class="login-container">
+
+    <div class="card login-card">
+
+        <div class="card-body">
+
+            <!-- ENCABEZADO -->
+
+            <div class="login-header">
+
+                <div class="login-icono">
+                    &#127860;
                 </div>
 
-                <div th:if="${error != null}" class="alert alert-danger">
-                    Usuario o contrasena invalidos.
-                </div>
+                <h2>EPICENTRO GOURMET</h2>
 
-                <div th:if="${logout != null}" class="alert alert-success">
-                    Cesion finalizada correctamente.
-                </div>
+                <p>
+                    Sistema de gestión de festivales gastronómicos
+                </p>
 
-                <form th:action="@{/loginprocess}" method="post">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Usuario</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus placeholder="Ingrese su usuario"/>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Contrasena</label>
-                        <input type="password" class="form-control" id="password" name="password" required placeholder="Ingrese su contrasena"/>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-                </form>
             </div>
+
+            <!-- ERROR DE AUTENTICACIÓN -->
+
+            <div th:if="${error != null}"
+                 class="alert alert-danger login-alerta">
+
+                Usuario o contraseña inválidos.
+
+            </div>
+
+            <!-- CIERRE DE SESIÓN -->
+
+            <div th:if="${logout != null}"
+                 class="alert alert-success login-alerta">
+
+                Sesión finalizada correctamente.
+
+            </div>
+
+            <!-- FORMULARIO DE LOGIN -->
+
+            <form th:action="@{/loginprocess}"
+                  method="post">
+
+                <!-- USUARIO -->
+
+                <div class="form-group login-form-group">
+
+                    <label for="username"
+                           class="login-label">
+                        Usuario
+                    </label>
+
+                    <input type="text"
+                           class="form-control login-input"
+                           id="username"
+                           name="username"
+                           required
+                           autofocus
+                           autocomplete="username"
+                           placeholder="Ingresá tu usuario"/>
+
+                </div>
+
+                <!-- CONTRASEÑA -->
+
+                <div class="form-group login-form-group">
+
+                    <label for="password"
+                           class="login-label">
+                        Contraseña
+                    </label>
+
+                    <input type="password"
+                           class="form-control login-input"
+                           id="password"
+                           name="password"
+                           required
+                           autocomplete="current-password"
+                           placeholder="Ingresá tu contraseña"/>
+
+                </div>
+
+                <!-- INGRESAR -->
+
+                <button type="submit"
+                        class="btn boton-ingresar">
+
+                    Iniciar sesión
+
+                </button>
+
+            </form>
+
+            <!-- PIE INFORMATIVO -->
+
+            <div class="login-footer">
+
+                <strong>Epicentro Gourmet</strong>
+
+                <p class="mb-0 mt-1">
+                    Trabajo Final Integrador - Orientación a Objetos II
+                </p>
+
+            </div>
+
         </div>
+
     </div>
 
-    <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-    <body class="bg-light login-page">
+</div>
+
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
 </body>
 </html>

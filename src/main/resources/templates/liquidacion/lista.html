@@ -1,84 +1,427 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
+
 <body>
+
 <nav th:replace="~{layout :: navbar}"></nav>
 
-<main class="container py-4">
+<style>
 
-    <style>
-        .card.tabla-fija, .card.tabla-fija:hover {
-            transform: none;
-            box-shadow: var(--shadow);
-            transition: none;
+    /* CONTENEDOR */
+
+    .liquidaciones-contenedor {
+        margin-top: 25px;
+        margin-bottom: 50px;
+    }
+
+    /* ENCABEZADO */
+
+    .liquidaciones-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 40px 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .liquidaciones-header h2 {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .liquidaciones-header p {
+        color: #e5e9e3;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    /* TARJETAS */
+
+    .liquidaciones-card,
+    .liquidaciones-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+    }
+
+    .liquidaciones-card {
+        margin-bottom: 30px;
+    }
+
+    .liquidaciones-card-body {
+        padding: 28px;
+    }
+
+    .titulo-card {
+        color: #26352b;
+        font-size: 19px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    /* FORMULARIO */
+
+    .liquidaciones-label {
+        font-weight: bold;
+        color: #26352b;
+        margin-bottom: 10px;
+    }
+
+    .liquidaciones-input {
+        border: 1px solid #ced5cd;
+        border-radius: 6px;
+        height: 42px;
+    }
+
+    .liquidaciones-input:focus {
+        border-color: #425843;
+        box-shadow: 0 0 0 0.2rem rgba(66, 88, 67, 0.15);
+    }
+
+    .boton-calcular {
+        background-color: #26352b;
+        border: 1px solid #26352b;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .boton-calcular:hover,
+    .boton-calcular:focus {
+        background-color: #425843;
+        border-color: #425843;
+        color: white;
+    }
+
+    .informacion-calculo {
+        margin-top: 20px;
+        padding: 15px 18px;
+        background-color: #f7f5f0;
+        border-left: 4px solid #d99a4e;
+        border-radius: 5px;
+        color: #4a554b;
+        font-size: 14px;
+    }
+
+    /* TABLA */
+
+    .tabla-liquidaciones {
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+
+    .tabla-liquidaciones thead {
+        background-color: #26352b;
+        color: white;
+    }
+
+    .tabla-liquidaciones thead th {
+        padding: 16px 13px;
+        border: none;
+        font-weight: bold;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .tabla-liquidaciones tbody td {
+        padding: 15px 13px;
+        vertical-align: middle;
+        border-top: 1px solid #e9ece8;
+    }
+
+    .tabla-liquidaciones tbody tr:nth-child(even) {
+        background-color: #f7f8f5;
+    }
+
+    .tabla-liquidaciones tbody tr:hover {
+        background-color: #edf2ec;
+    }
+
+    .tabla-liquidaciones tfoot {
+        background-color: #e8eee6;
+        color: #26352b;
+        font-weight: bold;
+    }
+
+    .tabla-liquidaciones tfoot th {
+        padding: 18px 13px;
+        border-top: 2px solid #425843;
+    }
+
+    .total-destacado {
+        color: #26352b;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    /* ALERTAS */
+
+    .alerta-liquidaciones {
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+    }
+
+    @media (max-width: 768px) {
+
+        .liquidaciones-header {
+            padding: 30px 22px;
         }
-    </style>
 
-    <h2>Liquidación de haberes</h2>
-    <p class="text-muted">
-        Sueldo base + plus por categoría (cocina) o antigüedad (cajeros),
-        según la cantidad de días que dura el festival.
-    </p>
+        .liquidaciones-header h2 {
+            font-size: 25px;
+        }
 
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        .liquidaciones-card-body {
+            padding: 22px 18px;
+        }
 
-    <!-- Días del festival (hasta que exista la entidad Festival) -->
-    <form th:action="@{/liquidaciones}" method="get" class="form-inline mb-3">
-        <label for="dias" class="mr-2">Días que dura el festival:</label>
-        <input type="number" id="dias" name="dias" min="1" th:value="${dias}"
-               class="form-control mr-2" style="width:110px"/>
-        <button type="submit" class="btn btn-primary">Calcular</button>
-        <span class="ml-3 text-muted">
-            Se liquida el <strong th:text="${porcentaje} + '%'">50%</strong> de (sueldo base + adicional)
-        </span>
-    </form>
+        .tabla-liquidaciones {
+            font-size: 13px;
+        }
 
-    <div class="alert alert-info" th:if="${#lists.isEmpty(liquidaciones)}">
-        No hay empleados activos asignados a unidades de venta.
+    }
+
+</style>
+
+<main class="container py-4 liquidaciones-contenedor">
+
+    <!-- ENCABEZADO -->
+
+    <section class="liquidaciones-header">
+
+        <h2>Liquidación de haberes</h2>
+
+        <p>
+            Sueldo base + plus por categoría (cocina)
+            o antigüedad (cajeros), según la cantidad
+            de días que dura el festival.
+        </p>
+
+    </section>
+
+    <!-- MENSAJE DE ERROR -->
+
+    <div class="alert alert-danger alerta-liquidaciones"
+         th:if="${error}"
+         th:text="${error}">
     </div>
 
-    <div class="card tabla-fija" th:unless="${#lists.isEmpty(liquidaciones)}">
-        <div class="table-responsive">
-            <table class="table table-striped mb-0">
-                <thead class="thead-dark">
-                <tr>
-                    <th>Empleado</th>
-                    <th>DNI</th>
-                    <th>Tipo</th>
-                    <th>Unidad</th>
-                    <th class="text-right">Sueldo base</th>
-                    <th class="text-right">Adicional</th>
-                    <th>Detalle</th>
-                    <th class="text-right">%</th>
-                    <th class="text-right">Total a cobrar</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="l : ${liquidaciones}">
-                    <td th:text="${l.empleado}">Pérez, Juan</td>
-                    <td th:text="${l.dni}">30111222</td>
-                    <td th:text="${l.tipo}">Cajero</td>
-                    <td th:text="${l.unidad}">La Parrilla</td>
-                    <td class="text-right" th:text="'$ ' + ${#numbers.formatDecimal(l.sueldoBase, 1, 'POINT', 2, 'COMMA')}">$ 100.000,00</td>
-                    <td class="text-right" th:text="'$ ' + ${#numbers.formatDecimal(l.adicional, 1, 'POINT', 2, 'COMMA')}">$ 0,00</td>
-                    <td th:text="${l.detalleAdicional}">Detalle</td>
-                    <td class="text-right" th:text="${l.porcentaje} + '%'">50%</td>
-                    <td class="text-right"><strong th:text="'$ ' + ${#numbers.formatDecimal(l.totalACobrar, 1, 'POINT', 2, 'COMMA')}">$ 0,00</strong></td>
-                </tr>
-                </tbody>
-                <tfoot>
-                <tr>
-                    <th colspan="8" class="text-right">Total a pagar</th>
-                    <th class="text-right" th:text="'$ ' + ${#numbers.formatDecimal(totalGeneral, 1, 'POINT', 2, 'COMMA')}">$ 0,00</th>
-                </tr>
-                </tfoot>
-            </table>
+    <!-- FORMULARIO DE CÁLCULO -->
+
+    <div class="card liquidaciones-card">
+
+        <div class="liquidaciones-card-body">
+
+            <h3 class="titulo-card">
+                Parámetros de liquidación
+            </h3>
+
+            <form th:action="@{/liquidaciones}"
+                  method="get">
+
+                <div class="form-row align-items-end">
+
+                    <div class="form-group col-md-5">
+
+                        <label for="dias"
+                               class="liquidaciones-label">
+                            Días que dura el festival:
+                        </label>
+
+                        <input type="number"
+                               id="dias"
+                               name="dias"
+                               min="1"
+                               th:value="${dias}"
+                               class="form-control liquidaciones-input"/>
+
+                    </div>
+
+                    <div class="form-group col-md-auto">
+
+                        <button type="submit"
+                                class="btn boton-calcular">
+                            Calcular liquidación
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+            <!-- PORCENTAJE APLICADO -->
+
+            <div class="informacion-calculo">
+
+                Se liquida el
+
+                <strong th:text="${porcentaje} + '%'">
+                    50%
+                </strong>
+
+                de (sueldo base + adicional).
+
+            </div>
+
         </div>
+
+    </div>
+
+    <!-- SIN EMPLEADOS -->
+
+    <div class="alert alert-info alerta-liquidaciones"
+         th:if="${#lists.isEmpty(liquidaciones)}">
+
+        No hay empleados activos asignados
+        a unidades de venta.
+
+    </div>
+
+    <!-- TABLA DE LIQUIDACIONES -->
+
+    <div class="card liquidaciones-card"
+         th:unless="${#lists.isEmpty(liquidaciones)}">
+
+        <div class="liquidaciones-card-body pb-0">
+
+            <h3 class="titulo-card">
+                Detalle de liquidaciones
+            </h3>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table tabla-liquidaciones">
+
+                <thead>
+
+                <tr>
+
+                    <th>Empleado</th>
+
+                    <th>DNI</th>
+
+                    <th>Tipo</th>
+
+                    <th>Unidad</th>
+
+                    <th class="text-right">
+                        Sueldo base
+                    </th>
+
+                    <th class="text-right">
+                        Adicional
+                    </th>
+
+                    <th>Detalle</th>
+
+                    <th class="text-right">
+                        %
+                    </th>
+
+                    <th class="text-right">
+                        Total a cobrar
+                    </th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr th:each="l : ${liquidaciones}">
+
+                    <td th:text="${l.empleado}">
+                        Pérez, Juan
+                    </td>
+
+                    <td th:text="${l.dni}">
+                        30111222
+                    </td>
+
+                    <td th:text="${l.tipo}">
+                        Cajero
+                    </td>
+
+                    <td th:text="${l.unidad}">
+                        La Parrilla
+                    </td>
+
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(l.sueldoBase, 1, 'POINT', 2, 'COMMA')}">
+                        $ 100.000,00
+                    </td>
+
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(l.adicional, 1, 'POINT', 2, 'COMMA')}">
+                        $ 0,00
+                    </td>
+
+                    <td th:text="${l.detalleAdicional}">
+                        Detalle
+                    </td>
+
+                    <td class="text-right"
+                        th:text="${l.porcentaje} + '%'">
+                        50%
+                    </td>
+
+                    <td class="text-right total-destacado">
+
+                        <strong th:text="'$ ' + ${#numbers.formatDecimal(l.totalACobrar, 1, 'POINT', 2, 'COMMA')}">
+                            $ 0,00
+                        </strong>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+                <tfoot>
+
+                <tr>
+
+                    <th colspan="8"
+                        class="text-right">
+                        Total a pagar
+                    </th>
+
+                    <th class="text-right total-destacado"
+                        th:text="'$ ' + ${#numbers.formatDecimal(totalGeneral, 1, 'POINT', 2, 'COMMA')}">
+                        $ 0,00
+                    </th>
+
+                </tr>
+
+                </tfoot>
+
+            </table>
+
+        </div>
+
     </div>
 
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>
+
 <div th:replace="~{layout :: scripts}"></div>
+
 </body>
 </html>

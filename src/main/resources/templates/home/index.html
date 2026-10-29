@@ -1,132 +1,499 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
 
 <body>
+
 <nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+
+    body {
+        background-color: #f7f5f0;
+        color: #26352b;
+        font-family: Arial, sans-serif;
+    }
+
+    /* BIENVENIDA */
+
+    .inicio-hero {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        text-align: center;
+        padding: 65px 25px;
+        border-radius: 12px;
+        margin-bottom: 45px;
+    }
+
+    .inicio-hero h1 {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .inicio-hero p {
+        font-size: 16px;
+        color: #e5e9e3;
+    }
+
+    .datos-usuario {
+        margin-top: 25px;
+    }
+
+    .dato {
+        display: inline-block;
+        background-color: rgba(255, 255, 255, 0.12);
+        color: white;
+        padding: 10px 16px;
+        margin: 5px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    /* TÍTULOS */
+
+    .titulo-seccion {
+        color: #26352b;
+        text-align: center;
+        font-size: 29px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .subtitulo {
+        text-align: center;
+        color: #666;
+        font-size: 15px;
+        margin-bottom: 35px;
+    }
+
+    /* FESTIVALES */
+
+    .festival-card,
+    .festival-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    .festival-card .card-body {
+        padding: 30px;
+    }
+
+    .festival-temporada {
+        display: inline-block;
+        background-color: #fbead5;
+        color: #87551e;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .festival-nombre {
+        color: #26352b;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .festival-fechas {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .festival-fechas strong {
+        color: #26352b;
+    }
+
+    /* UNIDADES */
+
+    .unidades-titulo {
+        color: #26352b;
+        font-size: 17px;
+        font-weight: bold;
+        margin-top: 25px;
+        margin-bottom: 18px;
+        padding-top: 20px;
+        border-top: 1px solid #e5e9e3;
+    }
+
+    .unidad-item {
+        background-color: #f5f8f5;
+        border-left: 4px solid #4b8660;
+        border-radius: 6px;
+        padding: 18px;
+        margin-bottom: 12px;
+    }
+
+    .unidad-nombre {
+        color: #26352b;
+        font-size: 15px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .unidad-detalle {
+        color: #555;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .unidad-estado {
+        background-color: #e5f3e8;
+        color: #287443;
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    /* SIN RESULTADOS */
+
+    .sin-resultados {
+        background-color: white;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        padding: 45px 25px;
+        text-align: center;
+        color: #666;
+        margin-bottom: 35px;
+    }
+
+    .sin-resultados h4 {
+        color: #26352b;
+        font-weight: bold;
+    }
+
+    /* ACCESOS */
+
+    .accesos-rapidos {
+        margin-top: 45px;
+        margin-bottom: 40px;
+    }
+
+    .acceso-card,
+    .acceso-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 4px solid #d99a4e;
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        transform: none;
+        transition: none;
+        text-align: center;
+    }
+
+    .acceso-card .card-body {
+        padding: 25px 20px;
+    }
+
+    .acceso-card h5 {
+        color: #26352b;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .acceso-card p {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .boton-principal {
+        display: inline-block;
+        background-color: #26352b;
+        color: white;
+        padding: 11px 22px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .boton-principal:hover {
+        background-color: #425843;
+        color: white;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+
+        .inicio-hero {
+            padding: 45px 20px;
+        }
+
+        .inicio-hero h1 {
+            font-size: 28px;
+        }
+
+        .festival-card .card-body {
+            padding: 22px;
+        }
+
+        .festival-nombre {
+            font-size: 19px;
+        }
+
+    }
+
+</style>
 
 <main class="container py-4">
 
-    <!-- Bienvenida -->
-    <div class="hero-section text-center">
-        <div class="container">
-            <h1>Bienvenido a Epicentro Gourmet</h1>
-            <p class="mb-3">
-                Sistema de gestión de festivales gastronómicos
+    <!-- BIENVENIDA -->
+
+    <section class="inicio-hero">
+
+        <h1>Bienvenido a Epicentro Gourmet</h1>
+
+        <p>
+            Descubrí nuestros festivales gastronómicos
+            y sus unidades de venta.
+        </p>
+
+        <div class="datos-usuario">
+
+            <span class="dato">
+
+                Usuario:
+                <strong th:text="${username}">Usuario</strong>
+
+            </span>
+
+            <span class="dato" th:if="${rol != null}">
+
+                Rol:
+                <strong th:text="${#strings.capitalize(
+                    #strings.toLowerCase(
+                        #strings.replace(rol, 'ROLE_', '')
+                    )
+                )}">
+                    Rol
+                </strong>
+
+            </span>
+
+        </div>
+
+    </section>
+
+    <!-- FESTIVALES DISPONIBLES -->
+
+    <section>
+
+        <h2 class="titulo-seccion">
+            Nuestros festivales
+        </h2>
+
+        <p class="subtitulo">
+            Conocé los festivales gastronómicos disponibles
+            y las unidades de venta que participan.
+        </p>
+
+        <!-- SIN FESTIVALES -->
+
+        <div th:if="${festivales == null or festivales.isEmpty()}"
+             class="sin-resultados">
+
+            <h4>No hay festivales disponibles</h4>
+
+            <p class="mb-0">
+                Actualmente no hay festivales gastronómicos
+                para mostrar.
             </p>
 
-            <!-- Usuario y rol autenticado -->
-            <div class="mt-3">
-
-    <span class="badge bg-light text-dark p-2">
-        Usuario:
-        <span th:text="${username}">Usuario</span>
-    </span>
-
-                <span class="badge bg-light text-dark p-2">
-        Rol:
-        <span th:text="${#strings.capitalize(
-            #strings.toLowerCase(
-                #strings.replace(rol, 'ROLE_', '')
-            )
-        )}">Rol</span>
-    </span>
-
-            </div>
         </div>
-    </div>
 
-    <!-- Accesos principales -->
-    <div class="row mb-4">
+        <!-- LISTADO DE FESTIVALES -->
 
-        <!-- Festivales -->
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card access-card h-100">
-                <div class="card-body text-center">
-                    <div class="icon">&#127914;</div>
-                    <h5 class="card-title">Festivales</h5>
-                    <p class="card-text text-muted">
-                        Consultar los festivales gastronómicos.
-                    </p>
-                    <span class="btn btn-primary">
-                            Próximamente
+        <div th:each="festival : ${festivales}"
+             class="card festival-card">
+
+            <div class="card-body">
+
+                <!-- TEMPORADA -->
+
+                <span class="festival-temporada"
+                      th:text="${festival.temporada}">
+                    Primavera
+                </span>
+
+                <!-- NOMBRE -->
+
+                <h3 class="festival-nombre"
+                    th:text="${festival.nombre}">
+                    Epicentro Gourmet 2026
+                </h3>
+
+                <!-- FECHAS -->
+
+                <div class="festival-fechas">
+
+                    <p>
+
+                        <strong>Fecha de inicio:</strong>
+
+                        <span th:text="${festival.fechaInicio}">
+                            22/10/2026
                         </span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Unidades de venta -->
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card access-card h-100">
-                <div class="card-body text-center">
-                    <div class="icon">&#127978;</div>
-                    <h5 class="card-title">Unidades de venta</h5>
-                    <p class="card-text text-muted">
-                        Consultar y gestionar puestos gastronómicos.
                     </p>
-                    <span class="btn btn-primary">
-                            Próximamente
+
+                    <p>
+
+                        <strong>Fecha de finalización:</strong>
+
+                        <span th:text="${festival.fechaFin}">
+                            15/12/2026
                         </span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Pedidos -->
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card access-card h-100">
-                <div class="card-body text-center">
-                    <div class="icon">&#128203;</div>
-
-                    <h5 class="card-title">Pedidos</h5>
-
-                    <p class="card-text text-muted">
-                        Registrar y consultar pedidos.
                     </p>
 
-                    <a th:href="@{/pedidos}" class="btn btn-primary">
-                        Ver pedidos
-                    </a>
                 </div>
-            </div>
-        </div>
 
-        <!-- Reportes -->
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card access-card h-100">
-                <div class="card-body text-center">
-                    <div class="icon">&#128200;</div>
-                    <h5 class="card-title">Reportes</h5>
-                    <p class="card-text text-muted">
-                        Consultar recaudación y rentabilidad.
-                    </p>
-                    <span class="btn btn-primary">
-                            Próximamente
+                <!-- UNIDADES DEL FESTIVAL -->
+
+                <h4 class="unidades-titulo">
+                    Unidades de venta
+                </h4>
+
+                <!-- SIN UNIDADES -->
+
+                <p th:if="${festival.unidadesVenta == null or festival.unidadesVenta.isEmpty()}"
+                   class="text-muted">
+
+                    Este festival todavía no tiene
+                    unidades de venta registradas.
+
+                </p>
+
+                <!-- LISTADO DE UNIDADES -->
+
+                <div th:each="unidad : ${festival.unidadesVenta}"
+                     class="unidad-item">
+
+                    <div class="d-flex justify-content-between
+                                align-items-center flex-wrap">
+
+                        <h5 class="unidad-nombre"
+                            th:text="${unidad.nombreComercial}">
+                            Hamburguesas Artesanales
+                        </h5>
+
+                    </div>
+
+                    <p class="unidad-detalle">
+
+                        <strong>Código:</strong>
+
+                        <span th:text="${unidad.codigoUnico}">
+                            FT-EG2026
                         </span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Personal (Alta y Gestión de Empleados) -->
-        <div class="col-md-6 col-lg-3 mb-4">
-            <div class="card access-card h-100 shadow-sm border-primary">
-                <div class="card-body text-center">
-                    <div class="icon">&#128101;</div>
-                    <h5 class="card-title text-primary">Personal</h5>
-                    <p class="card-text text-muted">
-                        Gestión y alta de cocineros y cajeros.
                     </p>
-                    <a th:href="@{/empleados}" class="btn btn-primary">
-                        Gestionar Personal
-                    </a>
+
+                    <p class="unidad-detalle mb-0">
+
+                        <strong>Tipo:</strong>
+
+                        <span th:text="${unidad.tipo}">
+                            FoodTruck
+                        </span>
+
+                    </p>
+
                 </div>
+
             </div>
+
         </div>
 
-    </div>
+    </section>
+
+    <!-- ACCESOS DE GESTIÓN -->
+
+    <section class="accesos-rapidos">
+
+        <h2 class="titulo-seccion">
+            Accesos de gestión
+        </h2>
+
+        <p class="subtitulo">
+            Accedé a las funcionalidades del sistema.
+        </p>
+
+        <div class="row">
+
+            <!-- PEDIDOS -->
+
+            <div class="col-md-6 mb-4">
+
+                <div class="card acceso-card h-100">
+
+                    <div class="card-body">
+
+                        <h5>Pedidos</h5>
+
+                        <p>
+                            Registrar y consultar
+                            pedidos gastronómicos.
+                        </p>
+
+                        <a th:href="@{/pedidos}"
+                           class="boton-principal">
+                            Ver pedidos
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- PERSONAL -->
+
+            <div class="col-md-6 mb-4">
+
+                <div class="card acceso-card h-100">
+
+                    <div class="card-body">
+
+                        <h5>Personal</h5>
+
+                        <p>
+                            Gestión y alta de
+                            cocineros y cajeros.
+                        </p>
+
+                        <a th:href="@{/empleados}"
+                           class="boton-principal">
+                            Gestionar personal
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
 
 </main>
 
 <footer th:replace="~{layout :: footer}"></footer>
+
 <div th:replace="~{layout :: scripts}"></div>
 
 </body>

@@ -1,21 +1,131 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{layout :: head}"></head>
+
 <body>
-    <nav th:replace="~{layout :: navbar}"></nav>
 
-    <main class="container py-4">
-        <div class="page-header">
-            <h2>Hola, <span th:text="${name}">Usuario</span></h2>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <p>Bienvenido al sistema de gestion del TFI.</p>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+
+    .bienvenida-contenedor {
+        max-width: 900px;
+        margin: 35px auto 60px;
+    }
+
+    .bienvenida-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        border-radius: 12px;
+        padding: 55px 35px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .bienvenida-header h1 {
+        font-size: 34px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .bienvenida-header p {
+        color: #e5e9e3;
+        font-size: 16px;
+        margin-bottom: 0;
+    }
+
+    .bienvenida-card {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        padding: 35px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .bienvenida-icono {
+        font-size: 45px;
+        margin-bottom: 20px;
+    }
+
+    .bienvenida-card h3 {
+        color: #26352b;
+        font-size: 23px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .bienvenida-card p {
+        color: #666;
+        font-size: 16px;
+        line-height: 1.7;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+
+        .bienvenida-header {
+            padding: 40px 20px;
+        }
+
+        .bienvenida-header h1 {
+            font-size: 27px;
+        }
+
+        .bienvenida-card {
+            padding: 25px 20px;
+        }
+
+    }
+
+</style>
+
+<main class="container py-4">
+
+    <div class="bienvenida-contenedor">
+
+        <!-- ENCABEZADO -->
+
+        <section class="bienvenida-header">
+
+            <h1>
+                Hola,
+                <span th:text="${name}">Usuario</span>
+            </h1>
+
+            <p>
+                Bienvenido a Epicentro Gourmet
+            </p>
+
+        </section>
+
+        <!-- INFORMACIÓN -->
+
+        <div class="bienvenida-card">
+
+            <div class="bienvenida-icono">
+                &#127860;
             </div>
-        </div>
-    </main>
 
-    <footer th:replace="~{layout :: footer}"></footer>
-    <div th:replace="~{layout :: scripts}"></div>
+            <h3>Sistema de gestión gastronómica</h3>
+
+            <p>
+                Bienvenido al sistema de gestión del
+                Trabajo Final Integrador.
+            </p>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+
+<div th:replace="~{layout :: scripts}"></div>
+
 </body>
 </html>
