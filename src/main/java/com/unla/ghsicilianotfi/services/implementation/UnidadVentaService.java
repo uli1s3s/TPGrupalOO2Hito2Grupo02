@@ -44,6 +44,9 @@ import java.util.Map;
 import java.math.BigDecimal;
 
 import java.time.LocalDate;
+import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
+import com.unla.ghsicilianotfi.entities.Cocinero;
+import java.util.HashMap;
 
 @Service("unidadVentaService")
 public class UnidadVentaService implements IUnidadVentaService {
@@ -86,6 +89,55 @@ public class UnidadVentaService implements IUnidadVentaService {
     @Override
     public List<UnidadVenta> listarPorResponsable(String nombreUsuario) {
         return unidadVentaRepository.findByResponsable_Nombre(nombreUsuario);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstadoEmpleadoDTO> listarPersonalConEstado(String busqueda) {
+
+        // 1) Armo un mapa: id del empleado -> unidad donde trabaja
+        Map<Long, UnidadVenta> unidadDeCadaEmpleado = new HashMap<>();
+        for (UnidadVenta unidad : unidadVentaRepository.buscarUnidadesConEmpleados()) {
+            for (Personal empleado : unidad.getEmpleados()) {
+                unidadDeCadaEmpleado.put(empleado.getIdPersonal(), unidad);
+            }
+        }
+
+        // 2) Recorro todo el personal y le calculo el estado a cada uno
+        List<EstadoEmpleadoDTO> resultado = new ArrayList<>();
+        for (Personal empleado : unidadVentaRepository.buscarTodoElPersonal()) {
+
+            if (!coincideBusqueda(empleado, busqueda)) {
+                continue;
+            }
+
+            UnidadVenta unidad = unidadDeCadaEmpleado.get(empleado.getIdPersonal());
+
+            String estado;
+            if (!empleado.isActivo()) {
+                estado = EstadoEmpleadoDTO.DADO_DE_BAJA;
+            } else if (unidad != null) {
+                estado = EstadoEmpleadoDTO.OCUPADO;
+            } else {
+                estado = EstadoEmpleadoDTO.LIBRE;
+            }
+
+            // La unidad solo se informa si el empleado está trabajando ahí
+            boolean estaOcupado = EstadoEmpleadoDTO.OCUPADO.equals(estado);
+
+            resultado.add(new EstadoEmpleadoDTO(
+                    empleado.getIdPersonal(),
+                    empleado.getNombre(),
+                    empleado.getApellido(),
+                    empleado.getDni(),
+                    (empleado instanceof Cocinero) ? "Cocinero" : "Cajero",
+                    empleado.getCredenciales() != null ? empleado.getCredenciales().getEmail() : "-",
+                    estado,
+                    estaOcupado ? unidad.getIdUnidad() : null,
+                    estaOcupado ? unidad.getNombreComercial() : null));
+        }
+
+        return resultado;
     }
     
     @Override
@@ -487,6 +539,17 @@ public class UnidadVentaService implements IUnidadVentaService {
             return unidad instanceof PuestoDesmontable;
         }
         return false;
+    }
+    
+    // True si el empleado coincide con lo buscado (nombre, apellido o DNI). Sin busqueda, coinciden todos.
+    private boolean coincideBusqueda(Personal empleado, String busqueda) {
+        if (busqueda == null || busqueda.isBlank()) {
+            return true;
+        }
+        String texto = busqueda.trim().toLowerCase(Locale.ROOT);
+        return empleado.getNombre().toLowerCase(Locale.ROOT).contains(texto)
+                || empleado.getApellido().toLowerCase(Locale.ROOT).contains(texto)
+                || empleado.getDni().contains(texto);
     }
     
     

@@ -61,4 +61,12 @@ public interface IUnidadVentaRepository extends JpaRepository<UnidadVenta, Long>
     
     // Unidad en la que trabaja un empleado (si esta asignado a alguna)
     Optional<UnidadVenta> findByEmpleados_IdPersonal(Long idPersonal);
+    
+    // Todo el personal (activo y dado de baja), ordenado por apellido y nombre
+    @Query("SELECT p FROM Personal p ORDER BY p.apellido, p.nombre")
+    List<Personal> buscarTodoElPersonal();
+
+    // Todas las unidades con sus empleados ya cargados (para saber quién trabaja en cada una)
+    @Query("SELECT DISTINCT u FROM UnidadVenta u LEFT JOIN FETCH u.empleados")
+    List<UnidadVenta> buscarUnidadesConEmpleados();
 }
