@@ -30,6 +30,7 @@ public class ViewRouteHelper {
 	//FESTIVAL
 	public final static String FESTIVAL_INDEX = "festival/index";
 	public final static String FESTIVAL_FORM = "festival/form";
+	public final static String FESTIVAL_FACTURACION = "festival/facturacion";
 	
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";

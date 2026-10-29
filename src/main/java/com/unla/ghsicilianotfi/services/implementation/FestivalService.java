@@ -2,6 +2,7 @@ package com.unla.ghsicilianotfi.services.implementation;
 
 import com.unla.ghsicilianotfi.dtos.CostoFestivalFormDTO;
 import com.unla.ghsicilianotfi.dtos.FestivalFormDTO;
+import com.unla.ghsicilianotfi.dtos.ReporteFacturacionFestivalDTO;
 import com.unla.ghsicilianotfi.entities.Costo;
 import com.unla.ghsicilianotfi.entities.Festival;
 import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
@@ -38,6 +39,18 @@ public class FestivalService implements IFestivalService {
         return festivalRepository.findAll()
                 .stream()
                 .map(this::toDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteFacturacionFestivalDTO> listarFacturacion() {
+        return festivalRepository.findFacturacionPorFestival()
+                .stream()
+                .map(festival -> new ReporteFacturacionFestivalDTO(
+                        festival.getIdFestival(),
+                        festival.getNombre(),
+                        festival.getFacturacion()))
                 .toList();
     }
 

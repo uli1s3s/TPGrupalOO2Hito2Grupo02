@@ -2,11 +2,13 @@ package com.unla.ghsicilianotfi.services.implementation;
 
 import com.unla.ghsicilianotfi.dtos.CostoFestivalFormDTO;
 import com.unla.ghsicilianotfi.dtos.FestivalFormDTO;
+import com.unla.ghsicilianotfi.repositories.FestivalFacturacionProjection;
 import com.unla.ghsicilianotfi.entities.Costo;
 import com.unla.ghsicilianotfi.entities.Festival;
 import com.unla.ghsicilianotfi.entities.TipoCostoFestival;
 import com.unla.ghsicilianotfi.entities.TipoUnidadAplicable;
 import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
+import com.unla.ghsicilianotfi.repositories.IUnidadVentaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -146,6 +148,23 @@ class FestivalServiceTest {
         assertEquals("Festival activo", resultado.get(0).getNombre());
         assertEquals(true, resultado.get(0).isActivo());
         verify(festivalRepository).findByActivoTrue();
+    }
+
+    @Test
+    void listarFacturacionDevuelveLasFilasDelRanking() {
+        FestivalFacturacionProjection fila = org.mockito.Mockito.mock(FestivalFacturacionProjection.class);
+        when(fila.getIdFestival()).thenReturn(2L);
+        when(fila.getNombre()).thenReturn("Festival de prueba");
+        when(fila.getFacturacion()).thenReturn(12500.50);
+        when(festivalRepository.findFacturacionPorFestival()).thenReturn(List.of(fila));
+
+        var resultado = festivalService.listarFacturacion();
+
+        assertEquals(1, resultado.size());
+        assertEquals(2L, resultado.get(0).getIdFestival());
+        assertEquals("Festival de prueba", resultado.get(0).getNombre());
+        assertEquals(12500.50, resultado.get(0).getFacturacion(), 0.001);
+        verify(festivalRepository).findFacturacionPorFestival();
     }
 
     private FestivalFormDTO festivalValido() {
