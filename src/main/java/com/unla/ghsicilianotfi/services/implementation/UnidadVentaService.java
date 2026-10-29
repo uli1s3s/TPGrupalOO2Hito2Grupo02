@@ -34,6 +34,9 @@ import com.unla.ghsicilianotfi.entities.TipoUnidadAplicable;
 import com.unla.ghsicilianotfi.helpers.TarifaCanon;
 
 import com.unla.ghsicilianotfi.entities.Personal;
+import com.unla.ghsicilianotfi.dtos.RentabilidadNetaDTO;
+
+import java.math.RoundingMode;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -274,6 +277,66 @@ public class UnidadVentaService implements IUnidadVentaService {
     }
     
     // =====================================================
+    // RENTABILIDAD NETA = (ventas - costo de platos) - sueldos - canon
+    // =====================================================
+    @Override
+    @Transactional(readOnly = true)
+    public RentabilidadNetaDTO calcularRentabilidadNeta(Long idUnidad, Long idFestival, String nombreResponsable) {
+
+        // 1. La unidad tiene que ser del responsable que inició sesión
+        UnidadVenta unidad = buscarUnidadDelResponsable(idUnidad, nombreResponsable);
+
+        // 2. La unidad tiene que participar del festival elegido
+        if (idFestival == null) {
+            throw new IllegalArgumentException("Seleccioná un festival");
+        }
+
+        Festival festival = null;
+        for (Festival f : unidad.getFestivales()) {
+            if (f.getIdFestival().equals(idFestival)) {
+                festival = f;
+            }
+        }
+
+        if (festival == null) {
+            throw new IllegalArgumentException("La unidad no participa del festival seleccionado");
+        }
+
+        // 3. Ventas y costo de los platos vendidos
+        BigDecimal ventas = aDinero(unidadVentaRepository.sumarVentas(idUnidad, idFestival));
+        BigDecimal costoPlatos = aDinero(unidadVentaRepository.sumarCostoPlatos(idUnidad, idFestival));
+        BigDecimal gananciaBruta = ventas.subtract(costoPlatos);
+
+        // 4. Se restan obligatoriamente los sueldos y el canon
+        BigDecimal sueldos = aDinero(unidadVentaRepository.sumarSueldos(idUnidad, idFestival));
+        BigDecimal canon = unidad.calcularCanon(armarTarifa(unidad, festival));
+
+        BigDecimal rentabilidadNeta = gananciaBruta.subtract(sueldos).subtract(canon);
+
+        return new RentabilidadNetaDTO(
+                unidad.getIdUnidad(),
+                unidad.getNombreComercial(),
+                unidad.getCodigoUnico(),
+                festival.getIdFestival(),
+                festival.getNombre(),
+                ventas,
+                costoPlatos,
+                gananciaBruta,
+                sueldos,
+                canon,
+                rentabilidadNeta
+        );
+    }
+
+    // Pasa un importe que viene de la base (double) a BigDecimal con 2 decimales
+    private BigDecimal aDinero(Double valor) {
+        if (valor == null) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+        return BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP);
+    }
+    
+    // =====================================================
     // MI UNIDAD: empleados disponibles, asignar, quitar y canon
     // =====================================================
 
@@ -299,7 +362,7 @@ public class UnidadVentaService implements IUnidadVentaService {
 
         // Disponibilidad: un empleado solo puede trabajar en una unidad
         if (unidadVentaRepository.existsByEmpleados_IdPersonal(idPersonal)) {
-            throw new IllegalArgumentException("El empleado ya está asignado a una unidad de venta");
+            throw new IllegalArgumentException("Esa unidad de venta no está a tu cargo");
         }
 
         unidad.getEmpleados().add(empleado);

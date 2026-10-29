@@ -9,6 +9,7 @@ import com.unla.ghsicilianotfi.entities.Personal;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import com.unla.ghsicilianotfi.dtos.RentabilidadNetaDTO;
 
 public interface IUnidadVentaService {
 
@@ -38,5 +39,8 @@ public interface IUnidadVentaService {
     
     // Unidades de venta que participan de un festival
     List<UnidadVenta> listarPorFestival(Long idFestival);
+    
+    // Rentabilidad neta de una unidad del responsable en uno de sus festivales
+    RentabilidadNetaDTO calcularRentabilidadNeta(Long idUnidad, Long idFestival, String nombreResponsable);
 }
 
