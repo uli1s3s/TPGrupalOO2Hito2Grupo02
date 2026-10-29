@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.unla.ghsicilianotfi.dtos.EstadoEmpleadoDTO;
 
 /**
  * "Mi unidad": el responsable ve su unidad de venta, el canon que paga en cada festival
@@ -38,13 +39,16 @@ public class MiUnidadController {
     }
 
     // ==========================================
-    // Ver mis unidades, sus canones y sus empleados
+    // Ver mis unidades, sus canones, sus empleados y todo el personal del predio
     // ==========================================
     @GetMapping
-    public String verMiUnidad(Model model, Authentication authentication) {
+    public String verMiUnidad(@RequestParam(value = "busqueda", required = false) String busqueda,
+                              Model model, Authentication authentication) {
 
         List<UnidadVenta> unidades = unidadVentaService.listarPorResponsable(authentication.getName());
-        List<Personal> disponibles = unidadVentaService.listarEmpleadosDisponibles();
+
+        // Todo el personal con su estado (libre, ocupado o dado de baja), filtrado por la busqueda
+        List<EstadoEmpleadoDTO> personal = unidadVentaService.listarPersonalConEstado(busqueda);
 
         // Canon de cada unidad en cada uno de sus festivales
         Map<Long, Map<String, BigDecimal>> canones = new HashMap<>();
@@ -52,19 +56,17 @@ public class MiUnidadController {
             canones.put(unidad.getIdUnidad(), unidadVentaService.calcularCanonPorFestival(unidad.getIdUnidad()));
         }
 
-        // Tipo de cada empleado (Cocinero o Cajero) para mostrarlo en la vista
+        // Tipo de cada empleado de mis unidades (Cocinero o Cajero) para mostrarlo en la vista
         Map<Long, String> tipos = new HashMap<>();
         for (UnidadVenta unidad : unidades) {
             for (Personal empleado : unidad.getEmpleados()) {
                 tipos.put(empleado.getIdPersonal(), tipoDe(empleado));
             }
         }
-        for (Personal empleado : disponibles) {
-            tipos.put(empleado.getIdPersonal(), tipoDe(empleado));
-        }
 
         model.addAttribute("unidades", unidades);
-        model.addAttribute("disponibles", disponibles);
+        model.addAttribute("personal", personal);
+        model.addAttribute("busqueda", busqueda);
         model.addAttribute("canones", canones);
         model.addAttribute("tipos", tipos);
 
@@ -75,7 +77,6 @@ public class MiUnidadController {
 
         return ViewRouteHelper.MI_UNIDAD;
     }
-
     // ==========================================
     // Asignar un empleado disponible a mi unidad
     // ==========================================
