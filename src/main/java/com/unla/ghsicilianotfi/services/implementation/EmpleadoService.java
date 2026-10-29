@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.unla.ghsicilianotfi.services.IUnidadVentaService;
 
 @Service("empleadoService")
 public class EmpleadoService implements IEmpleadoService {
@@ -27,6 +28,7 @@ public class EmpleadoService implements IEmpleadoService {
     private final IRolRepository rolRepository;
     private final IEmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final IUnidadVentaService unidadVentaService;
 
     public EmpleadoService(ICocineroRepository cocineroRepository,
                            ICajeroRepository cajeroRepository,
@@ -34,7 +36,8 @@ public class EmpleadoService implements IEmpleadoService {
                            IUsuarioRepository usuarioRepository,
                            IRolRepository rolRepository,
                            IEmailService emailService,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder, 
+                           IUnidadVentaService unidadVentaService) {
         this.cocineroRepository = cocineroRepository;
         this.cajeroRepository = cajeroRepository;
         this.categoriaCocineroRepository = categoriaCocineroRepository;
@@ -42,6 +45,7 @@ public class EmpleadoService implements IEmpleadoService {
         this.rolRepository = rolRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
+        this.unidadVentaService = unidadVentaService;
     }
 
     @Override
@@ -229,6 +233,9 @@ public class EmpleadoService implements IEmpleadoService {
                 c.getCredenciales().setActivo(false);
             }
             cocineroRepository.save(c);
+
+            // Al darlo de baja deja de trabajar en su unidad (queda libre para el futuro)
+            unidadVentaService.desasignarEmpleado(idPersonal);
             return true;
         }
 
@@ -240,6 +247,9 @@ public class EmpleadoService implements IEmpleadoService {
                 ca.getCredenciales().setActivo(false);
             }
             cajeroRepository.save(ca);
+
+            // Al darlo de baja deja de trabajar en su unidad (queda libre para el futuro)
+            unidadVentaService.desasignarEmpleado(idPersonal);
             return true;
         }
 
@@ -301,12 +311,24 @@ public class EmpleadoService implements IEmpleadoService {
         // Validación de DNI único
         String dni = dto.getDni().trim();
         if (cocineroRepository.existsByDni(dni) || cajeroRepository.existsByDni(dni)) {
+            if (dniEsDeEmpleadoDadoDeBaja(dni)) {
+                throw new IllegalArgumentException("Ya existe un empleado con el DNI " + dni
+                        + ", pero está dado de baja. Podés reactivarlo y asignarlo a tu unidad desde 'Mi unidad'.");
+            }
             throw new IllegalArgumentException("Ya existe un empleado registrado con el DNI: " + dni);
         }
 
         // Validación de email / usuario único
         String email = dto.getEmail().trim();
-        if (usuarioRepository.findByNombreConRol(email).isPresent()) {
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByNombreConRol(email);
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
+            boolean esEmpleadoDadoDeBaja = !Boolean.TRUE.equals(usuario.getActivo())
+                    && "EMPLEADO".equalsIgnoreCase(usuario.getRol().getNombre());
+            if (esEmpleadoDadoDeBaja) {
+                throw new IllegalArgumentException("Ya existe un empleado con el email " + email
+                        + ", pero está dado de baja. Podés reactivarlo y asignarlo a tu unidad desde 'Mi unidad'.");
+            }
             throw new IllegalArgumentException("Ya existe un usuario con el email: " + email);
         }
     }
@@ -354,6 +376,17 @@ public class EmpleadoService implements IEmpleadoService {
         }
 
         return dto;
+    }
+    
+    // true si el DNI pertenece a un cocinero o cajero que está dado de baja
+    private boolean dniEsDeEmpleadoDadoDeBaja(String dni) {
+        boolean cocineroDeBaja = cocineroRepository.findByDni(dni)
+                .map(cocinero -> !cocinero.isActivo())
+                .orElse(false);
+        boolean cajeroDeBaja = cajeroRepository.findByDni(dni)
+                .map(cajero -> !cajero.isActivo())
+                .orElse(false);
+        return cocineroDeBaja || cajeroDeBaja;
     }
 }
 
