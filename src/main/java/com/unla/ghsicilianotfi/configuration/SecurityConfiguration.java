@@ -85,9 +85,13 @@ public class SecurityConfiguration {
 							"RESPONSABLE"
 					);
 
-					// OTRAS API
-					auth.requestMatchers("/api/v1/**")
-							.permitAll();
+					// GESTIÓN DE FESTIVALES: solo administradores
+					auth.requestMatchers(
+							"/festivales",
+							"/festivales/**"
+					).hasRole("ADMINISTRADOR");
+
+					auth.requestMatchers("/api/v1/**").permitAll();
 
 					// RESTO DE LAS RUTAS
 					auth.anyRequest().authenticated();

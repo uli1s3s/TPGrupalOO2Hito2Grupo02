@@ -301,7 +301,7 @@
 
         <p class="subtitulo">
             Conocé los festivales gastronómicos disponibles
-            y las unidades de venta que participan.
+            y sus fechas.
         </p>
 
         <!-- SIN FESTIVALES -->
@@ -357,59 +357,6 @@
                         <span th:text="${festival.fechaFin}">
                             15/12/2026
                         </span>
-                    </p>
-
-                </div>
-
-                <!-- UNIDADES DEL FESTIVAL -->
-
-                <h4 class="unidades-titulo">
-                    Unidades de venta
-                </h4>
-
-                <!-- SIN UNIDADES -->
-
-                <p th:if="${festival.unidadesVenta == null or festival.unidadesVenta.isEmpty()}"
-                   class="text-muted">
-
-                    Este festival todavía no tiene
-                    unidades de venta registradas.
-
-                </p>
-
-                <!-- LISTADO DE UNIDADES -->
-
-                <div th:each="unidad : ${festival.unidadesVenta}"
-                     class="unidad-item">
-
-                    <div class="d-flex justify-content-between
-                                align-items-center flex-wrap">
-
-                        <h5 class="unidad-nombre"
-                            th:text="${unidad.nombreComercial}">
-                            Hamburguesas Artesanales
-                        </h5>
-
-                    </div>
-
-                    <p class="unidad-detalle">
-
-                        <strong>Código:</strong>
-
-                        <span th:text="${unidad.codigoUnico}">
-                            FT-EG2026
-                        </span>
-
-                    </p>
-
-                    <p class="unidad-detalle mb-0">
-
-                        <strong>Tipo:</strong>
-
-                        <span th:text="${unidad.tipo}">
-                            FoodTruck
-                        </span>
-
                     </p>
 
                 </div>

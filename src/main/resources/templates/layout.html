@@ -206,12 +206,22 @@
                     </a>
                 </li>
 
-                <!-- FESTIVALES: TODOS -->
+                <!-- FESTIVALES DISPONIBLES: TODOS -->
 
                 <li class="nav-item">
                     <a class="nav-link"
                        th:href="@{/index#festivales}">
                         Festivales
+                    </a>
+                </li>
+
+                <!-- GESTIÓN DE FESTIVALES: ADMINISTRADOR -->
+
+                <li class="nav-item"
+                    sec:authorize="hasRole('ADMINISTRADOR')">
+                    <a class="nav-link"
+                       th:href="@{/festivales}">
+                        Administrar festivales
                     </a>
                 </li>
 

@@ -24,6 +24,10 @@ public class ViewRouteHelper {
 	//UNIDAD DE VENTA
 	public final static String UNIDAD_NUEVA = "unidad/nueva";
 	public final static String UNIDAD_LISTA = "unidad/lista";
+
+	//FESTIVAL
+	public final static String FESTIVAL_INDEX = "festival/index";
+	public final static String FESTIVAL_FORM = "festival/form";
 	
 	public final static String REGISTRO_RESPONSABLE_EXITO = "unidad/registro-exito";
 	
