@@ -49,6 +49,7 @@ public class ViewRouteHelper {
 	//PLATO
 	public final static String PLATO_INDEX = "platos/index";
 	public final static String PLATO_FORM = "platos/form";
+	public final static String PLATO_RENTABILIDAD = "platos/rentabilidad";
 
 	/**** Redirects ****/
 	public final static String ROUTE = "/index";

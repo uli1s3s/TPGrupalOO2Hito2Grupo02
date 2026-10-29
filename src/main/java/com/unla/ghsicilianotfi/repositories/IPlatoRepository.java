@@ -16,6 +16,29 @@ public interface IPlatoRepository extends JpaRepository<Plato, Long> {
 
     List<Plato> findByUnidadVenta_Responsable_NombreOrderByNombreAsc(String nombreResponsable);
 
+    @Query("""
+            select plato.idPlato as idPlato,
+                   plato.nombre as nombre,
+                   unidad.nombreComercial as nombreUnidad,
+                   plato.precioVenta as precioVenta,
+                   plato.costoProduccion as costoProduccion,
+                   coalesce(sum(detalle.cantidad), 0) as cantidadVendida,
+                   coalesce(sum(detalle.cantidad * detalle.precioUnitario), 0.0) as facturacionTotal,
+                   coalesce(sum(detalle.cantidad * detalle.costoUnitario), 0.0) as costoTotal,
+                   plato.activo as activo
+            from Plato plato
+            join plato.unidadVenta unidad
+            left join DetallePedido detalle on detalle.plato = plato
+            where unidad.responsable.nombre = :nombreResponsable
+            group by plato.idPlato, plato.nombre, unidad.nombreComercial,
+                     plato.precioVenta, plato.costoProduccion, plato.activo
+            order by coalesce(sum(detalle.cantidad * (detalle.precioUnitario - detalle.costoUnitario)), 0.0) desc,
+                     (plato.precioVenta - plato.costoProduccion) desc,
+                     plato.nombre asc
+            """)
+    List<PlatoRentabilidadProjection> buscarRentabilidadPorResponsable(
+            @Param("nombreResponsable") String nombreResponsable);
+
     @EntityGraph(attributePaths = "unidadVenta")
     List<Plato> findByActivoTrue();
 

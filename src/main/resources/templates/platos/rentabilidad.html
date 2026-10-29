@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+        <div>
+            <h1>Rentabilidad de platos</h1>
+            <p class="text-muted mb-0">Rentabilidad bruta de los platos de tus unidades, ordenada por ganancia histórica.</p>
+        </div>
+        <a class="btn btn-outline-secondary mt-2" th:href="@{/platos}">Volver a platos</a>
+    </div>
+
+    <div class="alert alert-info" th:if="${#lists.isEmpty(reporte)}">
+        Todavía no hay platos registrados en tus unidades.
+    </div>
+
+    <div th:unless="${#lists.isEmpty(reporte)}">
+        <p class="text-muted">
+            La rentabilidad por unidad usa el precio y costo actuales. La rentabilidad total y la facturación
+            se calculan con los valores guardados al registrar cada pedido.
+        </p>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered bg-white">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Plato</th>
+                    <th>Unidad de venta</th>
+                    <th>Estado</th>
+                    <th class="text-right">Unidades vendidas</th>
+                    <th class="text-right">Precio actual</th>
+                    <th class="text-right">Costo actual</th>
+                    <th class="text-right">Ganancia bruta por unidad</th>
+                    <th class="text-right">Margen actual</th>
+                    <th class="text-right">Facturación histórica</th>
+                    <th class="text-right">Ganancia bruta histórica</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="plato : ${reporte}">
+                    <td th:text="${plato.nombre}"></td>
+                    <td th:text="${plato.nombreUnidad}"></td>
+                    <td>
+                        <span th:if="${plato.activo}" class="badge badge-success">Activo</span>
+                        <span th:unless="${plato.activo}" class="badge badge-secondary">Inactivo</span>
+                    </td>
+                    <td class="text-right" th:text="${plato.cantidadVendida}"></td>
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(plato.precioVenta, 1, 'POINT', 2, 'COMMA')}"></td>
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(plato.costoProduccion, 1, 'POINT', 2, 'COMMA')}"></td>
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(plato.rentabilidadUnitaria, 1, 'POINT', 2, 'COMMA')}"></td>
+                    <td class="text-right"
+                        th:if="${plato.margenPorcentaje != null}"
+                        th:text="${#numbers.formatDecimal(plato.margenPorcentaje, 1, 'POINT', 2, 'COMMA')} + ' %'"></td>
+                    <td class="text-right" th:if="${plato.margenPorcentaje == null}">No aplica</td>
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(plato.facturacionTotal, 1, 'POINT', 2, 'COMMA')}"></td>
+                    <td class="text-right"
+                        th:text="'$ ' + ${#numbers.formatDecimal(plato.rentabilidadTotal, 1, 'POINT', 2, 'COMMA')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+</body>
+</html>
