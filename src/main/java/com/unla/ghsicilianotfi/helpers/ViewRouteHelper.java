@@ -34,6 +34,9 @@ public class ViewRouteHelper {
 	//LIQUIDACION
 	public final static String LIQUIDACION_LISTA = "liquidacion/lista";
 	
+	//REPORTES
+	public final static String REPORTE_MAYOR_CANON = "reportes/mayor-canon";
+	
 	//EMPLEADO
 	public final static String EMPLEADO_INDEX = "empleados/index";
 	public final static String EMPLEADO_FORM = "empleados/form";

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head}"></head>
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .canon-contenedor { margin-top: 25px; margin-bottom: 50px; }
+
+    .canon-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 40px 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+    .canon-header h2 { font-size: 30px; font-weight: bold; margin-bottom: 12px; }
+    .canon-header p { color: #e5e9e3; font-size: 15px; margin-bottom: 0; }
+
+    .canon-card, .canon-card:hover {
+        background-color: white;
+        border: none;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    .canon-card-body { padding: 28px; }
+
+    .canon-label { font-weight: bold; color: #26352b; }
+    .boton-canon {
+        background-color: #26352b; border: 1px solid #26352b; color: white;
+        padding: 9px 22px; border-radius: 6px; font-weight: bold;
+    }
+    .boton-canon:hover { background-color: #425843; border-color: #425843; color: white; }
+
+    .formula-canon {
+        margin-top: 20px; padding: 15px 18px; background-color: #f7f5f0;
+        border-left: 4px solid #d99a4e; border-radius: 5px; color: #4a554b; font-size: 14px;
+    }
+
+    .tabla-canon { width: 100%; margin-bottom: 0; font-size: 14px; }
+    .tabla-canon thead { background-color: #26352b; color: white; }
+    .tabla-canon thead th { padding: 16px 14px; border: none; white-space: nowrap; }
+    .tabla-canon tbody td { padding: 15px 14px; vertical-align: middle; border-top: 1px solid #e9ece8; }
+    .tabla-canon tbody tr:nth-child(even) { background-color: #f7f8f5; }
+
+    .puesto-ranking {
+        display: inline-block; width: 32px; height: 32px; line-height: 32px;
+        border-radius: 50%; background-color: #d99a4e; color: #26352b;
+        text-align: center; font-weight: bold;
+    }
+    .tipo-unidad {
+        display: inline-block; background-color: #edf2ec; color: #425843;
+        border-radius: 20px; padding: 6px 12px; font-size: 13px; font-weight: bold;
+    }
+</style>
+
+<main class="container py-4 canon-contenedor">
+
+    <!-- ENCABEZADO -->
+    <section class="canon-header">
+        <h2>Unidades con mayor canon</h2>
+        <p>Ranking de las unidades de venta que más pagan de canon, de mayor a menor.</p>
+    </section>
+
+    <!-- ERROR -->
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <!-- CANTIDAD A MOSTRAR -->
+    <div class="card canon-card">
+        <div class="canon-card-body">
+            <form th:action="@{/reportes/mayor-canon}" method="get" class="form-inline">
+                <label for="cantidad" class="canon-label mr-2">Cantidad de unidades a mostrar:</label>
+                <input type="number" id="cantidad" name="cantidad" min="1"
+                       th:value="${cantidad}" class="form-control mr-2" style="width:100px"/>
+                <button type="submit" class="btn boton-canon">Ver ranking</button>
+            </form>
+
+            <div class="formula-canon">
+                <strong>Food truck:</strong> (superficie × $500) + $2.000 si requiere electricidad.<br/>
+                <strong>Puesto desmontable:</strong> (superficie × $500) − (minutos de montaje × $10).
+            </div>
+        </div>
+    </div>
+
+    <!-- SIN UNIDADES -->
+    <div class="alert alert-info" th:if="${#lists.isEmpty(reporte)} and ${error == null}">
+        Todavía no hay unidades de venta registradas.
+    </div>
+
+    <!-- RANKING -->
+    <div class="card canon-card" th:unless="${#lists.isEmpty(reporte)}">
+        <div class="table-responsive">
+            <table class="table tabla-canon">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Código</th>
+                    <th>Nombre comercial</th>
+                    <th>Tipo</th>
+                    <th class="text-right">Canon</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fila, estado : ${reporte}">
+                    <td><span class="puesto-ranking" th:text="${estado.count}">1</span></td>
+                    <td th:text="${fila.codigo}">FT00000001</td>
+                    <td th:text="${fila.nombreComercial}">Nombre</td>
+                    <td><span class="tipo-unidad" th:text="${fila.tipoUnidad}">Food truck</span></td>
+                    <td class="text-right">
+                        <strong th:text="'$ ' + ${#numbers.formatDecimal(fila.canon, 1, 'POINT', 2, 'COMMA')}">$ 0,00</strong>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+</body>
+</html>

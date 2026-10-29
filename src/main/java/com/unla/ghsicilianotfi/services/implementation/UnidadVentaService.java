@@ -1,6 +1,7 @@
 package com.unla.ghsicilianotfi.services.implementation;
 
 import com.unla.ghsicilianotfi.dtos.RegistroUnidadVentaDTO;
+
 import com.unla.ghsicilianotfi.entities.FoodTruck;
 import com.unla.ghsicilianotfi.entities.PuestoDesmontable;
 import com.unla.ghsicilianotfi.entities.Rol;
@@ -15,6 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.unla.ghsicilianotfi.configuration.ParametrosCanon;
+import com.unla.ghsicilianotfi.dtos.ReporteMayoresCanonDTO;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -27,6 +34,7 @@ public class UnidadVentaService implements IUnidadVentaService {
     private static final String ROL_RESPONSABLE = "RESPONSABLE";
     // Lógica de validación propia del código: 2 letras del tipo + 8 dígitos (10 caracteres)
     private static final String FORMATO_CODIGO = "^(FT|PD)\\d{8}$";
+    private final ParametrosCanon parametrosCanon;
 
     private final IUnidadVentaRepository unidadVentaRepository;
     private final IUsuarioRepository usuarioRepository;
@@ -34,14 +42,16 @@ public class UnidadVentaService implements IUnidadVentaService {
     private final PasswordEncoder passwordEncoder;
 
     public UnidadVentaService(IUnidadVentaRepository unidadVentaRepository,
-                              IUsuarioRepository usuarioRepository,
-                              IRolRepository rolRepository,
-                              PasswordEncoder passwordEncoder) {
-        this.unidadVentaRepository = unidadVentaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.rolRepository = rolRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+            IUsuarioRepository usuarioRepository,
+            IRolRepository rolRepository,
+            PasswordEncoder passwordEncoder,
+            ParametrosCanon parametrosCanon) {
+	this.unidadVentaRepository = unidadVentaRepository;
+	this.usuarioRepository = usuarioRepository;
+	this.rolRepository = rolRepository;
+	this.passwordEncoder = passwordEncoder;
+	this.parametrosCanon = parametrosCanon;
+	}
 
     @Override
     public List<UnidadVenta> listarUnidades() {
@@ -174,5 +184,35 @@ public class UnidadVentaService implements IUnidadVentaService {
         responsable.setRol(rolResponsable);
 
         return usuarioRepository.save(responsable);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReporteMayoresCanonDTO> unidadesConMayorCanon(int cantidad) {
+
+        if (cantidad < 1) {
+            throw new IllegalArgumentException("La cantidad de unidades debe ser al menos 1");
+        }
+
+        // 1. Calcular el canon de cada unidad (cada tipo usa su propia formula)
+        List<ReporteMayoresCanonDTO> reporte = new ArrayList<>();
+
+        for (UnidadVenta unidad : unidadVentaRepository.findAll()) {
+            reporte.add(new ReporteMayoresCanonDTO(
+                    unidad.getNombreComercial(),
+                    unidad.getCodigoUnico(),
+                    unidad.getTipo(),
+                    unidad.calcularCanon(parametrosCanon)
+            ));
+        }
+
+        // 2. Ordenar de mayor a menor canon
+        reporte.sort(Comparator.comparing(ReporteMayoresCanonDTO::getCanon).reversed());
+
+        // 3. Devolver solo las primeras cantidad unidades
+        if (reporte.size() > cantidad) {
+            return new ArrayList<>(reporte.subList(0, cantidad));
+        }
+        return reporte;
     }
 }
