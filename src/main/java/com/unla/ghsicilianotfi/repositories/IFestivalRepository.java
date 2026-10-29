@@ -16,6 +16,9 @@ public interface IFestivalRepository extends JpaRepository<Festival, Long> {
     @EntityGraph(attributePaths = {"costos", "unidades", "unidades.responsable"})
     List<Festival> findByActivoTrue();
 
+    @EntityGraph(attributePaths = {"costos", "unidades", "unidades.responsable"})
+    List<Festival> findByActivoTrueOrderByFechaInicioDesc();
+
     @Override
     @EntityGraph(attributePaths = {"costos", "unidades", "unidades.responsable"})
     Optional<Festival> findById(Long id);

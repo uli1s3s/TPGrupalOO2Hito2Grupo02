@@ -444,7 +444,7 @@
             </strong>
 
             <span class="fecha-pedido"
-                  th:text="${pedido.fechaPedido}">
+                  th:text="${pedido.fechaPedido != null ? #temporals.format(pedido.fechaPedido, 'dd/MM/yyyy') : '-'}">
                 Fecha
             </span>
             <span th:if="${pedido.unidadVenta != null}"

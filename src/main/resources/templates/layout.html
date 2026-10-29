@@ -239,6 +239,8 @@
 
                 <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
 
+                <!-- PERSONAL: ADMINISTRADOR Y RESPONSABLE -->
+
                 <li class="nav-item"
                     sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
 
@@ -257,6 +259,31 @@
                        th:href="@{/platos}">
                         Platos
                     </a>
+                </li>
+
+                <!-- LIQUIDACIONES: ADMINISTRADOR Y RESPONSABLE -->
+
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE')">
+
+                    <a class="nav-link"
+                       th:href="@{/liquidaciones}">
+                        Liquidaciones
+                    </a>
+
+                </li>
+
+                <!-- RECIBOS: USUARIOS AUTORIZADOS -->
+
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMINISTRADOR','RESPONSABLE','EMPLEADO')">
+
+                    <a class="nav-link"
+                       th:href="@{/recibos}">
+                        Recibos
+                    </a>
+
+                </li>
                 </li>
 
             </ul>

@@ -520,7 +520,7 @@
 
                     <!-- FECHA -->
 
-                    <td th:text="${emp.fechaIngreso}">
+                    <td th:text="${emp.fechaIngreso != null ? #temporals.format(emp.fechaIngreso, 'dd/MM/yyyy') : '-'}">
                         2026-10-25
                     </td>
 

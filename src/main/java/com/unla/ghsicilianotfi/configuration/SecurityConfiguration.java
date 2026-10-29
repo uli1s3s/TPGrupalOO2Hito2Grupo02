@@ -84,6 +84,25 @@ public class SecurityConfiguration {
 							"RESPONSABLE"
 					);
 
+					// LIQUIDACIONES: Administradores y Responsables
+					auth.requestMatchers(
+							"/liquidaciones",
+							"/liquidaciones/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE"
+					);
+
+					// RECIBOS DE SUELDO: Administradores, Responsables y Empleados
+					auth.requestMatchers(
+							"/recibos",
+							"/recibos/**"
+					).hasAnyRole(
+							"ADMINISTRADOR",
+							"RESPONSABLE",
+							"EMPLEADO"
+					);
+
 					// GESTIÓN DE FESTIVALES: solo administradores
 					auth.requestMatchers(
 							"/festivales",

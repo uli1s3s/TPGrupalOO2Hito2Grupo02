@@ -59,4 +59,20 @@ public class Festival {
 
     @OneToMany(mappedBy = "festival")
     private List<Pedido> pedidos = new ArrayList<>();
+
+    // Duración total del festival en días (inclusivo)
+    public int getDuracionDias() {
+        if (fechaInicio == null || fechaFin == null) {
+            return 0;
+        }
+        return (int) java.time.temporal.ChronoUnit.DAYS.between(fechaInicio, fechaFin) + 1;
+    }
+
+    // Nombre sin anotaciones de duración entre paréntesis
+    public String getNombreLimpio() {
+        if (nombre == null) {
+            return "";
+        }
+        return nombre.replaceAll("\\s*\\([^)]*\\)", "").trim();
+    }
 }
