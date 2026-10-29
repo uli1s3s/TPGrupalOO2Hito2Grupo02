@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .restablecer-contenedor {
+        max-width: 550px;
+        margin: 60px auto;
+    }
+
+    .restablecer-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 30px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .restablecer-header h2 {
+        font-size: 26px;
+        font-weight: bold;
+    }
+
+    .restablecer-card {
+        background: white;
+        border-top: 5px solid #d99a4e;
+        padding: 30px;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .boton-restablecer {
+        background: #d99a4e;
+        color: #26352b;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .boton-restablecer:hover {
+        background: #e7ad65;
+    }
+</style>
+
+<main class="container">
+
+    <div class="restablecer-contenedor">
+
+        <div class="restablecer-header">
+            <h2>Establecer nueva contraseña</h2>
+            <p>Ingresá una contraseña nueva para tu cuenta.</p>
+        </div>
+
+        <div class="restablecer-card">
+
+            <div class="alert alert-success"
+                 th:if="${mensaje}"
+                 th:text="${mensaje}">
+            </div>
+
+            <div class="alert alert-danger"
+                 th:if="${error}"
+                 th:text="${error}">
+            </div>
+
+            <form th:if="${token != null}"
+                  th:action="@{/restablecer-contrasena}"
+                  method="post">
+
+                <input type="hidden"
+                       name="token"
+                       th:value="${token}">
+
+                <div class="form-group">
+                    <label for="nuevaContrasena">
+                        Nueva contraseña
+                    </label>
+
+                    <input type="password"
+                           id="nuevaContrasena"
+                           name="nuevaContrasena"
+                           class="form-control"
+                           minlength="8"
+                           autocomplete="new-password"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmacion">
+                        Confirmar contraseña
+                    </label>
+
+                    <input type="password"
+                           id="confirmacion"
+                           name="confirmacion"
+                           class="form-control"
+                           minlength="8"
+                           autocomplete="new-password"
+                           required>
+                </div>
+
+                <button type="submit"
+                        class="boton-restablecer">
+                    Guardar nueva contraseña
+                </button>
+
+            </form>
+
+            <div class="text-center mt-4">
+                <a th:href="@{/login}">
+                    Volver al inicio de sesión
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+</body>
+</html>
