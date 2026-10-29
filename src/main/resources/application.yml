@@ -12,16 +12,14 @@ spring:
   thymeleaf:
     cache: false
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    host: localhost
+    port: 1025
     properties:
       mail:
         smtp:
-          auth: true
+          auth: false
           starttls:
-            enable: true
+            enable: false
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
