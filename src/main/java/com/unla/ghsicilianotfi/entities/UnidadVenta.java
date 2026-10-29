@@ -34,17 +34,15 @@ public abstract class UnidadVenta {
     @JoinColumn(name = "id_responsable", nullable = false)
     private Usuario responsable;
     
-    // Festival en el que participa la unidad (solo puede registrarse en uno activo)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_festival", nullable = false)
-    private Festival festival;
-    
     // Empleados de la unidad. Cada empleado pertenece a una sola unidad.
     // La columna id_unidad queda en la tabla personal y es opcional.
     @OneToMany
     @JoinColumn(name = "id_unidad")
     private Set<Personal> empleados = new HashSet<>();
 
+    
+    // Festivales en los que participa la unidad (muchos a muchos).
+    // Al registrarse, el responsable elige un festival activo y queda agregado aca
     @ManyToMany
     @JoinTable(
             name = "festival_unidad",
@@ -62,7 +60,7 @@ public abstract class UnidadVenta {
     // Prefijo del código unico según el tipo de unidad (FT o PD)
     public abstract String getPrefijoCodigo();
     
-    // Cada tipo de unidad calcula su canon con su propia fórmula (polimorfismo)
+    // Cada tipo de unidad calcula su canon con su propia formula (polimorfismo)
     public abstract BigDecimal calcularCanon(TarifaCanon tarifa);
 
     // Superficie como BigDecimal, para hacer cuentas de dinero sin errores de redondeo
