@@ -39,6 +39,9 @@ public class SecurityConfiguration {
 
 				.authorizeHttpRequests(auth -> {
 
+					auth.requestMatchers("/mi-asignacion")
+							.hasRole("EMPLEADO");
+
 					// RECURSOS ESTÁTICOS
 					auth.requestMatchers(
 							"/css/**",

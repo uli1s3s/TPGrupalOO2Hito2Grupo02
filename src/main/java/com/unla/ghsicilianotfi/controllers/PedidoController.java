@@ -18,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -52,9 +53,13 @@ public class PedidoController {
         this.pedidoService = pedidoService;
     }
 
-    // Consulta de pedidos según el rol y las fechas seleccionadas.
+    // ============================================
+    // LISTADO Y FILTROS DE PEDIDOS
+    // ============================================
+
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'RESPONSABLE', 'EMPLEADO')")
     @GetMapping("/pedidos")
+    @Transactional(readOnly = true)
     public String listarPedidos(
             Model model,
             Authentication authentication,
@@ -63,16 +68,31 @@ public class PedidoController {
             LocalDate desde,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate hasta) {
+            LocalDate hasta,
+            @RequestParam(required = false)
+            Long idFestival,
+            @RequestParam(required = false)
+            Long idUnidad) {
 
-        cargarDatos(model, authentication, desde, hasta);
+        cargarDatos(
+                model,
+                authentication,
+                desde,
+                hasta,
+                idFestival,
+                idUnidad
+        );
 
         return "pedido/lista";
     }
 
-    // Solo los empleados pueden registrar pedidos.
+    // ============================================
+    // REGISTRAR PEDIDO
+    // ============================================
+
     @PreAuthorize("hasRole('EMPLEADO')")
     @PostMapping("/pedidos/nuevo")
+    @Transactional
     public String registrarPedido(
             @ModelAttribute RegistrarPedidoDTO datos,
             Model model,
@@ -98,17 +118,30 @@ public class PedidoController {
 
             model.addAttribute("error", ex.getMessage());
 
-            cargarDatos(model, authentication, null, null);
+            cargarDatos(
+                    model,
+                    authentication,
+                    null,
+                    null,
+                    null,
+                    null
+            );
 
             return "pedido/lista";
         }
     }
 
+    // ============================================
+    // CARGAR DATOS PARA LA VISTA
+    // ============================================
+
     private void cargarDatos(
             Model model,
             Authentication authentication,
             LocalDate desde,
-            LocalDate hasta) {
+            LocalDate hasta,
+            Long idFestival,
+            Long idUnidad) {
 
         String username = authentication.getName();
 
@@ -122,45 +155,99 @@ public class PedidoController {
                 authentication, "ROLE_EMPLEADO");
 
         model.addAttribute("esEmpleado", esEmpleado);
+        model.addAttribute("esAdministrador", esAdministrador);
+
+        // Los filtros de festival y unidad
+        // solamente corresponden al administrador.
+        Long festivalAplicado = esAdministrador
+                ? idFestival
+                : null;
+
+        Long unidadAplicada = esAdministrador
+                ? idUnidad
+                : null;
+
+        // Conserva los filtros seleccionados.
         model.addAttribute("desde", desde);
         model.addAttribute("hasta", hasta);
+        model.addAttribute("idFestivalFiltro", festivalAplicado);
+        model.addAttribute("idUnidadFiltro", unidadAplicada);
 
-        // Identifica las unidades autorizadas según el rol.
-        List<Long> idsUnidades;
+        // ============================================
+        // UNIDADES AUTORIZADAS SEGÚN EL ROL
+        // ============================================
 
+        List<UnidadVenta> unidadesAutorizadas;
         Optional<UnidadVenta> unidadEmpleado = Optional.empty();
 
         if (esAdministrador) {
 
-            // El administrador puede consultar todos los pedidos.
-            idsUnidades = List.of();
+            // El administrador puede consultar todas las unidades.
+            unidadesAutorizadas = unidadVentaRepository.findAll();
 
         } else if (esResponsable) {
 
             // El responsable consulta sus unidades.
-            idsUnidades = unidadVentaRepository
-                    .findByResponsable_Nombre(username)
-                    .stream()
-                    .map(UnidadVenta::getIdUnidad)
-                    .toList();
+            unidadesAutorizadas = unidadVentaRepository
+                    .findByResponsable_Nombre(username);
 
         } else if (esEmpleado) {
 
-            // El empleado consulta solamente su unidad asignada.
-            unidadEmpleado =
-                    unidadVentaRepository.buscarUnidadDeEmpleado(username);
+            // El empleado consulta su unidad asignada.
+            unidadEmpleado = unidadVentaRepository
+                    .buscarUnidadDeEmpleado(username);
 
-            idsUnidades = unidadEmpleado
-                    .map(unidad -> List.of(unidad.getIdUnidad()))
+            unidadesAutorizadas = unidadEmpleado
+                    .map(List::of)
                     .orElseGet(List::of);
 
         } else {
 
-            idsUnidades = List.of();
+            unidadesAutorizadas = List.of();
         }
 
-        // Valida el rango de fechas.
-        if (desde != null && hasta != null && desde.isAfter(hasta)) {
+        List<Long> idsUnidades = unidadesAutorizadas
+                .stream()
+                .map(UnidadVenta::getIdUnidad)
+                .toList();
+
+        // ============================================
+        // OPCIONES DE LOS FILTROS
+        // SOLO ADMINISTRADOR
+        // ============================================
+
+        if (esAdministrador) {
+
+            // Incluye festivales activos e inactivos
+            // para permitir consultas históricas.
+            List<Festival> festivalesFiltro =
+                    festivalRepository.findAll();
+
+            model.addAttribute(
+                    "festivalesFiltro",
+                    festivalesFiltro
+            );
+
+            model.addAttribute(
+                    "unidadesFiltro",
+                    unidadesAutorizadas
+            );
+
+        } else {
+
+            // No se cargan filtros adicionales
+            // para responsables ni empleados.
+            model.addAttribute("festivalesFiltro", List.of());
+            model.addAttribute("unidadesFiltro", List.of());
+        }
+
+        // ============================================
+        // VALIDACIONES DE LA BÚSQUEDA
+        // ============================================
+
+        if (desde != null
+                && hasta != null
+                && desde.isAfter(hasta)) {
 
             model.addAttribute(
                     "error",
@@ -171,13 +258,14 @@ public class PedidoController {
 
         } else if (!esAdministrador && idsUnidades.isEmpty()) {
 
-            // Un usuario sin unidades autorizadas no ve pedidos.
+            // Sin unidades autorizadas no se muestran pedidos.
             model.addAttribute("pedidos", List.of());
 
         } else {
 
-            // Consulta los pedidos aplicando fechas y permisos.
-            // El ID -1 evita pasar una lista vacía a la consulta.
+            // El repositorio aplica los filtros.
+            // Para responsables y empleados, los filtros
+            // de festival y unidad siempre serán null.
             List<Long> idsConsulta = esAdministrador
                     ? List.of(-1L)
                     : idsUnidades;
@@ -185,6 +273,8 @@ public class PedidoController {
             List<Pedido> pedidos = pedidoRepository.buscarPedidos(
                     desde,
                     hasta,
+                    festivalAplicado,
+                    unidadAplicada,
                     esAdministrador,
                     idsConsulta
             );
@@ -192,7 +282,11 @@ public class PedidoController {
             model.addAttribute("pedidos", pedidos);
         }
 
-        // El formulario de registro solamente corresponde a empleados.
+        // ============================================
+        // FORMULARIO DE REGISTRO
+        // SOLO PARA EMPLEADOS
+        // ============================================
+
         if (!esEmpleado) {
 
             model.addAttribute("platos", List.of());
@@ -201,7 +295,6 @@ public class PedidoController {
             return;
         }
 
-        // Si no tiene unidad, no puede registrar pedidos.
         if (unidadEmpleado.isEmpty()) {
 
             model.addAttribute("platos", List.of());
@@ -217,7 +310,7 @@ public class PedidoController {
 
         UnidadVenta unidad = unidadEmpleado.get();
 
-        // Festivales activos donde participa la unidad del empleado.
+        // Solo festivales activos para registrar pedidos.
         List<Festival> festivalesDisponibles =
                 festivalRepository.findByActivoTrue()
                         .stream()
@@ -226,7 +319,9 @@ public class PedidoController {
                                         .stream()
                                         .anyMatch(unidadParticipante ->
                                                 unidadParticipante.getIdUnidad()
-                                                        .equals(unidad.getIdUnidad())
+                                                        .equals(
+                                                                unidad.getIdUnidad()
+                                                        )
                                         )
                         )
                         .toList();
@@ -246,8 +341,10 @@ public class PedidoController {
         model.addAttribute("festivales", festivalesDisponibles);
         model.addAttribute("platos", platosDisponibles);
 
-        // Enviamos la unidad al HTML para restringir el selector.
-        model.addAttribute("idUnidadEmpleado", unidad.getIdUnidad());
+        model.addAttribute(
+                "idUnidadEmpleado",
+                unidad.getIdUnidad()
+        );
 
         if (festivalesDisponibles.isEmpty()) {
 
@@ -257,6 +354,10 @@ public class PedidoController {
             );
         }
     }
+
+    // ============================================
+    // VERIFICAR ROL DEL USUARIO
+    // ============================================
 
     private boolean tieneRol(
             Authentication authentication,

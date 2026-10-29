@@ -8,6 +8,8 @@ import com.unla.ghsicilianotfi.entities.Festival;
 import com.unla.ghsicilianotfi.entities.Pedido;
 import com.unla.ghsicilianotfi.entities.Plato;
 import com.unla.ghsicilianotfi.entities.UnidadVenta;
+
+import com.unla.ghsicilianotfi.repositories.ICierreCajaRepository;
 import com.unla.ghsicilianotfi.repositories.IFestivalRepository;
 import com.unla.ghsicilianotfi.repositories.IPedidoRepository;
 import com.unla.ghsicilianotfi.repositories.IPlatoRepository;
@@ -25,16 +27,19 @@ public class PedidoService {
     private final IPlatoRepository platoRepository;
     private final IFestivalRepository festivalRepository;
     private final IUnidadVentaRepository unidadVentaRepository;
+    private final ICierreCajaRepository cierreCajaRepository;
 
     public PedidoService(IPedidoRepository pedidoRepository,
                          IPlatoRepository platoRepository,
                          IFestivalRepository festivalRepository,
-                         IUnidadVentaRepository unidadVentaRepository) {
+                         IUnidadVentaRepository unidadVentaRepository,
+                         ICierreCajaRepository cierreCajaRepository) {
 
         this.pedidoRepository = pedidoRepository;
         this.platoRepository = platoRepository;
         this.festivalRepository = festivalRepository;
         this.unidadVentaRepository = unidadVentaRepository;
+        this.cierreCajaRepository = cierreCajaRepository;
     }
 
     @Transactional
@@ -65,7 +70,6 @@ public class PedidoService {
                         "La unidad seleccionada no existe"
                 ));
 
-        // NUEVA VALIDACIÓN:
         // Busca la unidad asignada al empleado autenticado
         UnidadVenta unidadEmpleado = unidadVentaRepository
                 .buscarUnidadDeEmpleado(username)
@@ -91,8 +95,31 @@ public class PedidoService {
             );
         }
 
-        // Crea el pedido
-        Pedido pedido = new Pedido(LocalDate.now());
+        // ============================================
+        // VALIDACIÓN: ESTADO DEL CIERRE DE CAJA
+        // ============================================
+
+        LocalDate fechaPedido = LocalDate.now();
+
+        boolean cajaCerrada = cierreCajaRepository
+                .existsByUnidadVenta_IdUnidadAndFechaAndCerradaTrue(
+                        unidad.getIdUnidad(),
+                        fechaPedido
+                );
+
+        if (cajaCerrada) {
+
+            throw new IllegalArgumentException(
+                    "No se pueden registrar nuevos pedidos porque " +
+                            "la caja de esta unidad está cerrada."
+            );
+        }
+
+        // ============================================
+        // CREACIÓN DEL PEDIDO
+        // ============================================
+
+        Pedido pedido = new Pedido(fechaPedido);
         pedido.setFestival(festival);
         pedido.setUnidadVenta(unidad);
 

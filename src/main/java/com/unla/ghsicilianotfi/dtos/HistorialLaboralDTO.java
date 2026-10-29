@@ -1,4 +1,9 @@
+
 package com.unla.ghsicilianotfi.dtos;
 
-public class HistorialLaboralDTO {
+public record HistorialLaboralDTO(
+        String festival,
+        String unidadVenta,
+        String periodo
+) {
 }
