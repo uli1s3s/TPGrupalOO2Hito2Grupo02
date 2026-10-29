@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .ranking-contenedor {
+        margin-top: 25px;
+        margin-bottom: 50px;
+    }
+
+    .ranking-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 35px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+    }
+
+    .ranking-header h2 {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .ranking-header p {
+        color: #e5e9e3;
+        margin-bottom: 0;
+    }
+
+    .ranking-card {
+        background: white;
+        border-top: 5px solid #d99a4e;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .ranking-filtro {
+        margin-bottom: 25px;
+    }
+
+    .ranking-filtro label {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .ranking-filtro select {
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        min-width: 250px;
+    }
+
+    .boton-consultar {
+        background-color: #26352b;
+        color: white;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 8px;
+    }
+
+    .boton-consultar:hover {
+        background-color: #425843;
+    }
+
+    .tabla-ranking {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .tabla-ranking th {
+        background-color: #26352b;
+        color: white;
+        padding: 15px;
+        text-align: left;
+    }
+
+    .tabla-ranking td {
+        padding: 15px;
+        border-bottom: 1px solid #e9ece8;
+    }
+
+    .tabla-ranking th:last-child,
+    .tabla-ranking td:last-child {
+        text-align: right;
+        font-weight: bold;
+    }
+
+    .tabla-ranking tbody tr:hover {
+        background-color: #f7f5f1;
+    }
+
+    .primer-puesto {
+        background-color: #fff7e8;
+        font-weight: bold;
+    }
+
+    .boton-volver {
+        display: inline-block;
+        background-color: #d99a4e;
+        color: #26352b;
+        padding: 11px 22px;
+        border-radius: 6px;
+        font-weight: bold;
+        text-decoration: none;
+        margin-top: 25px;
+    }
+
+    .boton-volver:hover {
+        background-color: #e7ad65;
+        color: #26352b;
+        text-decoration: none;
+    }
+</style>
+
+<main class="container py-4 ranking-contenedor">
+
+    <section class="ranking-header">
+        <h2>Ranking de unidades de venta</h2>
+        <p>Unidades ordenadas de mayor a menor recaudación por festival.</p>
+    </section>
+
+    <section class="ranking-card">
+
+        <h4 class="mb-4">Consultar ranking</h4>
+
+        <!-- MENSAJES INFORMATIVOS -->
+        <div class="alert alert-info"
+             th:if="${mensaje}"
+             th:text="${mensaje}">
+        </div>
+
+        <form th:action="@{/ranking-unidades}"
+              method="get"
+              class="ranking-filtro"
+              th:if="${!#lists.isEmpty(festivales)}">
+
+            <label for="idFestival">Festival:</label>
+
+            <select id="idFestival"
+                    name="idFestival"
+                    required>
+
+                <option value="">Seleccione un festival</option>
+
+                <option th:each="festival : ${festivales}"
+                        th:value="${festival.idFestival}"
+                        th:text="${festival.nombre}"
+                        th:selected="${festival.idFestival == idFestivalSeleccionado}">
+                </option>
+
+            </select>
+
+            <button type="submit" class="boton-consultar">
+                Ver ranking
+            </button>
+
+        </form>
+
+        <div th:if="${ranking != null and !ranking.isEmpty()}">
+
+            <h5>Resultados del ranking</h5>
+
+            <div class="table-responsive">
+                <table class="tabla-ranking">
+                    <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Unidad de venta</th>
+                        <th>Código</th>
+                        <th>Recaudación</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="unidad : ${ranking}"
+                        th:classappend="${unidad.posicion == 1} ? 'primer-puesto' : ''">
+
+                        <td th:text="${unidad.posicion}"></td>
+
+                        <td th:text="${unidad.nombreComercial}"></td>
+
+                        <td th:text="${unidad.codigoUnico}"></td>
+
+                        <td th:text="${'$ ' + #numbers.formatDecimal(unidad.recaudacion, 1, 'POINT', 2, 'COMMA')}"></td>
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div th:if="${ranking != null and ranking.isEmpty()}"
+             class="alert alert-info">
+            El festival seleccionado no tiene unidades de venta registradas.
+        </div>
+
+        <a th:href="@{/}" class="boton-volver">
+            ← Volver al inicio
+        </a>
+
+    </section>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+</body>
+</html>
