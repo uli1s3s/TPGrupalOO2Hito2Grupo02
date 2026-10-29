@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout :: head}"></head>
+
+<body>
+
+<nav th:replace="~{layout :: navbar}"></nav>
+
+<style>
+    .recuperacion-contenedor {
+        max-width: 550px;
+        margin: 60px auto;
+    }
+
+    .recuperacion-header {
+        background: linear-gradient(135deg, #26352b, #425843);
+        color: white;
+        padding: 30px;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .recuperacion-header h2 {
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .recuperacion-header p {
+        margin-bottom: 0;
+        color: #e5e9e3;
+    }
+
+    .recuperacion-card {
+        background: white;
+        border-top: 5px solid #d99a4e;
+        padding: 30px;
+        border-radius: 0 0 12px 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .boton-recuperacion {
+        background: #d99a4e;
+        color: #26352b;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .boton-recuperacion:hover {
+        background: #e7ad65;
+    }
+</style>
+
+<main class="container">
+
+    <div class="recuperacion-contenedor">
+
+        <div class="recuperacion-header">
+            <h2>Recuperar contraseña</h2>
+            <p>Ingresá tu correo para recibir un enlace de recuperación.</p>
+        </div>
+
+        <div class="recuperacion-card">
+
+            <div class="alert alert-success"
+                 th:if="${mensaje}"
+                 th:text="${mensaje}">
+            </div>
+
+            <div class="alert alert-danger"
+                 th:if="${error}"
+                 th:text="${error}">
+            </div>
+
+            <form th:action="@{/recuperar-contrasena}"
+                  method="post">
+
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           class="form-control"
+                           placeholder="usuario@ejemplo.com"
+                           autocomplete="email"
+                           required>
+                </div>
+
+                <button type="submit"
+                        class="boton-recuperacion">
+                    Enviar enlace de recuperación
+                </button>
+
+            </form>
+
+            <div class="text-center mt-4">
+                <a th:href="@{/login}">
+                    Volver al inicio de sesión
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{layout :: footer}"></footer>
+<div th:replace="~{layout :: scripts}"></div>
+
+</body>
+</html>

@@ -137,6 +137,26 @@
             color: white;
         }
 
+        /* RECUPERAR CONTRASEÑA */
+
+        .recuperar-contrasena {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        .recuperar-contrasena a {
+            color: #425843;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .recuperar-contrasena a:hover {
+            color: #d99a4e;
+            text-decoration: underline;
+        }
+
         /* MENSAJES */
 
         .login-alerta {
@@ -262,6 +282,16 @@
                            required
                            autocomplete="current-password"
                            placeholder="Ingresá tu contraseña"/>
+
+                </div>
+
+                <!-- ENLACE PARA RECUPERAR CONTRASEÑA -->
+
+                <div class="recuperar-contrasena">
+
+                    <a th:href="@{/recuperar-contrasena}">
+                        ¿Olvidaste tu contraseña?
+                    </a>
 
                 </div>
 

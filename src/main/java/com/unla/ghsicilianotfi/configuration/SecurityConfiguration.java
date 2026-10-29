@@ -65,6 +65,13 @@ public class SecurityConfiguration {
 							"/cambiar-contrasena"
 					).authenticated();
 
+					// RECUPERAR CONTRASEÑA
+                    // Acceso público sin iniciar sesión
+					auth.requestMatchers(
+							"/recuperar-contrasena",
+							"/restablecer-contrasena"
+					).permitAll();
+
 					// PEDIDOS
 					auth.requestMatchers(
 							"/api/v1/pedidos",
