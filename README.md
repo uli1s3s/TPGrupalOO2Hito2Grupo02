@@ -210,7 +210,11 @@ Todos los usuarios con sesión pueden cambiar su contraseña en `/cambiar-contra
 
 ## Parámetros configurables
 
-Valores por defecto que se pueden cambiar en `application.yml` sin tocar el código:
+La aplicación dispone de parámetros generales cuyos valores por defecto están definidos en las clases `ParametrosCanon.java` y `ParametrosLiquidacion.java`. Estos valores pueden modificarse desde `application.yml`, sin necesidad de cambiar el código Java.
+
+**Importante:** para el cálculo del canon, se priorizan los costos configurados específicamente para cada festival en la base de datos. Los parámetros generales se utilizan como valores de respaldo cuando el festival no tiene configurado un determinado concepto.
+
+En las liquidaciones de haberes, el sistema utiliza el sueldo base del empleado y los parámetros generales correspondientes a los adicionales por categoría, antigüedad y días trabajados.
 
 | Propiedad | Valor por defecto |
 |---|---|
