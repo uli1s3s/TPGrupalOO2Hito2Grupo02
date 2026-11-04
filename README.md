@@ -121,7 +121,7 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 
 ### Ulises Izquierdo
 
-| Caso de uso | PR / Rama |
+| Caso de uso | PR |
 |---|---|
 | Registro y listado de pedidos con su detalle (Alta Pedido) | [#6](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/6) |
 | Integración y actualización de pantallas HTML | [#9](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/9) |
