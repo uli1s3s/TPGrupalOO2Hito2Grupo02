@@ -13,13 +13,14 @@ Aplicación web Spring Boot para administrar los festivales gastronómicos del p
 | Ulises Izquierdo | [@uli1s3s](https://github.com/uli1s3s) |
 | Valentín Hurtado | [@valenxpeke](https://github.com/valenxpeke) |
 
+
 ## Diagrama de clases
 
-**[Link]((https://drive.google.com/file/d/14-wxRBTZ9226GsmYlrRVA_HGJxptK0Yj/view?usp=sharing))**
+**[Ver diagrama de clases UML](https://drive.google.com/file/d/14-wxRBTZ9226GsmYlrRVA_HGJxptK0Yj/view?usp=sharing)**
 
 ## Excel con Casos de Uso
 
-**[Link]((https://docs.google.com/spreadsheets/d/1jY5EijAJSyeqUxUD4QP0P7rhF41nYdRb/edit?usp=sharing&ouid=111084632132324747103&rtpof=true&sd=true))**
+**[Ver Excel de Casos de Uso](https://docs.google.com/spreadsheets/d/1jY5EijAJSyeqUxUD4QP0P7rhF41nYdRb/edit?usp=sharing&ouid=111084632132324747103&rtpof=true&sd=true)**
 
 ## Tecnologías
 
