@@ -46,8 +46,8 @@ La aplicación lee la conexión a la base y la cuenta de mail desde **variables 
 | `DB_URL` | Sí | `jdbc:mysql://localhost:3306/tp_oo2_grupo02` | Conexión a la base |
 | `USERNAME` | Sí | `root` | Usuario de MySQL |
 | `PASSWORD` | Sí | `tu_clave` | Contraseña de MySQL |
-| `MAIL_USERNAME` | No | `epicentrogourmet.grupo2@gmail.com` | Cuenta desde la que se envían los mails |
-| `MAIL_PASSWORD` | No | `jdwx ppei nvtr vlfw` | Contraseña de aplicación de Gmail |
+| `MAIL_USERNAME` | No | `cuenta@gmail.com` | Cuenta desde la que se envían los mails |
+| `MAIL_PASSWORD` | No | `jdwx ppei nvtr vlfw` | Contraseña de aplicación de Gmail (se pide al grupo, no se publica) |
 
 Sin `MAIL_USERNAME` y `MAIL_PASSWORD` la aplicación funciona igual: los mails (credenciales, códigos de verificación, avisos) **se muestran en la consola** en lugar de enviarse.
 
@@ -66,12 +66,12 @@ Sin `MAIL_USERNAME` y `MAIL_PASSWORD` la aplicación funciona igual: los mails (
 4. Ejecutar la aplicación una vez para que Hibernate cree las tablas:
    - Eclipse: *Run As → Spring Boot App* sobre `GhsicilianotfiApplication`, o
    - consola: `./mvnw spring-boot:run` (en Windows `mvnw.cmd spring-boot:run`).
-5. Ejecutar el script de datos de prueba `src/main/resources/db/datos-prueba.sql` sobre la base. **Borra y vuelve a cargar los datos**: es solo para desarrollo y defensa.
+5. Ejecutar el script de datos de prueba `DatosCarga_Ampliada_Epicentro_Gourmet.sql` (en la raíz del proyecto) sobre la base. **Borra y vuelve a cargar los datos**: es solo para desarrollo y defensa.
 6. Abrir [http://localhost:8080](http://localhost:8080).
 
 ## Usuarios de prueba
 
-Cargados por `datos-prueba.sql`. Todas las contraseñas de prueba son `1234`, salvo la del administrador.
+Cargados por `DatosCarga_Ampliada_Epicentro_Gourmet.sql`. Todas las contraseñas de prueba son `1234`, salvo la del administrador.
 
 | Rol | Usuario | Contraseña |
 |---|---|---|
@@ -108,6 +108,7 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 | ABM de empleados con envío de credenciales por mail | [#5](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/5) |
 | Liquidación de haberes | [#10](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/10) |
 | Recibo de sueldo con descarga en PDF | [#18](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/18) |
+| El responsable solo ve, edita y da de baja a los empleados de su unidad | [Rama arreglos](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/tree/arreglos) |
 
 ### Martín Lucarelli
 
@@ -115,6 +116,8 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 |---|---|
 | ABM de festivales y sus costos | [#13](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/13), [#16](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/16) |
 | ABM de platos y plato estrella | [#15](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/15) |
+| Facturación de festivales | [#31](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/31) |
+| Rentabilidad de platos | [#32](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/32) |
 
 ### Ulises Izquierdo
 
@@ -168,6 +171,7 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 | Funcionalidad | Ruta |
 |---|---|
 | ABM de festivales y sus costos | `/festivales` |
+| Facturación por festival | `/festivales/facturacion` |
 | Unidades de venta, con filtro por festival y aviso de responsables pendientes de verificación | `/unidades` |
 | Ranking de unidades por recaudación en un festival | `/ranking-unidades` |
 | Unidades con mayor canon en un festival (`ReporteMayoresCanonDTO`) | `/reportes/mayor-canon` |
@@ -182,8 +186,9 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 | **Mi unidad**: canon a pagar en cada festival en el que participa | `/mi-unidad` |
 | Personal del predio con su estado (libre, ocupado en otra unidad o dado de baja), búsqueda en vivo, asignar, quitar y reactivar empleados | `/mi-unidad` |
 | Rentabilidad neta de su unidad en un festival (`RentabilidadNetaDTO`) | `/mi-unidad/{id}/rentabilidad` |
-| ABM de empleados (con envío de credenciales por mail) | `/empleados` |
+| ABM de los empleados de su unidad (con envío de credenciales por mail) | `/empleados` |
 | ABM de platos, con el plato estrella marcado | `/platos` |
+| Rentabilidad por plato | `/platos/rentabilidad` |
 | Liquidación de haberes, pedidos y recibos | `/liquidaciones`, `/pedidos`, `/recibos` |
 
 Al iniciar sesión, el responsable entra directamente a **Mi unidad**.
@@ -194,6 +199,8 @@ Al iniciar sesión, el responsable entra directamente a **Mi unidad**.
 |---|---|
 | Registrar y consultar pedidos | `/pedidos` |
 | Ver y descargar sus recibos de sueldo en PDF | `/recibos` |
+| Asignación actual (festival activo y unidad) e historial laboral | `/mi-asignacion` |
+| Cierre y reapertura de caja (cajero) | `/cerrar-caja` |
 
 Todos los usuarios con sesión pueden cambiar su contraseña en `/cambiar-contrasena`.
 
@@ -244,9 +251,10 @@ src/main/java/com/unla/ghsicilianotfi/
 
 src/main/resources/
 ├── application.yml
-├── db/datos-prueba.sql
 ├── static/          CSS, JS y Bootstrap
 └── templates/       Vistas Thymeleaf
+
+DatosCarga_Ampliada_Epicentro_Gourmet.sql   Script de datos de prueba (raíz del proyecto)
 ```
 
 ## Flujo de trabajo
