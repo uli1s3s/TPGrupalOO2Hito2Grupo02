@@ -76,12 +76,16 @@ Cargados por `datos-prueba.sql`. Todas las contraseñas de prueba son `1234`, sa
 
 El script también carga:
 
-- 2 festivales: *Invierno 2026* (inactivo) y *Primavera 2026* (activo), cada uno con sus costos.
-- 10 unidades de venta.
-- 11 empleados: 2 libres y 1 dado de baja.
-- Platos, pedidos con precios históricos y liquidaciones.
-
-Al final del archivo están los **resultados esperados** (canon, ranking y rentabilidad neta por unidad) para verificarlos en la aplicación.
+2 festivales: Festival de Invierno 2026 (inactivo) y Festival de Primavera 2026 (activo), con 7 costos configurados para cada uno.
+10 unidades de venta: 6 Food Trucks y 4 Puestos Desmontables, cada una con su responsable.
+23 empleados: entre cocineros y cajeros, incluyendo 2 disponibles para asignar y 1 dado de baja.
+33 platos: distribuidos entre las distintas unidades, incluyendo platos inactivos para probar los filtros.
+201 pedidos y 402 detalles de pedidos, con precios de venta y costos históricos para probar consultas, filtros, ranking y rentabilidad.
+27 liquidaciones de haberes, correspondientes a distintos empleados y períodos, utilizadas también para consultar el historial laboral y los recibos de sueldo.
+3 cierres de caja históricos: 2 cerrados y 1 reabierto, para probar la consulta y el funcionamiento del cierre de caja.
+34 usuarios de prueba, distribuidos entre administrador, responsables y empleados.
+3 roles y 3 categorías de cocinero.
+Al final del script se incluyen consultas SQL de verificación para comprobar las cantidades de registros, las liquidaciones, los cierres de caja y los pedidos por fecha y unidad.
 
 ## Casos de uso implementados, responsables y Pull Requests
 
