@@ -16,11 +16,11 @@ Aplicación web Spring Boot para administrar los festivales gastronómicos del p
 
 ## Diagrama de clases
 
-**[Ver diagrama de clases UML](https://drive.google.com/file/d/14-wxRBTZ9226GsmYlrRVA_HGJxptK0Yj/view?usp=sharing)**
+**[Ver diagrama de clases UML](https://drive.google.com/file/d/12OBys2SySsllt3wNt0xOTTv9p_Jr9PW5/view?usp=sharing)**
 
 ## Excel con Casos de Uso
 
-**[Ver Excel de Casos de Uso](https://docs.google.com/spreadsheets/d/1jY5EijAJSyeqUxUD4QP0P7rhF41nYdRb/edit?usp=sharing&ouid=111084632132324747103&rtpof=true&sd=true)**
+**[Ver Excel de Casos de Uso](https://docs.google.com/spreadsheets/d/1U-pMGVWLPFTfAa9O8oLbdAW4Bte5GjMP/edit?usp=sharing&ouid=116842791713214428288&rtpof=true&sd=true)**
 
 ## Tecnologías
 
@@ -47,7 +47,7 @@ La aplicación lee la conexión a la base y la cuenta de mail desde **variables 
 | `USERNAME` | Sí | `root` | Usuario de MySQL |
 | `PASSWORD` | Sí | `tu_clave` | Contraseña de MySQL |
 | `MAIL_USERNAME` | No | `cuenta@gmail.com` | Cuenta desde la que se envían los mails |
-| `MAIL_PASSWORD` | No | `jdwx ppei nvtr vlfw` | Contraseña de aplicación de Gmail (se pide al grupo, no se publica) |
+| `MAIL_PASSWORD` | No | `xxxx xxxx xxxx xxxx` | Contraseña de aplicación de Gmail (se pide al grupo, no se publica) |
 
 Sin `MAIL_USERNAME` y `MAIL_PASSWORD` la aplicación funciona igual: los mails (credenciales, códigos de verificación, avisos) **se muestran en la consola** en lugar de enviarse.
 
@@ -108,7 +108,7 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 | ABM de empleados con envío de credenciales por mail | [#5](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/5) |
 | Liquidación de haberes | [#10](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/10) |
 | Recibo de sueldo con descarga en PDF | [#18](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/18) |
-| El responsable solo ve, edita y da de baja a los empleados de su unidad | [Rama arreglos](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/tree/arreglos) |
+| El responsable solo ve, edita y da de baja a los empleados de su unidad | [#33](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/33) |
 
 ### Martín Lucarelli
 
@@ -129,10 +129,10 @@ Cada caso de uso se desarrolló en su propia rama y se integró a `develop` con 
 | Historial de pedidos (con precio y costo históricos) | [#26](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/26) |
 | Ranking de unidades por recaudación | [#27](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/27) |
 | Recuperar contraseña por mail | [#28](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/28) |
-| Historial laboral del empleado (festivales y unidades donde trabajó) | [Rama arreglos](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/tree/arreglos) |
-| Consulta de asignación actual del empleado (festival activo y unidad asignada) | [Rama arreglos](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/tree/arreglos) |
-| Cierre y reapertura de caja por parte del cajero | [Rama arreglos](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/tree/arreglos) |
-| Mejoras en el registro de pedidos y validaciones por unidad de venta | [Rama arreglos](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/tree/arreglos) |
+| Historial laboral del empleado (festivales y unidades donde trabajó) | [#33](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/33) |
+| Consulta de asignación actual del empleado (festival activo y unidad asignada) | [#33](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/33) |
+| Cierre y reapertura de caja por parte del cajero | [#33](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/33) |
+| Mejoras en el registro de pedidos y validaciones por unidad de venta | [#33](https://github.com/uli1s3s/TPGrupalOO2Hito2Grupo02/pull/33) |
 
 **Nota:** Las últimas cuatro funcionalidades fueron desarrolladas en la rama `arreglos` y se encuentran pendientes de integración a `develop`, con el objetivo de preservar la estabilidad de la versión principal del proyecto.
 
