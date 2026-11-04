@@ -53,7 +53,7 @@
         font-size: 14px;
     }
 
-    /* TÍTULOS */
+    /* TITULOS */
 
     .titulo-seccion {
         color: #26352b;
@@ -358,19 +358,18 @@
                             15/12/2026
                         </span>
                     </p>
-					
 
-					<!-- REGISTRO DE RESPONSABLE: SOLO VISITANTES -->
+                </div>
 
-					<div class="mt-3"
-					     sec:authorize="isAnonymous()">
+                <!-- REGISTRO DE RESPONSABLE: SOLO VISITANTES -->
 
-					    <a th:href="@{/registro-responsable(festival=${festival.idFestival})}"
-					       class="boton-principal">
-					        Quiero ser responsable
-					    </a>
+                <div class="mt-3"
+                     sec:authorize="isAnonymous()">
 
-					</div>
+                    <a th:href="@{/registro-responsable(festival=${festival.idFestival})}"
+                       class="boton-principal">
+                        Quiero ser responsable
+                    </a>
 
                 </div>
 
@@ -380,7 +379,7 @@
 
     </section>
 
-    <!-- ACCESOS DE GESTIÓN: SOLO AUTENTICADOS -->
+    <!-- ACCESOS DE GESTION: SOLO AUTENTICADOS -->
 
     <section class="accesos-rapidos"
              sec:authorize="isAuthenticated()">
@@ -441,6 +440,62 @@
                         <a th:href="@{/empleados}"
                            class="boton-principal">
                             Gestionar personal
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- NUEVO: ASIGNACION ACTUAL E HISTORIAL LABORAL -->
+
+            <div class="col-md-6 mb-4"
+                 sec:authorize="hasRole('EMPLEADO')">
+
+                <div class="card acceso-card h-100">
+
+                    <div class="card-body">
+
+                        <h5>Mi información laboral</h5>
+
+                        <p>
+                            Consultá tu asignación actual,
+                            la unidad de venta donde trabajás
+                            y tu historial laboral.
+                        </p>
+
+                        <a th:href="@{/mi-asignacion}"
+                           class="boton-principal">
+                            Ver información laboral
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- NUEVO: CIERRE DIARIO DE CAJA -->
+
+            <div class="col-md-6 mb-4"
+                 sec:authorize="hasRole('EMPLEADO')">
+
+                <div class="card acceso-card h-100">
+
+                    <div class="card-body">
+
+                        <h5>Cierre de caja</h5>
+
+                        <p>
+                            Consultá las ventas de tu unidad,
+                            la recaudación del día
+                            y registrá el cierre de caja.
+                        </p>
+
+                        <a th:href="@{/cerrar-caja}"
+                           class="boton-principal">
+                            Ir a cierre de caja
                         </a>
 
                     </div>
