@@ -3,14 +3,17 @@ package com.unla.ghsicilianotfi.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,13 +28,17 @@ public class SecurityConfiguration {
 	private final UserService userService;
 	private final LoginFallidoHandler loginFallidoHandler;
 
-	public SecurityConfiguration(UserService userService, LoginFallidoHandler loginFallidoHandler) {
+	public SecurityConfiguration(
+			UserService userService,
+			LoginFallidoHandler loginFallidoHandler) {
+
 		this.userService = userService;
 		this.loginFallidoHandler = loginFallidoHandler;
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http)
+			throws Exception {
 
 		return http
 				.csrf(AbstractHttpConfigurer::disable)
@@ -58,35 +65,34 @@ public class SecurityConfiguration {
 							"/error"
 					).permitAll();
 
-					// REGISTRO PUBLICO DE RESPONSABLES
-					// Incorporado desde develop
+					// REGISTRO PÚBLICO DE RESPONSABLES
 					auth.requestMatchers(
 							"/registro-responsable",
 							"/registro-responsable/**"
 					).permitAll();
 
 					// CAMBIAR CONTRASEÑA
-					// Cualquier usuario que haya iniciado sesión
 					auth.requestMatchers(
 							"/cambiar-contrasena"
 					).authenticated();
 
 					// RECUPERAR CONTRASEÑA
-                    // Acceso público sin iniciar sesión
 					auth.requestMatchers(
 							"/recuperar-contrasena",
 							"/restablecer-contrasena"
 					).permitAll();
 
-					// PEDIDOS
+					// HITO 3 - SWAGGER PÚBLICO
 					auth.requestMatchers(
-							"/api/v1/pedidos",
-							"/api/v1/pedidos/**"
-					).hasAnyRole(
-							"ADMINISTRADOR",
-							"RESPONSABLE",
-							"EMPLEADO"
-					);
+							"/swagger-ui.html",
+							"/swagger-ui/**",
+							"/v3/api-docs",
+							"/v3/api-docs/**"
+					).permitAll();
+
+					// HITO 3 - API REST PÚBLICA
+					auth.requestMatchers("/api/**")
+							.permitAll();
 
 					// PERSONAL
 					auth.requestMatchers(
@@ -97,7 +103,7 @@ public class SecurityConfiguration {
 							"RESPONSABLE"
 					);
 
-					// LIQUIDACIONES: Administradores y Responsables
+					// LIQUIDACIONES
 					auth.requestMatchers(
 							"/liquidaciones",
 							"/liquidaciones/**"
@@ -106,7 +112,7 @@ public class SecurityConfiguration {
 							"RESPONSABLE"
 					);
 
-					// RECIBOS DE SUELDO: Administradores, Responsables y Empleados
+					// RECIBOS DE SUELDO
 					auth.requestMatchers(
 							"/recibos",
 							"/recibos/**"
@@ -116,18 +122,17 @@ public class SecurityConfiguration {
 							"EMPLEADO"
 					);
 
-					// GESTIÓN DE FESTIVALES: solo administradores
+					// GESTIÓN DE FESTIVALES
 					auth.requestMatchers(
 							"/festivales",
 							"/festivales/**"
 					).hasRole("ADMINISTRADOR");
 
+					// GESTIÓN DE PLATOS
 					auth.requestMatchers(
 							"/platos",
 							"/platos/**"
 					).hasRole("RESPONSABLE");
-
-					auth.requestMatchers("/api/v1/**").permitAll();
 
 					// RESTO DE LAS RUTAS
 					auth.anyRequest().authenticated();
@@ -156,6 +161,7 @@ public class SecurityConfiguration {
 	AuthenticationManager authenticationManager(
 			AuthenticationConfiguration authenticationConfiguration
 	) throws Exception {
+
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 

@@ -81,6 +81,14 @@
 			<artifactId>layout</artifactId>
 			<version>7.2.5</version>
 		</dependency>
+
+		<!-- SWAGGER / OPENAPI - HITO 3 (Spring Boot 3.3.x) -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
