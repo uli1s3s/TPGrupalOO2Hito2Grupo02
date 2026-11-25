@@ -259,6 +259,55 @@ DatosCarga_Ampliada_Epicentro_Gourmet.sql   Script de datos de prueba (raíz del
 
 ## Flujo de trabajo
 
-- Una rama por caso de uso (`feature/CU<Nombre>`) o por corrección (`fix/<Nombre>`), creada desde `develop`.
+- Una rama por caso de uso (`feature/CU<Nombre>`) o por corrección (`fix/<Nombre>`), creada desde `develop` o `api-rest`.
 - Commits chicos y descriptivos (`feat:`, `fix:`, `docs:`).
-- Integración a `develop` mediante **Pull Request** revisado por el grupo.
+- Integración mediante **Pull Request** revisado por el grupo.
+
+## API REST - Documentación con Swagger
+
+La aplicación expone una API REST bajo la ruta `/api/v1` documentada interactivamente con **OpenAPI 3** y **Springdoc Swagger UI**.
+
+- **URL de acceso a Swagger UI:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **Especificación OpenAPI (JSON):** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+### Endpoints por Integrante
+
+#### Dylan Thomas Lopez
+- **Funcionalidad:** Gestión y consulta de Cocineros.
+- **Endpoint POST:** `POST /api/v1/cocineros`
+  - **Descripción:** Registra un nuevo cocinero en el sistema. Valida mayoría de edad (mínimo 18 años), unicidad de DNI en todo el personal, unicidad de correo electrónico y existencia de la categoría gastronómica seleccionada. Genera automáticamente una cuenta de usuario con rol `EMPLEADO`, contraseña aleatoria de 8 caracteres y envía las credenciales por correo electrónico.
+  - **Ejemplo de Payload (Request Body JSON):**
+    ```json
+    {
+      "nombre": "Carlos",
+      "apellido": "Gomez",
+      "dni": "40111222",
+      "fechaNacimiento": "1995-04-12",
+      "fechaIngreso": "2024-01-15",
+      "sueldoBase": 750000.0,
+      "activo": true,
+      "especialidad": "Parrilla",
+      "idCategoria": 1,
+      "email": "carlos.gomez@test.com"
+    }
+    ```
+- **Endpoint GET con Filtros (Requisito Hito 3):** `GET /api/v1/cocineros/filtrar`
+  - **Descripción:** Permite consultar y filtrar la lista de cocineros mediante Query Parameters combinables (todos opcionales).
+  - **Parámetros de búsqueda disponibles:**
+    - `texto` (*String*, opcional): Búsqueda parcial insensible a mayúsculas/minúsculas que coincide con el nombre o apellido del cocinero (ej. `Carlos` o `Gomez`).
+    - `idCategoria` (*Long*, opcional): ID de la categoría gastronómica asignada (ej. `1`). Se pueden consultar las categorías disponibles en `/api/v1/categorias-cocinero`.
+    - `activo` (*Boolean*, opcional): Filtra por estado de actividad laboral (`true` para activos, `false` para inactivos / dados de baja).
+    - `sueldoMinimo` (*Double*, opcional): Filtra cocineros con un sueldo base mayor o igual al valor indicado (ej. `500000.0`).
+
+- **Otros Endpoints GET de Cocineros:**
+  - `GET /api/v1/cocineros`: Listado general de cocineros. Admite el query parameter opcional `soloActivos` (*Boolean*, por defecto `false`) para filtrar únicamente los empleados activos.
+  - `GET /api/v1/cocineros/{id}`: Retorna el detalle completo de un cocinero según su ID único (404 si no existe).
+  - `GET /api/v1/cocineros/categoria/{idCategoria}`: Retorna el listado de cocineros pertenecientes a una categoría gastronómica específica.
+
+- **Endpoints adicionales de gestión (Ciclo de vida / CRUD):**
+  - `PUT /api/v1/cocineros/{id}`: Actualización de datos personales y laborales del cocinero.
+  - `PATCH /api/v1/cocineros/{id}/baja`: Baja lógica del cocinero y deshabilitación de sus credenciales de acceso.
+  - `PATCH /api/v1/cocineros/{id}/alta`: Reactivación lógica del cocinero y rehabilitación de sus credenciales de acceso.
+  - `DELETE /api/v1/cocineros/{id}`: Eliminación física del registro de cocinero en la base de datos.
+
+

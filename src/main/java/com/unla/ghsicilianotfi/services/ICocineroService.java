@@ -17,6 +17,8 @@ public interface ICocineroService {
 
     List<CocineroDTO> findByCategoria(Long idCategoria);
 
+    List<CocineroDTO> findConFiltros(String texto, Long idCategoria, Boolean activo, Double sueldoMinimo);
+
     CocineroDTO insertOrUpdate(CocineroDTO cocineroDTO);
 
     boolean darDeBajaLogica(Long id);
@@ -25,4 +27,3 @@ public interface ICocineroService {
 
     boolean remove(Long id);
 }
-
