@@ -11,6 +11,8 @@ public interface ICajeroService {
 
     List<CajeroDTO> getAllActivos();
 
+    List<CajeroDTO> findConFiltros(String texto, String turno, Boolean activo, Double sueldoMinimo);
+
     Optional<CajeroDTO> findById(Long id);
 
     Optional<CajeroDTO> findByDni(String dni);

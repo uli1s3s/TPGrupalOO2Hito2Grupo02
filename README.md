@@ -310,4 +310,40 @@ La aplicación expone una API REST bajo la ruta `/api/v1` documentada interactiv
   - `PATCH /api/v1/cocineros/{id}/alta`: Reactivación lógica del cocinero y rehabilitación de sus credenciales de acceso.
   - `DELETE /api/v1/cocineros/{id}`: Eliminación física del registro de cocinero en la base de datos.
 
+##### Gestión y consulta de Cajeros
+- **Endpoint POST:** `POST /api/v1/cajeros`
+  - **Descripción:** Registra un nuevo cajero en el sistema. Valida mayoría de edad (mínimo 18 años), unicidad de DNI en todo el personal y unicidad de correo electrónico. Genera automáticamente una cuenta de usuario con rol `EMPLEADO`, contraseña aleatoria de 8 caracteres y envía las credenciales por correo electrónico.
+  - **Ejemplo de Payload (Request Body JSON):**
+    ```json
+    {
+      "nombre": "Laura",
+      "apellido": "Fernández",
+      "dni": "38222111",
+      "fechaNacimiento": "1996-07-20",
+      "fechaIngreso": "2024-02-01",
+      "sueldoBase": 700000.0,
+      "activo": true,
+      "turno": "MAÑANA",
+      "email": "laura.fernandez@test.com"
+    }
+    ```
+- **Endpoint GET con Filtros (Requisito Hito 3):** `GET /api/v1/cajeros/filtrar`
+  - **Descripción:** Permite consultar y filtrar la lista de cajeros mediante Query Parameters combinables (todos opcionales).
+  - **Parámetros de búsqueda disponibles:**
+    - `texto` (*String*, opcional): Búsqueda parcial insensible a mayúsculas/minúsculas que coincide con el nombre o apellido del cajero (ej. `Laura`).
+    - `turno` (*String*, opcional): Turno laboral asignado (`MAÑANA`, `TARDE` o `NOCHE`).
+    - `activo` (*Boolean*, opcional): Filtra por estado de actividad laboral (`true` para activos, `false` para inactivos / dados de baja).
+    - `sueldoMinimo` (*Double*, opcional): Filtra cajeros con un sueldo base mayor o igual al valor indicado (ej. `500000.0`).
+
+- **Otros Endpoints GET de Cajeros:**
+  - `GET /api/v1/cajeros`: Listado general de cajeros. Admite el query parameter opcional `soloActivos` (*Boolean*, por defecto `false`) para filtrar únicamente los empleados activos.
+  - `GET /api/v1/cajeros/{id}`: Retorna el detalle completo de un cajero según su ID único (404 si no existe).
+  - `GET /api/v1/cajeros/turno/{turno}`: Retorna el listado de cajeros pertenecientes a un turno específico.
+
+- **Endpoints adicionales de gestión (Ciclo de vida / CRUD):**
+  - `PUT /api/v1/cajeros/{id}`: Actualización de datos personales y laborales del cajero.
+  - `PATCH /api/v1/cajeros/{id}/baja`: Baja lógica del cajero y deshabilitación de sus credenciales de acceso.
+  - `PATCH /api/v1/cajeros/{id}/alta`: Reactivación lógica del cajero y rehabilitación de sus credenciales de acceso.
+  - `DELETE /api/v1/cajeros/{id}`: Eliminación física del registro de cajero en la base de datos.
+
 
